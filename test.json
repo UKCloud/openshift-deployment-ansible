@@ -1,0 +1,4 @@
+cat /etc/docker/daemon.json
+{
+  "mtu": 1401
+}

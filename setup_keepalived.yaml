@@ -1,0 +1,29 @@
+---
+- hosts: loadbalancers
+  tasks:
+    - name: Include environment vairables for infrastructure hosts
+      include_vars:
+        file: /etc/ansible/group_vars/all.yml
+        name: env_details
+    - name: Install keepalived
+      yum:
+        name: keepalived
+        state: latest
+    - name: Configure keepalived
+      template:
+        src: files/keepalived.j2
+        dest: /etc/keepalived/keepalived.conf
+        force: yes
+        backup: yes
+    - name: Start keepalived
+      command: systemctl start keepalived
+    - name: Setup kernal bind parameters
+      sysctl:
+        name: net.ipv4.ip_nonlocal_bind
+        value: 1
+        state: present
+    - name: Setup kernal ip_forward parameters
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: 1
+        state: present

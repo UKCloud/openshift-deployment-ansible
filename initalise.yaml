@@ -1,0 +1,15 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Include environment vairables for infrastructure hosts
+      include_vars:
+        file: /etc/ansible/group_vars/all.yml
+        name: env_details
+    - name: Configure ansible hosts file
+      template:
+        src: files/ansible-hosts-multimaster.j2
+        dest: /etc/ansible/hosts
+        force: yes
+        backup: yes
+      become: yes
+      become_user: root

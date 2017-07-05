@@ -1,0 +1,38 @@
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+# SSH user, this user should allow ssh based auth without requiring a password
+ansible_ssh_user=cloud-user
+ansible_become=yes
+
+debug_level=2
+
+# If ansible_ssh_user is not root, ansible_become must be set to true
+#ansible_become=true
+
+deployment_type=openshift-enterprise
+
+# uncomment the following to enable htpasswd authentication; defaults to DenyAllPasswordIdentityProvider
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+openshift_master_htpasswd_users={'admin': '$apr1$mSg5YHIt$TSWms4a24FdbZbqiGPJvc/', 'demo': '$apr1$kxv5vr/4$Y6gc7iyLEa7kvG.DaYwrc/'}
+
+openshift_master_cluster_method=native
+openshift_master_cluster_hostname=console.example.com
+#openshift_master_cluster_public_hostname=ocp.custb.example.com
+
+# host group for masters
+[masters]
+master-0.example.com
+
+# host group for nodes, includes region info
+[nodes]
+worker-0.example.com
+worker-1.example.com
+#node1.example.com openshift_node_labels="{'region': 'primary', 'zone': 'east'}"
+#node2.example.com openshift_node_labels="{'region': 'primary', 'zone': 'west'}"
+#infra-node1.example.com openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+#infra-node2.example.com openshift_node_labels="{'region': 'infra', 'zone': 'default'}"

@@ -1,0 +1,19 @@
+---
+- hosts: master-0.openstacklocal
+  tasks:
+    - name: Setup tier-1 storage class file
+      template:
+        src: files/storage-class-tier1.j2
+        dest: ~/storage-class-tier1.yml
+        force: yes
+        backup: yes
+    - name: Setup tier-2 storage class file
+      template:
+        src: files/storage-class-tier2.j2
+        dest: ~/storage-class-tier2.yml
+        force: yes
+        backup: yes
+    - name: create tier-1 class 
+      command: /usr/local/bin/oc create -f ~/storage-class-tier1.yml
+    - name: create tier-2 class 
+      command: /usr/local/bin/oc create -f ~/storage-class-tier2.yml
