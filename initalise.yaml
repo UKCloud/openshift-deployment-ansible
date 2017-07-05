@@ -8,8 +8,6 @@
     - name: Configure ansible hosts file
       template:
         src: files/ansible-hosts-multimaster.j2
-        dest: /etc/ansible/hosts
+        dest: ./openshift-ansible-hosts
         force: yes
         backup: yes
-      become: yes
-      become_user: root
