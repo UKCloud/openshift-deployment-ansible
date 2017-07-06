@@ -36,7 +36,7 @@ openshift_master_default_subdomain={{ env_details.domainSuffix }}
 openshift_docker_options="--mtu=1400  --log-driver=journald"
 
 # ROUTER
-openshift_hosted_router_selector='target=router'
+openshift_hosted_router_selector='router=true'
 
 # REGISTRY
 openshift_hosted_registry_selector='purpose=tenant'
@@ -90,7 +90,7 @@ openshift_metrics_cassandra_pvc_size=50Gi
 [nodes]
 {% for ip, hostname in env_details.worker_details.items() %}
 {% if hostname | match('.*-[012].*') %}
-{{ hostname }}.openstacklocal openshift_node_labels="{'target':'router','purpose':'tenant'}"
+{{ hostname }}.openstacklocal openshift_node_labels="{'router':'true','purpose':'tenant'}"
 {% else %}
 {{ hostname }}.openstacklocal openshift_node_labels="{'purpose':'tenant'}"
 {% endif %}
