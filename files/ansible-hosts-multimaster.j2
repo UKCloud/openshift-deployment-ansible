@@ -30,7 +30,10 @@ openshift_master_cluster_public_hostname=ocp.{{ env_details.domainSuffix }}
 
 openshift_set_hostname=true
 
-openshift_master_default_subdomain=apps.{{ env_details.domainSuffix }}
+openshift_master_default_subdomain={{ env_details.domainSuffix }}
+
+# Set the MTU size for the Docker0 bridge and docker native containers
+openshift_docker_options="--mtu=1400  --log-driver=journald"
 
 # ROUTER
 openshift_hosted_router_selector='target=router'
@@ -57,6 +60,13 @@ openshift_cloudprovider_openstack_password={{ env_details.openstackOpenshiftPass
 openshift_cloudprovider_openstack_tenant_id={{ env_details.osTenantId }}
 openshift_cloudprovider_openstack_tenant_name={{ env_details.osTenantName }}
 openshift_cloudprovider_openstack_region={{ env_details.osRegion }}
+
+
+# openshift stats deployment - comment out if no stats deployment is required. this will run on the worker nodes
+openshift_hosted_metrics_deploy=true
+openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ env_details.domainSuffix }}/hawkular/metrics
+openshift_hosted_metrics_storage_kind=dynamic
+openshift_metrics_cassandra_pvc_size=50Gi
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
