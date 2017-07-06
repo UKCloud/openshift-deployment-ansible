@@ -18,6 +18,8 @@ debug_level=2
 
 deployment_type=openshift-enterprise
 
+os_sdn_network_plugin_name=redhat/openshift-ovs-multitenant
+
 # uncomment the following to enable htpasswd authentication; defaults to DenyAllPasswordIdentityProvider
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 openshift_master_htpasswd_users={'admin': '$apr1$mSg5YHIt$TSWms4a24FdbZbqiGPJvc/', 'demo': '$apr1$kxv5vr/4$Y6gc7iyLEa7kvG.DaYwrc/'}
