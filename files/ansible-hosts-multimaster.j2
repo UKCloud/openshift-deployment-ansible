@@ -41,11 +41,28 @@ openshift_hosted_router_selector='router=true'
 # REGISTRY
 openshift_hosted_registry_selector='purpose=tenant'
 openshift_hosted_registry_replicas=1
-openshift_hosted_registry_storage_kind=openstack
-openshift_hosted_registry_storage_access_modes=['ReadWriteOnce']
-openshift_hosted_registry_storage_openstack_filesystem=ext4
-openshift_hosted_registry_storage_openstack_volumeID={{ env_details.registryVolume }}
-openshift_hosted_registry_storage_volume_size={{ env_details.registryVolumeSize }}
+#openshift_hosted_registry_storage_kind=openstack
+#openshift_hosted_registry_storage_access_modes=['ReadWriteOnce']
+#openshift_hosted_registry_storage_openstack_filesystem=ext4
+#openshift_hosted_registry_storage_openstack_volumeID={{ env_details.registryVolume }}
+#openshift_hosted_registry_storage_volume_size={{ env_details.registryVolumeSize }}
+
+# Any S3 service (Minio, ExoScale, ...): Basically the same as above
+# but with regionendpoint configured
+# S3 bucket must already exist.
+openshift_hosted_registry_storage_kind=object
+openshift_hosted_registry_storage_provider=s3
+openshift_hosted_registry_storage_s3_accesskey={{ env_details.s3accesskey }}
+openshift_hosted_registry_storage_s3_secretkey={{ env_details.s3secretkey }}
+openshift_hosted_registry_storage_s3_regionendpoint={{ env_details.s3regionendpoint }}
+openshift_hosted_registry_storage_s3_bucket=test-bucket
+#openshift_hosted_registry_storage_s3_region=bucket_region
+openshift_hosted_registry_storage_s3_chunksize=26214400
+openshift_hosted_registry_storage_s3_rootdirectory=/registry
+openshift_hosted_registry_pullthrough=true
+openshift_hosted_registry_acceptschema2=true
+openshift_hosted_registry_enforcequota=true
+
 
 osm_default_node_selector='purpose=tenant'
 
@@ -88,6 +105,9 @@ openshift_metrics_cassandra_pvc_size=50Gi
 # host group for nodes, includes region info
 # Routers are placed only on first 3 workers
 [nodes]
+{% for ip, hostname in env_details.master_details.items() %}
+{{ hostname }}.openstacklocal
+{% endfor %}
 {% for ip, hostname in env_details.worker_details.items() %}
 {% if hostname | match('.*-[012].*') %}
 {{ hostname }}.openstacklocal openshift_node_labels="{'router':'true','purpose':'tenant'}"
