@@ -109,7 +109,7 @@ openshift_metrics_cassandra_pvc_size=50Gi
 {{ hostname }}.openstacklocal
 {% endfor %}
 {% for ip, hostname in env_details.worker_details.items() %}
-{% if hostname | match('.*-[012].*') %}
+{% if loop.index <= 3 %}
 {{ hostname }}.openstacklocal openshift_node_labels="{'router':'true','purpose':'tenant'}"
 {% else %}
 {{ hostname }}.openstacklocal openshift_node_labels="{'purpose':'tenant'}"
