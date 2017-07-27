@@ -1,6 +1,11 @@
 ---
 - hosts: loadbalancers
   tasks:
+    - name: Create a unique ID
+      shell: openssl rand -base64 20
+      run_once: true
+      delegate_to: 127.0.0.1
+      register: keepalived_password
     - name: Include environment vairables for infrastructure hosts
       include_vars:
         file: /etc/ansible/group_vars/all.yml

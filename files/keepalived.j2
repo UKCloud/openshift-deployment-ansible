@@ -13,7 +13,7 @@ vrrp_instance VI_1 {
     advert_int 1
     authentication {
         auth_type PASS
-        auth_pass $ place secure password here.
+        auth_pass {{ keepalived_password.stdout }}
     }
     virtual_ipaddress {
         {{ env_details.haproxy_vip }} dev eth0
