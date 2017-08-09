@@ -1,0 +1,69 @@
+---
+- hosts: loadbalancers
+  tasks:
+    - name: Include environment vairables for infrastructure hosts
+      include_vars:
+        file: /etc/ansible/group_vars/all.yml
+        name: env_details
+    - name: Install haproxy
+      yum:
+        name: haproxy
+        state: latest
+    - name: Configure haproxy
+      template:
+        src: files/haproxy.j2
+        dest: /etc/haproxy/haproxy.cfg
+        force: yes
+        backup: yes
+    - name: Update rsyslog config
+      blockinfile:
+        dest: /etc/rsyslog.conf
+        create: yes
+        block: |
+          $ModLoad imudp
+          $UDPServerRun 514
+          $UDPServerAddress 127.0.0.1
+          # Save haproxy logs to haproxy.log
+          local2.* /var/log/haproxy.log
+    - name: Restart haproxy
+      command: systemctl restart haproxy
+    - name: Restart rsyslog
+      command: systemctl restart rsyslog
+    - name: Install firewalld
+      yum:
+        name: firewalld
+        state: latest
+    - name: Start firewalld
+      command: systemctl unmask firewalld
+    - name: Start firewalld
+      command: systemctl start firewalld
+    - name: Enable firewalld
+      command: systemctl enable firewalld
+    - name: setup firewall - http
+      firewalld:
+        service: http
+        immediate: true
+        permanent: true
+        zone: public
+        state: enabled
+    - name: setup firewall - https
+      firewalld:
+        service: https
+        immediate: true
+        permanent: true
+        zone: public
+        state: enabled
+    - name: setup firewall - OpenShift API
+      firewalld:
+        port: 8443/tcp
+        immediate: true
+        permanent: true
+        state: enabled
+        zone: public
+    - name: setup firewall - Allow VRRP Adverts
+      firewalld:
+        rich_rule: 'rule protocol value="vrrp" accept'
+        immediate: true
+        permanent: true
+        state: enabled
+        zone: public
