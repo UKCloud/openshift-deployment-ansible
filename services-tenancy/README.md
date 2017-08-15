@@ -5,7 +5,7 @@ Scripts and configuration to be ran after the deployment of a services-tenancy
 
 Create self-signed certs
  
-Must be ran on host which has keytool installed (eg bastion) 
+Must be ran on a host which has keytool installed (eg bastion) 
 
 Note: the CN for the HTTPS cert is always "sso" - but it will never validate anyway
 
@@ -28,7 +28,7 @@ Deploy SSO project inside an existing services tenancy
 
 Must be ran as cluster admin user if SSO 7.1 templates haven't already been imported
 
-Must be provided with three keystore with correct keys inside of them
+Must be provided with three keystores with correct keys inside of them
 Script does some prework to import SSO7.1 images which may error if it has already been done previously
 
 Usage:
@@ -55,7 +55,36 @@ To use signed certs it is necessary to create a sso-https.jks containing the sig
 Contains a cert called sso-https-key and its supporting ca/intermediates (where required) used for the secure sso endpoint. Note that the container itself handles the SSL and the route creared is of "passthough" type. For signed certs, the CN for the cert should be the same which will be specified for the `domain_name` parameter of the `deploy_sso.sh` script.
 
 ### jgroups.jceks <jgroups_keystore>
-Contains a security key used internal which does not need to be signed - therefore the jgroups.jceks which is created by `create_self_signed_certs.sh` can be used in all cases
+Contains a security key used internally which does not need to be signed - therefore the jgroups.jceks which is created by `create_self_signed_certs.sh` can be used in all cases
 
 ### truststore.jks <truststore_keystore>
 Contains the ca certs and any intermediates necessary for the environment to self-validate
+
+---
+## Converting LetsEncrypt files obtained from certbot
+
+("changethispassword" is an example password - same password should be used throughout)
+```
+#Combine the x509 files for LetsEncrypt CA and intermediate public keys into one file
+cat leca.crt leinter.crt > ./letsencrypt-ca-all.crt
+#This file is included in git repo
+
+#Combine cert.pem and privkey.pem into a pkcs12 keystore as an intermediate step
+openssl pkcs12 -export -out keystore.p12 -in cert.pem -inkey privkey.pem -name sso-https-key -chain -CAfile letsencrypt-ca-all.crt -password pass:changethispassword
+
+#Convert the pkcs12 keystore to JKS
+keytool -importkeystore \
+        -deststorepass changethispassword -destkeypass changethispassword -destkeystore sso-https.jks \
+        -srckeystore keystore.p12 -srcstoretype PKCS12 -srcstorepass changethispassword \
+        -alias sso-https-key
+
+#Also add the chained ca/intermediate public keys to truststore
+keytool -import -storepass changethispassword -file letsencrypt-ca-all.crt -alias ca.crt  -trustcacerts -noprompt -keystore truststore.jks
+
+#Also, create a jgroups.jceks containing the necessary key
+keytool -genseckey -storepass changethispassword -keypass changethispassword -alias jgroups -storetype JCEKS -keystore jgroups.jceks
+
+
+```
+
+Files `sso-https.jks` `truststore.jks` `jgroups.jceks` can now be used as inputs for `deploy-sso.sh`
