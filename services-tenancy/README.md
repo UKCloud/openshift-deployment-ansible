@@ -52,7 +52,7 @@ The following can be created using the create_self_signed_certs.sh script.
 To use signed certs it is necessary to create a sso-https.jks containing the signed cert and its ca cert, and to add the ca cert to truststore.jks
 
 ### sso-https.jks <https_keystore>
-Contains a cert called sso-https-key and it's supporting ca/intermediates (where required) used for the secure sso endpoint. Note that the container itself handles the SSL and the route creared is of "passthough" type. For signed certs, the CN for the cert should be the same which will be specified for the `domain_name` parameter of the `deploy_sso.sh` script.
+Contains a cert called sso-https-key and its supporting ca/intermediates (where required) used for the secure sso endpoint. Note that the container itself handles the SSL and the route creared is of "passthough" type. For signed certs, the CN for the cert should be the same which will be specified for the `domain_name` parameter of the `deploy_sso.sh` script.
 
 ### jgroups.jceks <jgroups_keystore>
 Contains a security key used internal which does not need to be signed - therefore the jgroups.jceks which is created by `create_self_signed_certs.sh` can be used in all cases
