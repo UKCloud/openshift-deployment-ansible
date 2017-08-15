@@ -1,7 +1,7 @@
 Scripts and configuration to be ran after the deployment of a services-tenancy
 
 ---
-##create_self_signed_certs.sh
+## create_self_signed_certs.sh
 
 Create self-signed certs
  
@@ -19,7 +19,7 @@ Args:
 
 
 ---
-##deploy_sso.sh
+## deploy_sso.sh
 
 Deploy SSO project inside an existing services tenancy
 
