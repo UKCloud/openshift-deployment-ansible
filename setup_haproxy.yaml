@@ -25,6 +25,8 @@
           $UDPServerAddress 127.0.0.1
           # Save haproxy logs to haproxy.log
           local2.* /var/log/haproxy.log
+    - name: Enable haproxy
+      command: systemctl enable haproxy
     - name: Restart haproxy
       command: systemctl restart haproxy
     - name: Restart rsyslog
