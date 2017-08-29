@@ -20,6 +20,8 @@
         dest: /etc/keepalived/keepalived.conf
         force: yes
         backup: yes
+    - name: Enable keepalived
+      command: systemctl enable keepalived
     - name: Start keepalived
       command: systemctl start keepalived
     - name: Setup kernal bind parameters
