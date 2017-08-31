@@ -1,0 +1,13 @@
+- name: Install firewalld
+  yum:
+    name: firewalld
+    state: latest
+- name: Start firewalld
+  systemd:
+    name: firewalld
+    state: started
+    enabled: yes
+- name: FIX BUG WITH NMCLI
+  systemd:
+    name: NetworkManager
+    state: restarted

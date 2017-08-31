@@ -1,0 +1,35 @@
+- name: Load vairables
+  include_vars:
+    file: /etc/ansible/group_vars/all.yml
+    name: env_details
+- name: Install bind packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - bind
+    - bind-utils
+- name: setup firewall - dns
+  firewalld:
+    service: dns
+    immediate: true
+    permanent: true
+    zone: public
+    state: enabled
+- name: Configure bind to listen on all addresses
+  replace:
+    path: /etc/named.conf
+    regexp: "listen-on port 53 { 127.0.0.1; }"
+    replace: "listen-on port 53 { any; }"
+    backup: yes
+- name: Configure bind to allow queries
+  replace:
+    path: /etc/named.conf
+    regexp: "allow-query     { localhost; };"
+    replace: "allow-query     { any; };"
+    backup: yes
+- name: Enable bind and start service
+  systemd:
+    name: named
+    state: started
+    enabled: true

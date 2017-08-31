@@ -1,0 +1,10 @@
+key "TRANSFER" {
+    algorithm hmac-md5;
+    secret "{{ dnsKey.stdout.split(' ')[-1] }}";
+};
+# Slave server IP # 1
+server {{ hostvars[groups.dns[1]].ansible_default_ipv4.address }} {
+    keys {
+        TRANSFER;
+    };
+};

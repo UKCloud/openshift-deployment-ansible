@@ -1,0 +1,4 @@
+- include: loadbalancers.yml
+- include: dns.yml
+- include: all.yml
+- include: openshift.yml

@@ -1,0 +1,3 @@
+- include: dns_common.yml
+- include: dns_master.yml
+- include: dns_slave.yml

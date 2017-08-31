@@ -1,0 +1,26 @@
+- name: Load vairables
+  include_vars:
+    file: /etc/ansible/group_vars/all.yml
+    name: env_details
+- name: Setup slave key
+  template:
+    src: templates/slave_key_config.j2
+    dest: /etc/openshift-tsig.key
+  when: inventory_hostname == groups.dns[1] and hostvars[groups.dns[0]].dnsKeyOutout.changed
+- name: Add slave DNS configuration
+  blockinfile:
+    block: "{{ lookup('template', 'templates/slave_zone_config.j2') }}"
+    dest: "/etc/named.conf"
+    backup: yes
+  when: inventory_hostname == groups.dns[1]
+- name: Set corect selinux permissions
+  seboolean:
+    name: named_write_master_zones
+    state: yes
+    persistent: yes
+  when: inventory_hostname == groups.dns[1]
+- name: Restart bind
+  systemd:
+    name: named
+    state: restarted
+  when: inventory_hostname == groups.dns[1]
