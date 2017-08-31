@@ -1,7 +1,4 @@
-- hosts: all
-  roles:
-    - common
-    - openshift
+- include: /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml
 
 - hosts: masters[0]
   roles:
