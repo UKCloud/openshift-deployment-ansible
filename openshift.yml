@@ -1,0 +1,8 @@
+- hosts: all
+  roles:
+    - common
+    - openshift
+
+- hosts: masters[0]
+  roles:
+    - openshiftpostdeployment
