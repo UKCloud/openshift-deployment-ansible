@@ -1,0 +1,5 @@
+- include: /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml
+
+- hosts: masters[0]
+  roles:
+    - openshiftpostdeployment

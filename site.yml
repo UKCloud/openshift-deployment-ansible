@@ -1,0 +1,3 @@
+- include: bastion.yml
+- include: loadbalancers.yml
+- include: openshift.yml
