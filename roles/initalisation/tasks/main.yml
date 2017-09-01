@@ -1,3 +1,7 @@
+- name: Install bind-utils
+  yum:
+    name: bind-utils
+    state: latest
 - name: Include environment vairables for infrastructure hosts
   include_vars:
     file: /etc/ansible/group_vars/all.yml

@@ -1,0 +1,44 @@
+- name: Load vairables
+  include_vars:
+    file: /etc/ansible/group_vars/all.yml
+    name: env_details
+- name: inv hostname
+  debug:
+    var: inventory_hostname
+- name: group hostname
+  debug:
+    var: groups.dns[0]
+- name: Generate DNS signing key
+  shell: dnssec-keygen -a HMAC-MD5 -n HOST -b 128 -r /dev/urandom openshift_dns_key && touch .dns_key_created
+  args:
+    creates: .dns_key_created
+  register: dnsKeyFile
+  when: inventory_hostname == groups.dns[0]
+- name: Extract DNS Key
+  shell: cat "{{ dnsKeyFile.stdout }}".key
+  register: dnsKeyOutout
+  when: inventory_hostname == groups.dns[0] and dnsKeyFile.changed
+- set_fact:
+     dnsKey: "{{ dnsKeyOutout }}"
+- name: Setup master key
+  template:
+    src: templates/master_key_config.j2
+    dest: /etc/openshift-tsig.key
+  when: inventory_hostname == groups.dns[0] and dnsKeyOutout.changed
+- set_fact:
+- name: Add master DNS configuration
+  blockinfile:
+    block: "{{ lookup('template', 'templates/master_zone_config.j2') }}"
+    dest: "/etc/named.conf"
+    backup: yes
+  when: inventory_hostname == groups.dns[0]
+- name: Copy across zone
+  template:
+    src: templates/zonefile.j2
+    dest: /var/named/{{ env_details.localDomainSuffix }}.zone
+  when: inventory_hostname == groups.dns[0]
+- name: Restart bind
+  systemd:
+    name: named
+    state: restarted
+  when: inventory_hostname == groups.dns[0]

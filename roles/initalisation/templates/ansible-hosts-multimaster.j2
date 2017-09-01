@@ -25,7 +25,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 openshift_master_htpasswd_users={'admin': '$apr1$mSg5YHIt$TSWms4a24FdbZbqiGPJvc/', 'demo': '$apr1$kxv5vr/4$Y6gc7iyLEa7kvG.DaYwrc/'}
 
 openshift_master_cluster_method=native
-openshift_master_cluster_hostname=console.{{ env_details.domainSuffix }}
+openshift_master_cluster_hostname=console.{{ env_details.localDomainSuffix }}
 openshift_master_cluster_public_hostname=ocp.{{ env_details.domainSuffix }}
 
 openshift_set_hostname=true
@@ -98,6 +98,11 @@ openshift_metrics_cassandra_pvc_size=50Gi
 {% endfor %}
 
 [loadbalancers]
+{% for ip, hostname in env_details.haproxy_details.items() %}
+{{ hostname }}.openstacklocal
+{% endfor %}
+
+[dns]
 {% for ip, hostname in env_details.haproxy_details.items() %}
 {{ hostname }}.openstacklocal
 {% endfor %}

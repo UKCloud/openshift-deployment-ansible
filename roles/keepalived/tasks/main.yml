@@ -1,8 +1,31 @@
+- name: Setup kernal bind parameters
+  sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: 1
+    state: present
+- name: Setup kernal ip_forward parameters
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    state: present
+- name: Install kill utils for Keepalived
+  yum:
+    name: psmisc
+    state: latest
+- name: setup firewall - Allow VRRP Adverts
+  firewalld:
+    rich_rule: 'rule protocol value="vrrp" accept'
+    immediate: true
+    permanent: true
+    state: enabled
+    zone: public
 - name: Create a unique ID
   shell: openssl rand -base64 20
-  run_once: true
-  delegate_to: 127.0.0.1
-  register: keepalived_password
+  register: keepalived_password_output
+  when: inventory_hostname == groups.loadbalancers[0]
+- name: Store keepalived password
+  set_fact:
+    keepalived_password: "{{ keepalived_password_output }}"
 - name: Include environment vairables for infrastructure hosts
   include_vars:
     file: /etc/ansible/group_vars/all.yml
@@ -18,16 +41,7 @@
     force: yes
     backup: yes
 - name: Enable keepalived
-  command: systemctl enable keepalived
-- name: Start keepalived
-  command: systemctl start keepalived
-- name: Setup kernal bind parameters
-  sysctl:
-    name: net.ipv4.ip_nonlocal_bind
-    value: 1
-    state: present
-- name: Setup kernal ip_forward parameters
-  sysctl:
-    name: net.ipv4.ip_forward
-    value: 1
-    state: present
+  systemd:
+    name: keepalived
+    enabled: true
+    state: restarted

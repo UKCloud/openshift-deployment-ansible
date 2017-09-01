@@ -1,7 +1,7 @@
 vrrp_script chk_haproxy {
-  script "killall -0 haproxy" # check the haproxy process
-  interval 2 # every 2 seconds
-  weight 2 # add 2 points if OK
+    script "/usr/bin/killall -0 haproxy"
+    interval 2 # every 2 seconds
+    weight 2 # add 2 points if OK
 }
 
 vrrp_instance VI_1 {
@@ -13,12 +13,12 @@ vrrp_instance VI_1 {
     advert_int 1
     authentication {
         auth_type PASS
-        auth_pass {{ keepalived_password.stdout }}
+        auth_pass "{{ hostvars[groups.loadbalancers[0]].keepalived_password.stdout }}"
     }
     virtual_ipaddress {
         {{ env_details.haproxy_vip }} dev eth0
     }
-    track_script {
-      chk_haproxy
-    }
+    track_script {
+        chk_haproxy
+    }
 }

@@ -28,16 +28,6 @@
   command: systemctl restart haproxy
 - name: Restart rsyslog
   command: systemctl restart rsyslog
-- name: Install firewalld
-  yum:
-    name: firewalld
-    state: latest
-- name: Start firewalld
-  command: systemctl unmask firewalld
-- name: Start firewalld
-  command: systemctl start firewalld
-- name: Enable firewalld
-  command: systemctl enable firewalld
 - name: setup firewall - http
   firewalld:
     service: http
@@ -55,13 +45,6 @@
 - name: setup firewall - OpenShift API
   firewalld:
     port: 8443/tcp
-    immediate: true
-    permanent: true
-    state: enabled
-    zone: public
-- name: setup firewall - Allow VRRP Adverts
-  firewalld:
-    rich_rule: 'rule protocol value="vrrp" accept'
     immediate: true
     permanent: true
     state: enabled

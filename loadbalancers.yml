@@ -1,5 +1,5 @@
 - hosts: loadbalancers
   roles:
-    - common
+    - firewalld
     - keepalived
     - haproxy

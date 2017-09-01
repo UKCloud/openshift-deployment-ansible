@@ -1,0 +1,42 @@
+- name: Include environment vairables for infrastructure hosts
+  include_vars:
+    file: /etc/ansible/group_vars/all.yml
+    name: env_details
+- name: Check if we have already set resolv.conf
+  stat: 
+    path: .resolv_conf_set
+  register: status
+- name: Set network manager DNS
+  shell: nmcli c modify 'System eth0' ipv4.ignore-auto-dns yes ipv4.dns {{ hostvars[groups.dns[0]].ansible_default_ipv4.address }},{{ hostvars[groups.dns[1]].ansible_default_ipv4.address }} && nmcli c up "System eth0"  && touch .set_network_manager_dns
+  args:
+    creates: .set_network_manager_dns
+  become: yes
+  become_method: sudo
+- name: Tidy up hosts file on bastion
+  blockinfile:
+    block: |
+      127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+      ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+    path: /etc/hosts
+    backup: yes
+  when: inventory_hostname == 'localhost' and not status.stat.exists
+  become: yes
+  become_method: sudo
+- name: disable TTY for sudo on all hosts
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^Defaults.*requiretty$'
+    line: '#Defaults    requiretty'
+    backup: yes
+  become: yes
+  become_method: sudo
+- name: Create a file so we only run once
+  file:
+    path: .resolv_conf_set
+    state: touch
+- name: Restart keepalived now the network has been reloaded to bring up the VIP again
+  systemd:
+    name: keepalived
+    state: restarted
+    daemon_reload: yes
+  when: inventory_hostname in groups.loadbalancers
