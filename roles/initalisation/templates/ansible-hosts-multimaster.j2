@@ -89,35 +89,35 @@ openshift_metrics_cassandra_pvc_size=50Gi
 # host group for masters
 [masters]
 {% for ip, hostname in env_details.master_details.items() %}
-{{ hostname }}.openstacklocal
+{{ hostname }}
 {% endfor %}
 
 [etcd]
 {% for ip, hostname in env_details.master_details.items() %}
-{{ hostname }}.openstacklocal
+{{ hostname }}
 {% endfor %}
 
 [loadbalancers]
 {% for ip, hostname in env_details.haproxy_details.items() %}
-{{ hostname }}.openstacklocal
+{{ hostname }}
 {% endfor %}
 
 [dns]
 {% for ip, hostname in env_details.haproxy_details.items() %}
-{{ hostname }}.openstacklocal
+{{ hostname }}
 {% endfor %}
 
 # host group for nodes, includes region info
 # Routers are placed only on first 3 workers
 [nodes]
 {% for ip, hostname in env_details.master_details.items() %}
-{{ hostname }}.openstacklocal
+{{ hostname }}
 {% endfor %}
 {% for ip, hostname in env_details.worker_details.items() %}
 {% if loop.index <= 3 %}
-{{ hostname }}.openstacklocal openshift_node_labels="{'router':'true','purpose':'tenant'}"
+{{ hostname }} openshift_node_labels="{'router':'true','purpose':'tenant'}"
 {% else %}
-{{ hostname }}.openstacklocal openshift_node_labels="{'purpose':'tenant'}"
+{{ hostname }} openshift_node_labels="{'purpose':'tenant'}"
 {% endif %}
 {% endfor %}
 
