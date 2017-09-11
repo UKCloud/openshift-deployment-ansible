@@ -18,15 +18,15 @@ dns{{ count }}	IN	A	{{ hostvars[hostname].ansible_default_ipv4.address }}
 {% endfor %}
 
 {% for ip, hostname in env_details.haproxy_details.iteritems() %}
-{{ hostname }}	IN	A	{{ ip }}
+{{ hostname }}.	IN	A	{{ ip }}
 {% endfor %}
 
 {% for ip, hostname in env_details.worker_details.iteritems() %}
-{{ hostname }}	IN	A	{{ ip }}
+{{ hostname }}.	IN	A	{{ ip }}
 {% endfor %}
 
 {% for ip, hostname in env_details.master_details.iteritems() %}
-{{ hostname }}	IN	A	{{ ip }}
+{{ hostname }}.	IN	A	{{ ip }}
 {% endfor %}
 
 console		IN 	A	{{ env_details.haproxy_vip }}
