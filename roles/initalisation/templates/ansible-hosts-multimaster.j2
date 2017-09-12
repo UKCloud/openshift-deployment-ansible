@@ -30,6 +30,10 @@ openshift_master_cluster_public_hostname=ocp.{{ env_details.domainSuffix }}
 
 openshift_set_hostname=true
 
+# Makes the openshift_ip setting in the host groups are below take effect.
+# This sets the nodeIP setting in node-config on each host to the correct IP
+openshift_set_node_ip=true
+
 openshift_master_default_subdomain={{ env_details.domainSuffix }}
 
 # Set the MTU size for the Docker0 bridge and docker native containers
@@ -111,13 +115,13 @@ openshift_metrics_cassandra_pvc_size=50Gi
 # Routers are placed only on first 3 workers
 [nodes]
 {% for ip, hostname in env_details.master_details.items() %}
-{{ hostname }}
+{{ hostname }} openshift_ip={{ ip }}
 {% endfor %}
 {% for ip, hostname in env_details.worker_details.items() %}
 {% if loop.index <= 3 %}
-{{ hostname }} openshift_node_labels="{'router':'true','purpose':'tenant'}"
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','purpose':'tenant'}"
 {% else %}
-{{ hostname }} openshift_node_labels="{'purpose':'tenant'}"
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'purpose':'tenant'}"
 {% endif %}
 {% endfor %}
 
