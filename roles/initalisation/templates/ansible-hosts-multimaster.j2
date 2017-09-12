@@ -30,6 +30,10 @@ openshift_master_cluster_public_hostname=ocp.{{ env_details.domainSuffix }}
 
 openshift_set_hostname=true
 
+# Makes the openshift_ip setting in the host groups are below take effect.
+# This sets the nodeIP setting in node-config on each host to the correct IP
+openshift_set_node_ip=true
+
 openshift_master_default_subdomain={{ env_details.domainSuffix }}
 
 # Set the MTU size for the Docker0 bridge and docker native containers
