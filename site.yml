@@ -2,3 +2,4 @@
 - include: dns.yml
 - include: all.yml
 - include: openshift.yml
+- include: monitoring.yml
