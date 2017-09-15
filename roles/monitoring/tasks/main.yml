@@ -18,7 +18,7 @@
     state: started
     enabled: yes
     daemon_reload: yes
-  when: inventory_hostname in groups.loadbalancers
+  when: inventory_hostname == 'localhost' or inventory_hostname in groups.loadbalancers
 - name: install zabbix db
   command: docker run -d --name zabbix-db -v /backups:/backups -v /etc/localtime:/etc/localtime:ro --volumes-from zabbix-db-storage --env="MARIADB_USER=zabbix" --env="MARIADB_PASS=my_password" monitoringartist/zabbix-db-mariadb
   when: inventory_hostname == 'localhost'
