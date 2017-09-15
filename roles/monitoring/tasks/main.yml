@@ -10,6 +10,8 @@
     name: docker
     state: latest
   when: inventory_hostname == 'localhost' or inventory_hostname in groups.loadbalancers
+  become: yes
+  become_method: sudo
 - name: Enable and start docker daemon service
   systemd:
     name: docker
@@ -18,14 +20,22 @@
     daemon_reload: yes
   when: inventory_hostname in groups.loadbalancers
 - name: install zabbix db
-  command: sudo docker run -d --name zabbix-db -v /backups:/backups -v /etc/localtime:/etc/localtime:ro --volumes-from zabbix-db-storage --env="MARIADB_USER=zabbix" --env="MARIADB_PASS=my_password" monitoringartist/zabbix-db-mariadb
+  command: docker run -d --name zabbix-db -v /backups:/backups -v /etc/localtime:/etc/localtime:ro --volumes-from zabbix-db-storage --env="MARIADB_USER=zabbix" --env="MARIADB_PASS=my_password" monitoringartist/zabbix-db-mariadb
   when: inventory_hostname == 'localhost'
+  become: yes
+  become_method: sudo
 - name: install zabbix server
-  command: sudo docker run -d --name zabbix -p 80:80 -p 10051:10051 -v /etc/localtime:/etc/localtime:ro --link zabbix-db:zabbix.db --env="ZS_DBHost=zabbix.db" --env="ZS_DBUser=zabbix" --env="ZS_DBPassword=my_password" monitoringartist/zabbix-xxl:latest
+  command: docker run -d --name zabbix -p 80:80 -p 10051:10051 -v /etc/localtime:/etc/localtime:ro --link zabbix-db:zabbix.db --env="ZS_DBHost=zabbix.db" --env="ZS_DBUser=zabbix" --env="ZS_DBPassword=my_password" monitoringartist/zabbix-xxl:latest
   when: inventory_hostname == 'localhost'
+  become: yes
+  become_method: sudo
 - name: install zabbix agents
-  command: sudo docker run --name=dockbix-agent-xxl --net=host --privileged -v /:/rootfs -v /var/run:/var/run --restart unless-stopped -e "ZA_Server=10.2.1.101" -e "ZA_ServerActive=10.2.1.101" -e 'ZA_Hostname={{ inventory_hostname }}' -d monitoringartist/dockbix-agent-xxl-limited:latest
+  command: docker run --name=dockbix-agent-xxl --net=host --privileged -v /:/rootfs -v /var/run:/var/run --restart unless-stopped -e "ZA_Server=10.2.1.101" -e "ZA_ServerActive=10.2.1.101" -e 'ZA_Hostname={{ inventory_hostname }}' -d monitoringartist/dockbix-agent-xxl-limited:latest
   when: inventory_hostname != 'localhost'
+  become: yes
+  become_method: sudo
 - name: Setup iptables on nodes
-  command: sudo iptables -I INPUT -p tcp -s 10.2.1.101 --dport 10050 -j ACCEPT
+  command: iptables -I INPUT -p tcp -s 10.2.1.101 --dport 10050 -j ACCEPT
   when: inventory_hostname in groups.nodes
+  become: yes
+  become_method: sudo
