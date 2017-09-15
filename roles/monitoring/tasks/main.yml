@@ -54,3 +54,11 @@
   when: inventory_hostname in groups.nodes
   become: yes
   become_method: sudo
+- name: Setup firewall for zabbix agent on loadbalancers
+  firewalld:
+    port: 10050/tcp
+    immediate: true
+    permanent: true
+    zone: public
+    state: enabled
+  when: inventory_hostname in groups.loadbalancers
