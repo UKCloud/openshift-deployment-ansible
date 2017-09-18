@@ -4,4 +4,4 @@
     name: env_details
 - hosts: all, localhost
   roles:
-    - { role: monitoring, when: {{ env_details.setupMonitoring }} == 'yes' }
+    - { role: monitoring, when: {{ env_details.setupMonitoring }} == 'true' }
