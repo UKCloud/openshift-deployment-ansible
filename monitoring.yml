@@ -1,3 +1,7 @@
+- name: Load variables
+  include_vars:
+    file: /etc/ansible/group_vars/all.yml
+    name: env_details
 - hosts: all, localhost
   roles:
-    - monitoring
+    - { role: monitoring, when: setupMonitoring == 'yes' }
