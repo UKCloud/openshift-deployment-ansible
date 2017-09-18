@@ -1,7 +1,3 @@
-- name: Load vairables
-  include_vars:
-    file: /etc/ansible/group_vars/all.yml
-    name: env_details
 - name: Install bind packages
   yum:
     name: "{{ item }}"

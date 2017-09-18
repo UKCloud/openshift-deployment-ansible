@@ -81,7 +81,7 @@ frontend  atomic-openshift-api
 backend atomic-openshift-router-http
     balance source
     mode tcp
-    {% for ip, hostname in env_details.worker_details.items() %}
+    {% for ip, hostname in worker_details.items() %}
       server     {{ hostname }} {{ ip }}:80 check
     {% endfor %}
   
@@ -101,12 +101,12 @@ backend atomic-openshift-router-ssl
     # Learn on response if server hello.
     stick store-response payload_lv(43,1) if serverhello
     option ssl-hello-chk
-    {% for ip, hostname in env_details.worker_details.items() %}
+    {% for ip, hostname in worker_details.items() %}
       server     {{ hostname }} {{ ip }}:443 check
     {% endfor %}
   backend atomic-openshift-api
     balance source
     mode tcp
-    {% for ip, hostname in env_details.master_details.items() %}
+    {% for ip, hostname in master_details.items() %}
       server     {{ hostname }} {{ ip }}:8443 check
     {% endfor %}

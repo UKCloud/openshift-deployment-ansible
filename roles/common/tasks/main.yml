@@ -1,7 +1,3 @@
-- name: Include environment vairables for infrastructure hosts
-  include_vars:
-    file: /etc/ansible/group_vars/all.yml
-    name: env_details
 - name: Check if we have already set resolv.conf
   stat: 
     path: .resolv_conf_set

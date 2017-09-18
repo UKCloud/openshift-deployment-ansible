@@ -16,7 +16,7 @@ vrrp_instance VI_1 {
         auth_pass "{{ hostvars[groups.loadbalancers[0]].keepalived_password.stdout }}"
     }
     virtual_ipaddress {
-        {{ env_details.haproxy_vip }} dev eth0
+        {{ haproxy_vip }} dev eth0
     }
     track_script {
         chk_haproxy

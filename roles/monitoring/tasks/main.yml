@@ -1,7 +1,3 @@
-- name: Load variables
-  include_vars:
-    file: /etc/ansible/group_vars/all.yml
-    name: env_details
 - name: Enable extras repo
   command: subscription-manager repos --enable=rhel-7-server-extras-rpms
   when: inventory_hostname in groups.loadbalancers

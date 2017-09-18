@@ -1,6 +1,6 @@
-$ORIGIN {{ env_details.localDomainSuffix }}. 
+$ORIGIN {{ localDomainSuffix }}.
 $TTL 60s 
-@    IN    SOA    dns1.{{ env_details.localDomainSuffix }}.    hostmaster.{{ env_details.localDomainSuffix }}. (
+@    IN    SOA    dns1.{{ localDomainSuffix }}.    hostmaster.{{ localDomainSuffix }}. (
             2001062501 ; serial                     
             21600      ; refresh after 6 hours                     
             3600       ; retry after 1 hour                     
@@ -8,8 +8,8 @@ $TTL 60s
             86400 )    ; minimum TTL of 1 day  
              
                    
-    IN    NS    dns1.{{ env_details.localDomainSuffix }}.
-    IN    NS    dns2.{{ env_details.localDomainSuffix }}.        
+    IN    NS    dns1.{{ localDomainSuffix }}.
+    IN    NS    dns2.{{ localDomainSuffix }}.
     
 {% set count = 1 %}
 {% for hostname in groups.dns %}
@@ -17,16 +17,16 @@ dns{{ count }}	IN	A	{{ hostvars[hostname].ansible_default_ipv4.address }}
 {% set count = count + 1 %}
 {% endfor %}
 
-{% for ip, hostname in env_details.haproxy_details.iteritems() %}
+{% for ip, hostname in haproxy_details.iteritems() %}
 {{ hostname }}.	IN	A	{{ ip }}
 {% endfor %}
 
-{% for ip, hostname in env_details.worker_details.iteritems() %}
+{% for ip, hostname in worker_details.iteritems() %}
 {{ hostname }}.	IN	A	{{ ip }}
 {% endfor %}
 
-{% for ip, hostname in env_details.master_details.iteritems() %}
+{% for ip, hostname in master_details.iteritems() %}
 {{ hostname }}.	IN	A	{{ ip }}
 {% endfor %}
 
-console		IN 	A	{{ env_details.haproxy_vip }}
+console		IN 	A	{{ haproxy_vip }}
