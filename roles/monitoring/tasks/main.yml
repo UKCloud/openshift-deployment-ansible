@@ -17,6 +17,10 @@
   when: inventory_hostname == 'localhost' or inventory_hostname in groups.loadbalancers
   become: yes
   become_method: sudo
+- name: Create a password for zabbix db
+  shell: openssl passwd -in /dev/urandom | head -1 
+  register: zabbixDbPassword
+  when: inventory_hostname == 'localhost'
 - name: create persistent storage volume for zabbix
   command: docker run -d -v /var/lib/mysql --name zabbix-db-storage busybox:latest
   when: inventory_hostname == 'localhost'
