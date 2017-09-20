@@ -29,14 +29,14 @@
   args:
     creates: .zabbix_persistence_created 
 - name: install zabbix db
-  command: docker run -d --name zabbix-db -v /backups:/backups -v /etc/localtime:/etc/localtime:ro --volumes-from zabbix-db-storage --env="MARIADB_USER=zabbix" --env="MARIADB_PASS={{ zabbixDbPassword }}" monitoringartist/zabbix-db-mariadb
+  command: docker run -d --name zabbix-db -v /backups:/backups -v /etc/localtime:/etc/localtime:ro --volumes-from zabbix-db-storage --env="MARIADB_USER=zabbix" --env="MARIADB_PASS={{ zabbixDbPassword.stdout }}" monitoringartist/zabbix-db-mariadb
   when: inventory_hostname == 'localhost'
   become: yes
   become_method: sudo
   args:
     creates: .zabbix_db_created 
 - name: install zabbix server
-  command: docker run -d --name zabbix -p 80:80 -p 10051:10051 -v /etc/localtime:/etc/localtime:ro --link zabbix-db:zabbix.db --env="ZS_DBHost=zabbix.db" --env="ZS_DBUser=zabbix" --env="ZS_DBPassword={{ zabbixDbPassword }}" monitoringartist/zabbix-xxl:latest
+  command: docker run -d --name zabbix -p 80:80 -p 10051:10051 -v /etc/localtime:/etc/localtime:ro --link zabbix-db:zabbix.db --env="ZS_DBHost=zabbix.db" --env="ZS_DBUser=zabbix" --env="ZS_DBPassword={{ zabbixDbPassword.stdout }}" monitoringartist/zabbix-xxl:latest
   when: inventory_hostname == 'localhost'
   become: yes
   become_method: sudo
