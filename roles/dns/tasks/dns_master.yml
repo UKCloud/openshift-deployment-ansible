@@ -1,7 +1,3 @@
-- name: Load vairables
-  include_vars:
-    file: /etc/ansible/group_vars/all.yml
-    name: env_details
 - name: inv hostname
   debug:
     var: inventory_hostname
@@ -35,7 +31,7 @@
 - name: Copy across zone
   template:
     src: templates/zonefile.j2
-    dest: /var/named/{{ env_details.localDomainSuffix }}.zone
+    dest: /var/named/{{ localDomainSuffix }}.zone
   when: inventory_hostname == groups.dns[0]
 - name: Restart bind
   systemd:

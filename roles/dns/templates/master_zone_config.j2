@@ -1,6 +1,6 @@
-zone "{{ env_details.localDomainSuffix }}" IN {
+zone "{{ localDomainSuffix }}" IN {
     type master;
-    file "{{ env_details.localDomainSuffix }}.zone";
+    file "{{ localDomainSuffix }}.zone";
     allow-update { none; };
     allow-transfer { key TRANSFER; };
 };

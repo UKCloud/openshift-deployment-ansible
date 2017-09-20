@@ -26,10 +26,6 @@
 - name: Store keepalived password
   set_fact:
     keepalived_password: "{{ keepalived_password_output }}"
-- name: Include environment vairables for infrastructure hosts
-  include_vars:
-    file: /etc/ansible/group_vars/all.yml
-    name: env_details
 - name: Install keepalived
   yum:
     name: keepalived

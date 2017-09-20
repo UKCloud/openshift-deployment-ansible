@@ -25,8 +25,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 openshift_master_htpasswd_users={'admin': '$apr1$mSg5YHIt$TSWms4a24FdbZbqiGPJvc/', 'demo': '$apr1$kxv5vr/4$Y6gc7iyLEa7kvG.DaYwrc/'}
 
 openshift_master_cluster_method=native
-openshift_master_cluster_hostname=console.{{ env_details.localDomainSuffix }}
-openshift_master_cluster_public_hostname=ocp.{{ env_details.domainSuffix }}
+openshift_master_cluster_hostname=console.{{ localDomainSuffix }}
+openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
 
 openshift_set_hostname=true
 
@@ -34,7 +34,7 @@ openshift_set_hostname=true
 # This sets the nodeIP setting in node-config on each host to the correct IP
 openshift_set_node_ip=true
 
-openshift_master_default_subdomain={{ env_details.domainSuffix }}
+openshift_master_default_subdomain={{ domainSuffix }}
 
 # Set the MTU size for the Docker0 bridge and docker native containers
 openshift_docker_options="--mtu=1400  --log-driver=journald"
@@ -48,18 +48,18 @@ openshift_hosted_registry_replicas=1
 #openshift_hosted_registry_storage_kind=openstack
 #openshift_hosted_registry_storage_access_modes=['ReadWriteOnce']
 #openshift_hosted_registry_storage_openstack_filesystem=ext4
-#openshift_hosted_registry_storage_openstack_volumeID={{ env_details.registryVolume }}
-#openshift_hosted_registry_storage_volume_size={{ env_details.registryVolumeSize }}
+#openshift_hosted_registry_storage_openstack_volumeID={{ registryVolume }}
+#openshift_hosted_registry_storage_volume_size={{ registryVolumeSize }}
 
 # Any S3 service (Minio, ExoScale, ...): Basically the same as above
 # but with regionendpoint configured
 # S3 bucket must already exist.
 openshift_hosted_registry_storage_kind=object
 openshift_hosted_registry_storage_provider=s3
-openshift_hosted_registry_storage_s3_accesskey={{ env_details.s3accesskey }}
-openshift_hosted_registry_storage_s3_secretkey={{ env_details.s3secretkey }}
-openshift_hosted_registry_storage_s3_regionendpoint={{ env_details.s3regionendpoint }}
-openshift_hosted_registry_storage_s3_bucket={{ env_details.s3bucketname }}
+openshift_hosted_registry_storage_s3_accesskey={{ s3accesskey }}
+openshift_hosted_registry_storage_s3_secretkey={{ s3secretkey }}
+openshift_hosted_registry_storage_s3_regionendpoint={{ s3regionendpoint }}
+openshift_hosted_registry_storage_s3_bucket={{ s3bucketname }}
 openshift_hosted_registry_storage_s3_region=bucket_region
 openshift_hosted_registry_storage_s3_chunksize=26214400
 openshift_hosted_registry_storage_s3_rootdirectory=/registry
@@ -75,49 +75,49 @@ openshift_clock_enabled=true
 
 # openstack cinder integration for persistant volume claims
 openshift_cloudprovider_kind=openstack
-openshift_cloudprovider_openstack_auth_url={{ env_details.osAuthUrl }}
-openshift_cloudprovider_openstack_username={{ env_details.openstackOpenshiftUsername}}
-openshift_cloudprovider_openstack_password={{ env_details.openstackOpenshiftPassword }}
-openshift_cloudprovider_openstack_tenant_id={{ env_details.osTenantId }}
-openshift_cloudprovider_openstack_tenant_name={{ env_details.osTenantName }}
-openshift_cloudprovider_openstack_region={{ env_details.osRegion }}
+openshift_cloudprovider_openstack_auth_url={{ osAuthUrl }}
+openshift_cloudprovider_openstack_username={{ openstackOpenshiftUsername}}
+openshift_cloudprovider_openstack_password={{ openstackOpenshiftPassword }}
+openshift_cloudprovider_openstack_tenant_id={{ osTenantId }}
+openshift_cloudprovider_openstack_tenant_name={{ osTenantName }}
+openshift_cloudprovider_openstack_region={{ osRegion }}
 
 
 # openshift stats deployment - comment out if no stats deployment is required. this will run on the worker nodes
 openshift_hosted_metrics_deploy=true
-openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ env_details.domainSuffix }}/hawkular/metrics
+openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ domainSuffix }}/hawkular/metrics
 openshift_hosted_metrics_storage_kind=dynamic
 openshift_metrics_cassandra_pvc_size=50Gi
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
 [masters]
-{% for ip, hostname in env_details.master_details.items() %}
+{% for ip, hostname in master_details.items() %}
 {{ hostname }}
 {% endfor %}
 
 [etcd]
-{% for ip, hostname in env_details.master_details.items() %}
+{% for ip, hostname in master_details.items() %}
 {{ hostname }}
 {% endfor %}
 
 [loadbalancers]
-{% for ip, hostname in env_details.haproxy_details.items() %}
+{% for ip, hostname in haproxy_details.items() %}
 {{ hostname }}
 {% endfor %}
 
 [dns]
-{% for ip, hostname in env_details.haproxy_details.items() %}
+{% for ip, hostname in haproxy_details.items() %}
 {{ hostname }}
 {% endfor %}
 
 # host group for nodes, includes region info
 # Routers are placed only on first 3 workers
 [nodes]
-{% for ip, hostname in env_details.master_details.items() %}
+{% for ip, hostname in master_details.items() %}
 {{ hostname }} openshift_ip={{ ip }}
 {% endfor %}
-{% for ip, hostname in env_details.worker_details.items() %}
+{% for ip, hostname in worker_details.items() %}
 {% if loop.index <= 3 %}
 {{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','purpose':'tenant'}"
 {% else %}

@@ -10,8 +10,8 @@ if [[ -z $username ]] || [[ -z $password ]]; then
   exit 1
 else
   if [[ $debug != 0 ]]; then
-    ansible-playbook --private-key ../../id_rsa_jenkins -i ../openshift-ansible-hosts -e USERNAME=$username -e PASSWORD=$password playbooks/htpassword.yaml -vv
+    ansible-playbook --private-key ~/id_rsa_jenkins -i ../openshift-ansible-hosts -e USERNAME=$username -e PASSWORD=$password playbooks/htpassword.yaml -vv
   else
-    ansible-playbook --private-key ../../id_rsa_jenkins -i ../openshift-ansible-hosts -e USERNAME=$username -e PASSWORD=$password playbooks/htpassword.yaml
+    ansible-playbook --private-key ~/id_rsa_jenkins -i ../openshift-ansible-hosts -e USERNAME=$username -e PASSWORD=$password playbooks/htpassword.yaml
   fi
 fi
