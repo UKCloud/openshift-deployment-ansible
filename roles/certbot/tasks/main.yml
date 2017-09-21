@@ -1,0 +1,26 @@
+- name: Enable optional and extras repos
+  command: subscription-manager repos --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-optional-rpmss
+- name: Install wget
+  yum:
+    name: wget
+    state: latest
+  become: yes
+  become_method: sudo
+- name: Get rpm for epel repo
+  command: wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -O /tmp/epel-release-latest-7.noarch.rpm; chmod +x /tmp/epel-release-latest-7.noarch.rpm
+- name: Install epel repo
+  yum:
+    name: /tmp/epel-release-latest-7.noarch.rpm
+    state: present
+  become: yes
+  become_method: sudo
+- name: Install certbot
+  yum:
+    name: certbot
+    state: latest
+- name: Stop HAProxy
+  command: systemctl stop haproxy
+- name: Run certbot
+  command: certbot -h
+- name: Start HAProxy
+  command: systemctl start haproxy
