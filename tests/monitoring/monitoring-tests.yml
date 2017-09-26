@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  tasks:
+  - set_fact: hostIP={{ lookup('env','bastionip') }}
+  - debug: msg={{ hostIP }}
+  - name: Test monitoring web page is available
+    uri: 
+      url: http://{{ hostIP }}
+      status_code: 200
