@@ -1,13 +1,12 @@
 - name: Enable optional and extras repos
-  command: subscription-manager repos --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-optional-rpmss
-- name: Install wget
-  yum:
-    name: wget
-    state: latest
-  become: yes
-  become_method: sudo
-- name: Get rpm for epel repo
-  command: wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -O /tmp/epel-release-latest-7.noarch.rpm; chmod +x /tmp/epel-release-latest-7.noarch.rpm
+  command: subscription-manager repos --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-optional-rpms
+- name: Download file
+  get_url:
+    url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    dest: /tmp/epel-release-latest-7.noarch.rpm
+- file:
+    path: /tmp/epel-release-latest-7.noarch.rpm
+    mode: 0777
 - name: Install epel repo
   yum:
     name: /tmp/epel-release-latest-7.noarch.rpm
