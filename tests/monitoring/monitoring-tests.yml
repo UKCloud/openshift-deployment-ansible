@@ -2,9 +2,9 @@
 - hosts: localhost
   tasks:
   - vars:
-       b1: {{ ansible_env.bastionip }}
+       b1: "{{ ansible_env.bastionip }}"
        b2: "{{ lookup('env','bastionip') }}"
-       b3: {{ ansible_env.bastianHost }}
+       b3: "{{ ansible_env.bastianHost }}"
   - debug: msg={{ b1 }}
   - debug: msg={{ b2 }}
   - debug: msg={{ b3 }}
