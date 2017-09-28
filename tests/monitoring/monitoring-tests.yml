@@ -1,7 +1,7 @@
 ---
 - hosts: localhost
   tasks:
-  - set_fact: hostIP={{ lookup('env','bastionip') }}
+  - set_fact: hostIP={{ lookup('env','bastianHost') }}
   - debug: msg={{ hostIP }}
   - name: Test monitoring web page is available
     uri: 
