@@ -1,7 +1,14 @@
 ---
 - hosts: localhost
   tasks:
-  - set_fact: hostIP={{ lookup('env','bastianHost') }}
+  - vars:
+       b1: {{ ansible_env.bastionip }}
+       b2: "{{ lookup('env','bastionip') }}"
+       b3: {{ ansible_env.bastianHost }}
+  - debug: msg={{ b1 }}
+  - debug: msg={{ b2 }}
+  - debug: msg={{ b3 }}
+  - set_fact: hostIP={{ lookup('env','bastionip') }}
   - debug: msg={{ hostIP }}
   - name: Test monitoring web page is available
     uri: 
