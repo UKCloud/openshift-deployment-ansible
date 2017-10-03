@@ -30,6 +30,9 @@ openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
 
 openshift_set_hostname=true
 
+openshift_master_overwrite_named_certificates=true
+openshift_master_named_certificates=[{"certfile": "/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem", "keyfile": "/home/cloud-user/ocp.{{ domainSuffix }}/privkey1.pem", "names": ["ocp.{{ domainSuffix }}"]}]
+
 # Makes the openshift_ip setting in the host groups are below take effect.
 # This sets the nodeIP setting in node-config on each host to the correct IP
 openshift_set_node_ip=true
