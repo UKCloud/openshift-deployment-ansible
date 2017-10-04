@@ -20,6 +20,6 @@
 - name: Stop HAProxy
   command: systemctl stop haproxy
 - name: Run certbot
-  command: certbot -h
+  command: certbot certonly --standalone -m smulholland@ukcloud.com -d ocp.{{ domainSuffix }},hawkular-metrics.{{ domainSuffix }},registry-console-default.{{ domainSuffix }} --agree-tos -n
 - name: Start HAProxy
   command: systemctl start haproxy
