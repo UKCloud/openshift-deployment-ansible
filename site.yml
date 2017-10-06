@@ -1,5 +1,6 @@
 - include: loadbalancers.yml
 - include: dns.yml
 - include: all.yml
+- include: certbot.yml
 - include: openshift.yml
 - include: monitoring.yml

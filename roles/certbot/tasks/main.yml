@@ -60,3 +60,6 @@
   fetch:
     src: "{{ item.path }}"
     dest: /home/cloud-user/ocp.{{ domainSuffix }}/
+    flat: yes
+  with_items: "{{ certs_to_copy.files }}"
+  when: inventory_hostname == groups.loadbalancers[0]
