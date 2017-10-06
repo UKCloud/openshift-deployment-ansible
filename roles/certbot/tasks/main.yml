@@ -1,25 +1,53 @@
+- name: Stop keepalived service on second node
+  systemd:
+    name: keepalived
+    state: stopped
+    enabled: yes
+  when: inventory_hostname == groups.loadbalancers[1]
+  become: yes
+  become_method: sudo
 - name: Enable optional and extras repos
   command: subscription-manager repos --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-optional-rpms
+  when: inventory_hostname == groups.loadbalancers[0]
 - name: Download file
   get_url:
     url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     dest: /tmp/epel-release-latest-7.noarch.rpm
+  when: inventory_hostname == groups.loadbalancers[0]
 - file:
     path: /tmp/epel-release-latest-7.noarch.rpm
     mode: 0777
+  when: inventory_hostname == groups.loadbalancers[0]
 - name: Install epel repo
   yum:
     name: /tmp/epel-release-latest-7.noarch.rpm
     state: present
   become: yes
   become_method: sudo
+  when: inventory_hostname == groups.loadbalancers[0]
 - name: Install certbot
   yum:
     name: certbot
     state: latest
+  when: inventory_hostname == groups.loadbalancers[0]
 - name: Stop HAProxy
-  command: systemctl stop haproxy
+  systemd:
+    name: haproxy
+    state: stopped
+  when: inventory_hostname == groups.loadbalancers[0]
 - name: Run certbot
-  command: certbot certonly --standalone -m smulholland@ukcloud.com -d ocp.{{ domainSuffix }},hawkular-metrics.{{ domainSuffix }},registry-console-default.{{ domainSuffix }} --agree-tos -n
+  command: certbot certonly -m smulholland@ukcloud.com --standalone -d ocp.{{ domainSuffix }},hawkular-metrics.{{ domainSuffix }},registry-console-default.{{ domainSuffix }} --agree-tos -n
+  when: inventory_hostname == groups.loadbalancers[0]
 - name: Start HAProxy
-  command: systemctl start haproxy
+  systemd:
+    name: haproxy
+    state: started
+  when: inventory_hostname == groups.loadbalancers[0]
+- name: Restart keepalived service on second node
+  systemd:
+    name: keepalived
+    state: started
+    enabled: yes
+  when: inventory_hostname == groups.loadbalancers[1]
+  become: yes
+  become_method: sudo
