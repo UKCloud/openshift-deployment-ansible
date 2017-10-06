@@ -51,3 +51,12 @@
   when: inventory_hostname == groups.loadbalancers[1]
   become: yes
   become_method: sudo
+- name: find certs to copy back
+  find:
+    paths: /etc/letsencrypt/archive/ocp.{{ domainSuffix }}
+  register: certs_to_copy
+  when: inventory_hostname == groups.loadbalancers[0]
+- name: copy certs back
+  fetch:
+    src: "{{ item.path }}"
+    dest: /home/cloud-user/ocp.{{ domainSuffix }}/
