@@ -7,3 +7,36 @@
       status_code: 200
       body: ok
       validate_certs: no
+
+  - name: Request URL to confirm homepage works
+    uri:
+      url: https://ocp.customer2.cor00005.cna.ukcloud.com:8443
+      status_code: 200
+      validate_certs: no
+
+  - name: Login to openshift
+    command: oc login https://ocp.customer2.cor00005.cna.ukcloud.com:8443 -u user -p password --insecure-skip-tls-verify
+
+  - name: Creating project
+    command: oc new-project test
+
+  - name: Creating pod
+    command: oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data
+
+  - name: Testing pod
+    shell: |
+       pods_list="$(oc get pods | grep -v "NAME")"
+       pod="$(echo $pods_list | grep mariadb | awk '{print $1}')"
+       for i in $(seq 1 10); do
+         oc rsh "$pod" /opt/rh/rh-mariadb101/root/usr/bin/mysql -u admin -e 'exit'
+         exit_status=$?
+         if [ $exit_status -eq 0 ]; then
+            break
+          else
+            sleep 4
+         fi
+       done
+
+  - name: delete project
+    command: oc delete project test
+
