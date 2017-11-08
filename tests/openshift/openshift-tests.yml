@@ -1,24 +1,33 @@
 ---
 - hosts: localhost
   tasks:
+  
+  - name: Get webserver variable
+    include_vars:
+      file: openshift-server.yml
+
   - name: Test cluster health reports OK
     uri:
-      url: https://ocp.customer2.cor00005.cna.ukcloud.com:8443/healthz/ping
+      url: "{{server}}/healthz/ping"
       status_code: 200
       body: ok
       validate_certs: no
-
+  
   - name: Request URL to confirm homepage works
     uri:
-      url: https://ocp.customer2.cor00005.cna.ukcloud.com:8443
+      url: "{{server}}"
       status_code: 200
       validate_certs: no
 
+  - name: Get openshift password
+    include_vars: 
+       file: passwords.yaml
+
   - name: Login to openshift
-    command: oc login https://ocp.customer2.cor00005.cna.ukcloud.com:8443 -u user -p password --insecure-skip-tls-verify
+    command: oc login "{{server}}" -u demo -p "{{openshiftpassword}}" --insecure-skip-tls-verify
 
   - name: Creating project
-    command: oc new-project test
+    command: oc new-project test-maria
 
   - name: Creating pod
     command: oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data
@@ -38,5 +47,5 @@
        done
 
   - name: delete project
-    command: oc delete project test
+    command: oc delete project test-maria
 
