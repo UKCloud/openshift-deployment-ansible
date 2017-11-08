@@ -1,5 +1,5 @@
-- include: loadbalancers.yml
-- include: dns.yml
-- include: all_servers.yml
-- include: openshift.yml
-- include: monitoring.yml
+- import_playbook: loadbalancers.yml
+- import_playbook: dns.yml
+- import_playbook: all_servers.yml
+- import_playbook: openshift.yml
+- import_playbook: monitoring.yml
