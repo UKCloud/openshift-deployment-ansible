@@ -1,5 +1,5 @@
 - include: loadbalancers.yml
 - include: dns.yml
-- include: all.yml
+- include: all_servers.yml
 - include: openshift.yml
 - include: monitoring.yml
