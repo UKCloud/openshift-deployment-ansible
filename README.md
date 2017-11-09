@@ -5,7 +5,7 @@ To execute the playbooks and set up your Openshift environment, run the followin
 ./deploy-openshift.sh
 ``` 
 
-The environment definition is in the file "/etc/ansible/group_vars/all.yml". This file is written by the ansible-heat code.
+The environment definition is in the file "/etc/ansible/group_vars/all.yml". This file is written by the openshift-heat code.
 (**Note** This file is a default location in Ansible, so there is no need to specify it when running playbooks; it will be loaded automatically.)
 
 
