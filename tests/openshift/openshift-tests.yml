@@ -24,7 +24,7 @@
        file: passwords.yaml
 
   - name: Login to openshift
-    command: oc login "{{server}}" -u demo -p "{{openshiftpassword}}" --insecure-skip-tls-verify
+    command: oc login "{{server}}" -u demo -p "{{OS_PASSWORD}}" --insecure-skip-tls-verify
 
   - name: Creating project
     command: oc new-project test-maria
