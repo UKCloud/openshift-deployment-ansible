@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Test cluster health reports OK
+    uri:
+      url: https://ocp.customer2.cor00005.cna.ukcloud.com:8443/healthz/ping
+      status_code: 200
+      body: ok
+      validate_certs: no
