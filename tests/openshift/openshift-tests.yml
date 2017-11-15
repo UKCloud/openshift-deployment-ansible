@@ -41,13 +41,13 @@
    
     
   - name: Creating pod
-    #shell: oc project test-maria ; oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data OPENSHIFT_BUILD_NAMESPACE=test-maria
-    shell: for var in $(export | grep KUB | awk '{ print $2 }' | sed 's/\=.*//g'); do unset $var; done ; oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data; export
-    register: result3
-    ignore_errors: yes
+    shell: oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data
+    #shell: for var in $(export | grep KUB | awk '{ print $2 }' | sed 's/\=.*//g'); do unset $var; done ; oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data; export
+    #register: result3
+    #ignore_errors: yes
 
-  - debug:
-      var: result3
+#  - debug:
+#      var: result3
        
   - name: Testing pod
     #shell: |
@@ -62,8 +62,9 @@
     #        sleep 4
     #     fi
     #   done
-    shell: for var in $(export | grep KUB | awk '{ print $2 }' | sed 's/\=.*//g'); do unset $var; done; sleep 20; pod=$(oc get pods | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /opt/rh/rh-mariadb101/root/usr/bin/mysql -u admin -e 'exit'
+    #shell: for var in $(export | grep KUB | awk '{ print $2 }' | sed 's/\=.*//g'); do unset $var; done; sleep 20; pod=$(oc get pods | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /opt/rh/rh-mariadb101/root/usr/bin/mysql -u admin -e 'exit'
+    shell: sleep 20; pod=$(oc get pods | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /opt/rh/rh-mariadb101/root/usr/bin/mysql -u admin -e 'exit'
 
-  #- name: delete project
-  #  command: oc delete project test-maria
+  - name: delete project
+    command: oc delete project test-maria
 
