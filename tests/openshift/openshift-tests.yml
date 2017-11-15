@@ -16,53 +16,20 @@
       validate_certs: no
 
   - name: Login to openshift
-    shell: |
-        oc login "{{server}}" -u demo -p "{{OS_PASSWORD}}" --insecure-skip-tls-verify
-#        oc new-project test-maria
-#        oc project test-maria
-#        oc version
-#        oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data
-#        oc version
+    command: oc login "{{server}}" -u demo -p "{{OS_PASSWORD}}" --insecure-skip-tls-verify
 
   - name: Creating project
     command: oc new-project test-maria
     register: result
 
-  - debug:
-      var: result
-       
-
-  - name: Change current project
+  - name: Ensure on current project
     command: oc project test-maria
     register: result2
-
-  - debug:
-      var: result2
-   
     
   - name: Creating pod
     shell: oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data
-    #shell: for var in $(export | grep KUB | awk '{ print $2 }' | sed 's/\=.*//g'); do unset $var; done ; oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data; export
-    #register: result3
-    #ignore_errors: yes
-
-#  - debug:
-#      var: result3
        
   - name: Testing pod
-    #shell: |
-    #   for var in $(export | grep KUB | awk '{ print $2 }' | sed 's/\=.*//g'); do unset $var; done
-    #   pod=$(oc get pods | grep -v NAME | awk '{ print $1 }')
-    #   for i in $(seq 1 10); do
-    #     oc rsh $pod /opt/rh/rh-mariadb101/root/usr/bin/mysql -u admin -e 'exit'
-    #     exit_status=$?
-    #     if [ $exit_status -eq 0 ]; then
-    #        break
-    #      else
-    #        sleep 4
-    #     fi
-    #   done
-    #shell: for var in $(export | grep KUB | awk '{ print $2 }' | sed 's/\=.*//g'); do unset $var; done; sleep 20; pod=$(oc get pods | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /opt/rh/rh-mariadb101/root/usr/bin/mysql -u admin -e 'exit'
     shell: sleep 20; pod=$(oc get pods | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /opt/rh/rh-mariadb101/root/usr/bin/mysql -u admin -e 'exit'
 
   - name: delete project
