@@ -88,6 +88,14 @@ openshift_hosted_metrics_deploy=true
 openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ domainSuffix }}/hawkular/metrics
 openshift_hosted_metrics_storage_kind=dynamic
 openshift_metrics_cassandra_pvc_size=50Gi
+## cassandra is misspelt in the openshift-ansible 3.6.173.0.48-1 code so line below needs "cassanda"
+openshift_metrics_cassanda_pvc_storage_class_name=tier-2
+## and again with the correct spelling, incase the typo is fixed in the future
+openshift_metrics_cassandra_pvc_storage_class_name=tier-2
+## Also, for 3.6.173.0.48-1, ^ this ^ config is completely ignored unless you backport a fix by adding Line 57 from
+## https://github.com/openshift/openshift-ansible/blob/80d141b5d60da9afbd3c02350933c090d1839c46/roles/openshift_metrics/tasks/install_cassandra.yaml#L57
+# into /usr/share/ansible/openshift-ansible/roles/openshift_metrics/tasks/install_cassandra.yaml before the deployment runs.
+# RH support case 01975215 is open for this...
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
