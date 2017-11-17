@@ -28,6 +28,10 @@ openshift_master_cluster_method=native
 openshift_master_cluster_hostname=console.{{ localDomainSuffix }}
 openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
 
+# Temporary fix for issue - NoVolumeZoneConflict predicate stops volume provisioning - needs Red Hat to diagnose because
+# specifying the predicates explicitly would prevent any future change of defaults in future versions
+openshift_master_scheduler_predicates=[{ "name": "MaxEBSVolumeCount" }, { "name": "MaxGCEPDVolumeCount" }, { "name": "MatchInterPodAffinity" }, { "name": "NoDiskConflict" },  { "name": "GeneralPredicates" }, { "name": "PodToleratesNodeTaints" }, { "name": "CheckNodeMemoryPressure" }, { "name": "CheckNodeDiskPressure"  }, {  "argument": {  "serviceAffinity": { "labels": [ "region" ] } }, "name": "Region" }]
+
 openshift_set_hostname=true
 
 # Makes the openshift_ip setting in the host groups are below take effect.
