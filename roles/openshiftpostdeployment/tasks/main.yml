@@ -4,13 +4,19 @@
     dest: ~/storage-class-tier1.yml
     force: yes
     backup: yes
+
 - name: Setup tier-2 storage class file
   template:
     src: templates/storage-class-tier2.j2
     dest: ~/storage-class-tier2.yml
     force: yes
     backup: yes
+
 - name: create tier-1 class 
   command: /usr/local/bin/oc create -f ~/storage-class-tier1.yml
+
 - name: create tier-2 class 
   command: /usr/local/bin/oc create -f ~/storage-class-tier2.yml
+
+- name: add admin role
+  command: oadm policy add-cluster-role-to-user cluster-admin 'admin'
