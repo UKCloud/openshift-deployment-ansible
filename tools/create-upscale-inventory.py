@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 """
-Construct the new inventory file to add new workers
+Construct the new inventory file to add new workers.
+
+See main() for the main routine.
 
 writes to a file called "openshift-ansible-hosts-upscale"
+
+There are also some unit tests towards the end of the file
 """
 
 import argparse
@@ -10,10 +14,9 @@ import re
 import os
 import yaml
 
+# Py2/Py3 compatibility is provided by 'six'
 from six.moves.configparser import ConfigParser
 
-from ansible.inventory.manager import InventoryManager
-from ansible.parsing.dataloader import DataLoader
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -21,19 +24,50 @@ from ansible.parsing.dataloader import DataLoader
 class UpscalingMasterNodeException(Exception):
     """ An exception raised if we find we're trying to add
     a Master (because this isn't supported at present)"""
+    pass
 
 
 class AnsibleInventory(ConfigParser):
+    """
+    A representation of an Ansible INI file. This is based on the ConfigParser,
+    which can read normal windows INI files, but Ansible INI files are slightly
+    different. This class handles these differences.
+
+    http://docs.ansible.com/ansible/latest/dev_guide/developing_api.html
+    https://github.com/ansible/ansible/blob/devel/lib/ansible/inventory
+    """
     def __init__(self, filename=None):
+        """ Constructor for a new Inventory object. """
         # ConfigParser is an old-style class; can't use Super()
         ConfigParser.__init__(self, allow_no_value=True)
         if filename:
             self.read(filename)
 
+    def get_groups_dict(self):
+        """ Retrieve a dict of the groups from the inventory.
+        The keys are the section names. the values are the node names,
+        without any further parameters, or keys without values in the case of
+        [OSE3:vars]
+
+        Ansible INI files separate node from parameters with a space,
+        which is not a standard INI file thing. Here, we identify a space
+        in a "node name" and remove the right-hand part.
+        """
+        out = {}
+        for section in self.sections():
+            out[section] = []
+            for pair in self.items(section):
+                node = pair[0]  # items() returns a  list of 2-tuples
+                if ' ' in node:
+                    node = node.split(' ')[0]
+                if node is not None:
+                    out[section].append(node)
+        return out
+
     def create_ini(self):
-        """ construct the contents of the INI file (as a string)"""
-        # ConfigParser DOES have its own write() method
-        # we could re-implement more of it here
+        """ construct the contents of the INI file (as a string)
+        Does part of what ConfigParser.write() does
+        """
         out = []
         for s in self.sections():
             out.append("[{}]".format(s))
@@ -85,25 +119,16 @@ def parse_args():
 
 def read_hosts_from_inventory(inventory_file):
     """
-    Ansible inventory isn't exactly the same as an INI file. You could use a
-    ConfigParser, but it doesn't quite give you the right output. However, you
-    can use the Ansible inventory manager.
-    http://docs.ansible.com/ansible/latest/dev_guide/developing_api.html
-    https://github.com/ansible/ansible/blob/devel/lib/ansible/inventory
-
-    Update: Ansible's Inventory Manager is not useful for WRITING, but the
-    ConfigParser can be made to provide the right output
-
     Args:
         inventory_file: the filename containing the inventory.
 
     Returns:
         a dict representing the hosts from the inventory file.
         The following keys should be present:
-        ['all', 'dns', 'loadbalancers', 'masters', 'ungrouped', 'etcd',
-         'OSEv3', 'nodes']
+        ['OSEv3:children', 'OSEv3:vars', 'dns',
+         'etcd', 'loadbalancers', 'masters', 'nodes']
     """
-    ivm = InventoryManager(loader=DataLoader(), sources=[inventory_file])
+    ivm = AnsibleInventory(filename=inventory_file)
     return ivm.get_groups_dict()
 
 
@@ -111,7 +136,7 @@ def read_hosts_from_config_yaml(vars_config_file):
     """
     Read from the ansible vars file group_vars/all.yml
 
-    Return a list of tuples, each being (hostname, ip_address)
+    Return a list of 2-tuples, each item being (hostname, ip_address)
 
     """
     with open(vars_config_file, 'r') as vars_fh:
@@ -132,12 +157,11 @@ def find_missing_hosts(all_inventory_hosts, new_hosts_list):
 
     Args:
         all_inventory_hosts: a list of hostnames, originating
-            from the inventory file (
+            from the inventory file.
         new_hosts_list: a list of tuples of all the hosts that should be
             in the enlarged cluster. Each is (hostname, ip_address)
     """
 
-    # Does every host in all.yml exist in the inventory?
     discovered_hosts = []
     added = []
 
@@ -156,18 +180,30 @@ def write_scale_up_inventory(old_inventory_file, upscaled_inventory_file,
     https://docs.openshift.com/container-platform/3.5/install_config/
         adding_hosts_to_existing_cluster.html#adding-nodes-advanced
 
+    Adds a worker node as follows:
+
+    - Add a new value called "new_nodes" to the section [OSEv3:children]
+    - Add a new section [new_nodes]
+    - Add the new workers to the [new_nodes] section, and append the
+      Ansible parameters "openshift_ip" and "openshift_node_labels".
+    - The value attached to "openshift_node_labels" differs, depending on the
+      worker ID.
+
+    Attempting to add a master node results in an Exception being thrown,
+    as this is not currently supported.
+
     """
     inventory = AnsibleInventory(filename=old_inventory_file)
 
     for host, ip_arg in new_hosts:
-        # the new host is either "master-*.openstacklocal" or
-        # worker-*.openstacklocal"
+        # the new host is either "master-*.<localDomainSuffix>" or
+        # worker-*.<localDomainSuffix>" We don't have to match on the suffix
 
         host_type = ''
         host_num = -1
         if debug:
             print("DEBG: {}".format(host))
-        mtch = re.match('(worker|master)-(\d+).openstacklocal', host)
+        mtch = re.match('(worker|master)-(\d+)\.', host)
         if mtch:
             host_type = mtch.group(1)
             host_num = int(mtch.group(2))
@@ -214,19 +250,24 @@ def main():
     assert os.path.exists(inventory_file)
     assert os.path.exists(vars_config_file)
 
+    # Read all the hosts from the config file; includes new ones.
     new_hosts_list = read_hosts_from_config_yaml(vars_config_file)
     if args.debug:
-        print('DBUG: %r' % new_hosts_list)
+        print('DBUG: 1 %r' % new_hosts_list)
 
-    all_inventory_hosts = read_hosts_from_inventory(inventory_file)['all']
+    # Read the list of all existing hosts
+    inventory = read_hosts_from_inventory(inventory_file)
+    all_inventory_hosts = inventory['nodes'] + inventory['loadbalancers']
     if args.debug:
         print('DBUG: %r' % all_inventory_hosts)
 
+    # Work out which hosts need to be added
     added_hosts = find_missing_hosts(all_inventory_hosts, new_hosts_list)
 
     for host, ipaddr in added_hosts:
         print("Adding: %s %s" % (host, ipaddr))
 
+    # Generate the new inventory for upscaling
     if len(added_hosts) > 0:
         write_scale_up_inventory(inventory_file, upscale_inventory_file,
                                  added_hosts, args.debug)
@@ -237,6 +278,9 @@ def main():
 #    Unit tests follow
 #
 #
+# To run these tests, ensure the files "group_vars/all.yml and
+# "openshift-ansible-hosts" are available locally (taken from the test
+# deployment, then run ``pytest create-upscale-inventory.py``
 
 
 def test_read_hosts_from_config_yaml():
@@ -290,8 +334,9 @@ def test_read_hosts_from_inventory():
 
     for k, v in should_contain.items():
         assert actual[k] == v
-    assert actual.keys() == ['all', 'dns', 'loadbalancers', 'masters',
-                             'ungrouped', 'etcd', 'OSEv3', 'nodes']
+    assert sorted(actual.keys()) == ['OSEv3:children', 'OSEv3:vars', 'dns',
+                                     'etcd', 'loadbalancers', 'masters',
+                                     'nodes']
 
 
 if __name__ == '__main__':
