@@ -17,6 +17,3 @@
 
 - name: create tier-2 class 
   command: /usr/local/bin/oc create -f ~/storage-class-tier2.yml
-
-- name: add admin role
-  command: oadm policy add-cluster-role-to-user cluster-admin 'admin'
