@@ -1,6 +1,6 @@
 To use these tests run the following:
 
-# The environment variables set by the pipeline need to be overwritten. The kubernetes of the pipeline automatically override the target host, so therefore need to unset them so you can deploy pods within the correct environment.
+The environment variables set by the pipeline need to be overwritten. The pipeline automatically overwrites the target host, therefore we need to unset them so we can deploy the pods within the correct environment. 
 
 ```
 for var in \$(export | grep KUB | awk '{ print \$2 }' | sed 's/\\=.*//g'); do unset \$var; done; source ./openstack_rc.sh ;
