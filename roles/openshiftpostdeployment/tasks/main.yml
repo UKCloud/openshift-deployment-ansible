@@ -19,4 +19,4 @@
   command: /usr/local/bin/oc create -f ~/storage-class-tier2.yml
 
 - name: Give admin rights
-  command: oc adm policy add-cluster-role-to-user cluster-admin admin
+  command: /usr/local/bin/oc adm policy --config=/etc/origin/master/admin.kubeconfig add-cluster-role-to-user cluster-admin admin

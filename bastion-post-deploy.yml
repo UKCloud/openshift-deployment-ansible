@@ -13,9 +13,6 @@
       new_admin_password: "{{ new_admin_password_output.stdout }}"
       new_user_password: "{{ new_user_password_output.stdout }}"
 
-  - debug:
-      msg: "{{ new_admin_password }}"
-
   - name: update passwords
     shell: |
       ansible-playbook --private-key ~/id_rsa_jenkins -i openshift-ansible-hosts -e USERNAME='admin' -e PASSWORD="{{ new_admin_password }}" tools/playbooks/htpassword.yaml
