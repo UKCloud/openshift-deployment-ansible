@@ -1,19 +1,25 @@
 ---
 - hosts: localhost
   tasks:
+  - name: Generate admin password
+    shell: openssl rand -base64 20 | cut -d= -f1
+    register: new_admin_password_output
+
+  - name: Generate user password
+    shell: openssl rand -base64 20 | cut -d= -f1
+    register: new_user_password_output
+
   - set_fact:
-      new-admin-password: $(openssl rand -base64 20 | cut -d= -f1)
-      new-user-password: $(openssl rand -base64 20 | cut -d= -f1)
+      new_admin_password: "{{ new_admin_password_output.stdout }}"
+      new_user_password: "{{ new_user_password_output.stdout }}"
 
   - name: update passwords
     shell: |
-      oc config set-credentials --username='admin' --password='{{ new-admin-password }}';
-      oc config set-credentials --username='demo' --password='{{ new-user-password }}'
+      oc config set-credentials --username='admin' --password='{{ new_admin_password }}';
+      oc config set-credentials --username='demo' --password='{{ new_user_password }}'
 
   - name: create text file
     shell: |
-      echo "admin: {{ new-admin-password }})" > /home/cloud-user/passwords.txt;
-      echo "demo: {{ new-user-password }}" > /home/cloud-user/passwords.txt
+      echo "admin: {{ new_admin_password }})" > /home/cloud-user/passwords.txt;
+      echo "demo: {{ new_user_password }}" > /home/cloud-user/passwords.txt
 
-  - name: add admin status
-    command: oc adm policy add-cluster-role-to-user cluster-admin admin
