@@ -1,0 +1,4 @@
+- hosts: loadbalancers
+  roles:
+    - name: certbot
+      when: getCertificates == True
