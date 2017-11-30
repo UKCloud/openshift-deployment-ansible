@@ -75,3 +75,21 @@
     flat: yes
   with_items: "{{ certs_to_copy.files }}"
   when: inventory_hostname == groups.loadbalancers[0]
+
+- name: Update inventory file with certificates for cluster
+  blockinfile:
+    path: /usr/share/ansible/openshift-deployment-pipeline/openshift-ansible-hosts
+    backup: yes
+    insertafter: openshift_set_hostname=.
+    block: |
+      openshift_master_overwrite_named_certificates=true
+      openshift_master_named_certificates=[{"certfile": "/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem", "keyfile": "/home/cloud-user/ocp.{{ domainSuffix }}/privkey1.pem", "names": ["ocp.{{ domainSuffix }}"]}]
+
+- name: Update inventory file with certificates for metrics service
+  blockinfile:
+    path: /usr/share/ansible/openshift-deployment-pipeline/openshift-ansible-hosts
+    backup: yes
+    insertafter: openshift_metrics_cassandra_pvc_size=.
+    block: |
+      openshift_metrics_hawkular_cert="/home/cloud-user/ocp.{{ domainSuffix  }}/fullchain1.pem"
+      openshift_metrics_hawkular_key="/home/cloud-user/ocp.{{ domainSuffix  }}/privkey1.pem"

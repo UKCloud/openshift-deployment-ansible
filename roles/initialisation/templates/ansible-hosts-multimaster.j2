@@ -30,9 +30,6 @@ openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
 
 openshift_set_hostname=true
 
-openshift_master_overwrite_named_certificates=true
-openshift_master_named_certificates=[{"certfile": "/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem", "keyfile": "/home/cloud-user/ocp.{{ domainSuffix }}/privkey1.pem", "names": ["ocp.{{ domainSuffix }}"]}]
-
 # Makes the openshift_ip setting in the host groups are below take effect.
 # This sets the nodeIP setting in node-config on each host to the correct IP
 openshift_set_node_ip=true
@@ -91,9 +88,6 @@ openshift_hosted_metrics_deploy=true
 openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ domainSuffix }}/hawkular/metrics
 openshift_hosted_metrics_storage_kind=dynamic
 openshift_metrics_cassandra_pvc_size=50Gi
-openshift_metrics_hawkular_cert="/home/cloud-user/ocp.{{ domainSuffix  }}/fullchain1.pem"
-openshift_metrics_hawkular_key="/home/cloud-user/ocp.{{ domainSuffix  }}/privkey1.pem"
-
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
