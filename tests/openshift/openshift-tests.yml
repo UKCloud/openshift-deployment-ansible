@@ -1,9 +1,37 @@
 ---
 - hosts: localhost
   tasks:
+  
   - name: Test cluster health reports OK
     uri:
-      url: https://ocp.customer2.cor00005.cna.ukcloud.com:8443/healthz/ping
+      url: "{{server}}/healthz/ping"
       status_code: 200
       body: ok
       validate_certs: no
+  
+  - name: Request URL to confirm homepage works
+    uri:
+      url: "{{server}}"
+      status_code: 200
+      validate_certs: no
+
+  - name: Login to openshift
+    command: oc login "{{server}}" -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
+
+  - name: Create project
+    command: oc new-project test-maria
+    register: result
+
+  - name: Switch to current project
+    command: oc project test-maria
+    register: result2
+    
+  - name: Create pod
+    shell: oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data
+       
+  - name: Testing pod
+    shell: sleep 20; pod=$(oc get pods | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /opt/rh/rh-mariadb101/root/usr/bin/mysql -u admin -e 'exit'
+
+  - name: Delete project
+    command: oc delete project test-maria
+
