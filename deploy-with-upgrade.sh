@@ -11,12 +11,12 @@ fi
 # build the openshift-ansible-hosts file for use in the next play.
 ansible-playbook -i localhost, -c local bastion.yml
 
-# Part 3: Configure the rest of the system
-ansible-playbook $PRIVKEY_ARG ~/id_rsa_jenkins -i openshift-ansible-hosts site.yml
-
-# Part 4: Patch the system
+# Part 3: Patch the system
 ansible --private-key $PRIVKEY_ARG -i openshift-ansible-hosts  nodes -m atomic_host -b -a "revision=latest"
 ansible --private-key $PRIVKEY_ARG -i openshift-ansible-hosts  loadbalancers -m yum -b -a 'name=* state=latest'
+
+# Part 4: Configure the rest of the system
+ansible-playbook $PRIVKEY_ARG ~/id_rsa_jenkins -i openshift-ansible-hosts site.yml
 
 # Part 5: Reboot Masters, Workers and Loadbalancers
 ansible --private-key $PRIVKEY_ARG -i openshift-ansible-hosts  nodes -b -a "reboot"
