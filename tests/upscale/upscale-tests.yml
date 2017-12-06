@@ -1,0 +1,84 @@
+#
+# To run this playbook:
+# ansible-playbook -i localhost, -c local tests/upscale/upscale-tests.yml \
+#          --extra-vars oc_url=$OPENSHIFT_BASE_URL \
+#          --extra-vars oc_user=$OPENSHIFT_USERNAME \
+#          --extra-vars oc_password=$OPENSHIFT_PASSWORD \
+#          --extra-vars hostIP=$BASTION_IP_ADDR
+#
+---
+- hosts: localhost
+
+  vars:
+    dc_name: "os-sample-python"
+
+  tasks:
+
+  - name: Log in to OC
+    shell: oc login {{ oc_url }} --username={{ oc_user }} --password={{ oc_password }} --insecure-skip-tls-verify
+
+  - name: Ensure we're logged in to OC, and record the username
+    shell: oc whoami 
+    register: oc_whoami
+
+  # Invent a random project name (must be lowercase and [a-z0-9]
+  - name: Invent a project name
+    shell: openssl rand -base64 32 | sed s/[\/=\+]//g | awk '{print "upscale-test-" tolower(substr($1,0,24))}'
+    register: oc_project_name
+
+  - name: Create a project
+    shell: oc new-project {{ oc_project_name.stdout }}
+
+  - name: Install the Sample Python app
+    shell: oc new-app https://github.com/OpenShiftDemos/{{ dc_name }}
+
+  - name: Expose the app as a service 
+    shell: oc expose svc/{{ dc_name }}
+
+  - name: Obtain the URL for the route
+    shell: oc get route | grep -v NAME | awk '{print $2}'
+    register: oc_route_url
+
+  # We need to wait for the App to be properly installed; it can take a while
+  # for the build to complete. (console suggests 42 seconds)
+  # call "oc get pod" repeatedly until we get one row, which should be the
+  # actual pod name. Retry for 2 mins (24*5s)
+  - name: "Wait for app to warm up"
+    shell: "oc get pod -o name | grep -v -- '-build$' | grep -v -- '-deploy$' | sed -e s,pod/,,"
+    register: app_is_ready_pod_name
+    until: app_is_ready_pod_name.stdout != ""
+    retries: 24
+    delay: 5
+
+
+  - name: Show the vars
+    debug:
+      msg:
+        - "User = {{ oc_whoami.stdout }}"
+        - "Bastion IP = {{ hostIP }}"
+        - "DC name = {{ dc_name }}"
+        - "Project = {{ oc_project_name.stdout }}"
+        - "Project URL = {{ oc_route_url.stdout }}"
+        - "Initial Pod name = {{ app_is_ready_pod_name.stdout }}"
+
+  - name: "Find all configured workers"
+    shell: grep worker- /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts | sort | awk '{print $1}'
+    register: workers_from_inventory
+
+  # -----------------------------------------------------------------
+  # Iterate over the workers (discovered from the openshift-ansible-hosts file)
+  # Tag the pod to a specific worker and check the app
+  # is now attached to this worker.
+  # -----------------------------------------------------------------
+  - name: Iterate over the workers
+    include_tasks: test-one-worker.yml
+    with_items: "{{ workers_from_inventory.stdout.split() }}"
+    loop_control:
+      loop_var: worker
+
+  - name: "Remove the app"
+    shell: oc delete project {{ oc_project_name.stdout }}
+
+  - name: Log out of OC
+    shell: oc logout
+
