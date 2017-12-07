@@ -4,3 +4,5 @@
 ansible-playbook -i localhost, -c local bastion.yml
 
 ansible-playbook --private-key ~/id_rsa_jenkins -i openshift-ansible-hosts site.yml
+
+ansible-playbook -i localhost, -c local bastion-post-deploy.yml
