@@ -26,7 +26,7 @@
   shell: "oc get pod -o name | grep -v -- '-build$' | sed -e s,pod/,,"
   register: pod_name
   until: pod_name.stdout.find('-deploy') == -1
-  retries: 10
+  retries: 15
   delay: 2
 
 - name: "Ensure we have a valid pod name"
