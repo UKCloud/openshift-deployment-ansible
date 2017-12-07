@@ -1,0 +1,9 @@
+.idea
+.cache
+*.py[cod]
+__pycache__/
+
+# These files appear in the deployment
+group_vars
+openshift-ansible-hosts
+openshift-ansible-hosts-upscale
