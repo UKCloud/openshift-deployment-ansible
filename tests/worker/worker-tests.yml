@@ -1,11 +1,16 @@
+# -----------------------------------------------------------------------
+# Test that each worker in the cluster is functioning properly
+# by installing an app, pinning it to each worker in turn, and ensuring
+# the app responds.
 #
 # To run this playbook:
-# ansible-playbook -i localhost, -c local tests/upscale/upscale-tests.yml \
+# ansible-playbook -i localhost, -c local tests/worker/worker-tests.yml \
 #          --extra-vars oc_url=$OPENSHIFT_BASE_URL \
 #          --extra-vars oc_user=$OPENSHIFT_USERNAME \
 #          --extra-vars oc_password=$OPENSHIFT_PASSWORD \
 #          --extra-vars hostIP=$BASTION_IP_ADDR
 #
+# -----------------------------------------------------------------
 ---
 - hosts: localhost
 
@@ -23,7 +28,7 @@
 
   # Invent a random project name (must be lowercase and [a-z0-9]
   - name: Invent a project name
-    shell: openssl rand -base64 32 | sed s/[\/=\+]//g | awk '{print "upscale-test-" tolower(substr($1,0,24))}'
+    shell: openssl rand -base64 32 | sed s/[\/=\+]//g | awk '{print "worker-test-" tolower(substr($1,0,24))}'
     register: oc_project_name
 
   - name: Create a project
@@ -39,10 +44,12 @@
     shell: oc get route | grep -v NAME | awk '{print $2}'
     register: oc_route_url
 
+  # -----------------------------------------------------------------
   # We need to wait for the App to be properly installed; it can take a while
   # for the build to complete. (console suggests 42 seconds)
   # call "oc get pod" repeatedly until we get one row, which should be the
   # actual pod name. Retry for 2 mins (24*5s)
+  # -----------------------------------------------------------------
   - name: "Wait for app to warm up"
     shell: "oc get pod -o name | grep -v -- '-build$' | grep -v -- '-deploy$' | sed -e s,pod/,,"
     register: app_is_ready_pod_name

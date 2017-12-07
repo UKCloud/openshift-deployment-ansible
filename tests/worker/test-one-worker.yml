@@ -1,13 +1,12 @@
----
 # -----------------------------------------------------------------------
-# This task list is part of upscale-tests.yml
+# This task list is part of worker-tests.yml
 #
 # The following variables are expected to be set by the parent playbook:
 #    worker - the hostname of the worker
 #    dc_name - the name of the Deployment Config
 #    oc_route_url.stdout - the URL of the app.
 # -----------------------------------------------------------------------
-
+---
 - name: "Starting iteration."
   debug:
     msg: "expected worker = {{ worker }}"
