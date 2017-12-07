@@ -1,0 +1,62 @@
+# -----------------------------------------------------------------------
+# This task list is part of worker-tests.yml
+#
+# The following variables are expected to be set by the parent playbook:
+#    worker - the hostname of the worker
+#    dc_name - the name of the Deployment Config
+#    oc_route_url.stdout - the URL of the app.
+# -----------------------------------------------------------------------
+---
+- name: "Starting iteration."
+  debug:
+    msg: "expected worker = {{ worker }}"
+
+- name: "Patch the deployment config (dc) to pin the pod to a specific worker node"
+  shell: "oc patch dc {{ dc_name }} -p '{\"spec\": {\"template\": {\"spec\": {\"nodeSelector\": {\"kubernetes.io/hostname\": \"{{ worker }}\"}}}}}'"
+
+- name: "Wait for Deployment to respond to 'oc patch dc ...'"
+  pause: seconds=4
+
+  # -----------------------------------------------------------------
+  # Get the pod. If we're too early, we'll see the old pod, and a <name>-deploy
+  # pod too, so poll until the "-deploy" pod has stopped appearing in the results.
+  # 10sec (5*2s) isn't long enough.
+  # -----------------------------------------------------------------
+- name: "Get the pod name"
+  shell: "oc get pod -o name | grep -v -- '-build$' | sed -e s,pod/,,"
+  register: pod_name
+  until: pod_name.stdout.find('-deploy') == -1
+  retries: 15
+  delay: 2
+
+- name: "Ensure we have a valid pod name"
+  assert:
+    that:
+      - pod_name.stdout != ""
+
+- name: "Get the new worker"
+  shell: "oc get pod -o wide {{ pod_name.stdout }} | grep worker | awk '{print $7}'"
+  register: assigned_worker
+
+- name: "Show the vars"
+  debug:
+    msg:
+      - "discovered pod = {{ pod_name.stdout }}"
+      - "expected worker = {{ worker }}"
+      - "disovered worker = {{ assigned_worker.stdout }}"
+      - "App URL = {{ oc_route_url.stdout }}"
+
+- name: "Verify the pod is really pinned to this worker"
+  assert:
+    that:
+      - worker == assigned_worker.stdout
+
+- name: Test the app is responding over HTTP
+  uri:
+    url: http://{{ oc_route_url.stdout }}
+    status_code: 200
+    body: "Hello World!"
+    validate_certs: no
+
+- name: "Catch your breath..."
+  pause: seconds=3

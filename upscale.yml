@@ -1,0 +1,6 @@
+---
+# Run this playbook via upscale.sh
+# dns.yml and all_servers.yml configures DNS, which is needed before scaling up
+- import_playbook: dns.yml
+- import_playbook: all_servers.yml
+- import_playbook: /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-node/scaleup.yml
