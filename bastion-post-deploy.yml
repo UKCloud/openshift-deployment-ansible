@@ -21,4 +21,4 @@
   - name: create text file
     shell: |
       echo "admin: {{ new_admin_password }})" > /home/cloud-user/passwords.txt;
-      echo "demo: {{ new_user_password }}" > /home/cloud-user/passwords.txt
+      echo "demo: {{ new_user_password }}" >> /home/cloud-user/passwords.txt
