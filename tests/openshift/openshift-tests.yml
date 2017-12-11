@@ -28,9 +28,9 @@
     
   - name: Creating pod
     shell: oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data
-       
+
   - name: Testing pod
-    shell: sleep 20; pod=$(oc get pods | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /opt/rh/rh-mariadb101/root/usr/bin/mysql -u admin -e 'exit'
+    shell: sleep 30; pod=$(oc get pods | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /opt/rh/rh-mariadb101/root/usr/bin/mysql -u admin -e 'select 1'
 
   - name: delete project
     command: oc delete project test-maria
