@@ -18,20 +18,24 @@
   - name: Login to openshift
     command: oc login "{{server}}" -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
 
-  - name: Creating project
-    command: oc new-project test-maria
+  - name: Create project
+    command: oc new-project test-container
     register: result
 
-  - name: Ensure on current project
-    command: oc project test-maria
-    register: result2
-    
-  - name: Creating pod
-    shell: oc new-app registry.access.redhat.com/rhscl/mariadb-101-rhel7 --env MYSQL_USER=admin MYSQL_PASSWORD=pass MYSQL_DATABASE=data
+  - name: Create pod
+    shell: oc new-app https://github.com/OpenShiftDemos/os-sample-python.git
 
-  - name: Testing pod
-    shell: sleep 30; pod=$(oc get pods | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /opt/rh/rh-mariadb101/root/usr/bin/mysql -u admin -e 'select 1'
+  # oc rollout status waits for the deployment to get going, but may
+  # return before the app is really ready. Poll for specific output.
+  - name: "Wait for app to warm up"
+    shell: "oc rollout status dc os-sample-python"
+    register: app_readiness
+    until: "'successfully rolled out' in app_readiness.stdout"
+    retries: 30
+    delay: 2
 
-  - name: delete project
-    command: oc delete project test-maria
+  - name: Test pod
+    shell: pod=$(oc get pods | grep -v python-.*-build | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /usr/bin/python --version
 
+  - name: Delete project
+    command: oc delete project test-container
