@@ -2,6 +2,10 @@
   yum:
     name: bind-utils
     state: latest
+
+- set_fact:
+    admin_password: "{{ lookup('env', 'OPENSHIFT_PASSWORD') }}"
+
 - name: Configure ansible hosts file
   template:
     src: templates/ansible-hosts-multimaster.j2
