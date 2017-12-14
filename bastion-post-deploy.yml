@@ -1,0 +1,25 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Generate admin password
+    shell: openssl rand -base64 20 | cut -d= -f1
+    register: new_admin_password_output
+
+  - name: Generate user password
+    shell: openssl rand -base64 20 | cut -d= -f1
+    register: new_user_password_output
+
+  - set_fact:
+      new_admin_password: "{{ new_admin_password_output.stdout }}"
+      new_user_password: "{{ new_user_password_output.stdout }}"
+
+  - name: update passwords
+    shell: |
+      cd tools
+      ./create-user.sh 'admin' "{{ new_admin_password }}"
+      ./create-user.sh 'demo' "{{ new_user_password }}"
+
+  - name: create text file
+    shell: |
+      echo "admin: {{ new_admin_password }})" > /home/cloud-user/passwords.txt;
+      echo "demo: {{ new_user_password }}" >> /home/cloud-user/passwords.txt
