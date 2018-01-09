@@ -7,8 +7,7 @@
 # ansible-playbook -i localhost, -c local tests/worker/worker-tests.yml \
 #          --extra-vars oc_url=$OPENSHIFT_BASE_URL \
 #          --extra-vars oc_user=$OPENSHIFT_USERNAME \
-#          --extra-vars oc_password=$OPENSHIFT_PASSWORD \
-#          --extra-vars hostIP=$BASTION_IP_ADDR
+#          --extra-vars oc_password=$OPENSHIFT_PASSWORD
 #
 # -----------------------------------------------------------------
 ---
@@ -62,7 +61,6 @@
     debug:
       msg:
         - "User = {{ oc_whoami.stdout }}"
-        - "Bastion IP = {{ hostIP }}"
         - "DC name = {{ dc_name }}"
         - "Project = {{ oc_project_name.stdout }}"
         - "Project URL = {{ oc_route_url.stdout }}"

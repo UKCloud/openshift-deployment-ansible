@@ -1,2 +1,1 @@
-- include: ./monitoring/monitoring-tests.yml
 - include: ./openshift/openshift-tests.yml
