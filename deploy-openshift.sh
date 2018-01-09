@@ -1,14 +1,28 @@
 #!/bin/bash
+#
+# Deploy an Openshift cluster by running the Ansible Playbooks.
+#
+# If called with no args, the initial user is assumed to be "admin",
+# and a password is generated.
+#
+# Optional args: (intended to allow the test pipeline to supply known credentials)
+#    $1 - username of the admin user
+#    $2 - password for the admin user
+#    $3 - username of an additional user
+#    $4 - password for the additional user
+#
+# If $1 is supplied, $2 must be supplied.
+# if $3 is supplied, $4 must also be supplied.
+# All optional args are positional.
 
-# Read password from command args. If it is absent, generate a new one.
-# Intended to allow test pipeline to use a known password.
-if [[ "$1" == "" ]]; then
+if [[ "$1" == "" && "$2" == "" ]]; then
+    ADMIN_USER="admin"
     ADMIN_PASSWORD=$(openssl rand -base64 20 | cut -d= -f1)
 else
-    ADMIN_PASSWORD=$1
+    ADMIN_USER=$1
+    ADMIN_PASSWORD=$2
 fi
 
-ADMIN_USER="admin"
 
 # Store the password
 echo "${ADMIN_USER}:${ADMIN_PASSWORD}" > /home/cloud-user/passwords.txt;
@@ -25,3 +39,8 @@ rm tmp_htpasswd
 ansible-playbook -i localhost, -c local bastion.yml
 
 ansible-playbook --private-key ~/id_rsa_jenkins -i openshift-ansible-hosts site.yml
+
+if [[ "$3" != "" && "$4" != "" ]]; then
+    # Create an additional user
+    (cd tools; ./create-user.sh "$3" "$4")
+fi
