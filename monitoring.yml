@@ -1,4 +1,0 @@
-- hosts: all, localhost
-  roles:
-    - name: monitoring
-      when: setupMonitoring == True
