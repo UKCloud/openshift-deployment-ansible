@@ -82,6 +82,13 @@ openshift_cloudprovider_openstack_tenant_id={{ osTenantId }}
 openshift_cloudprovider_openstack_tenant_name={{ osTenantName }}
 openshift_cloudprovider_openstack_region={{ osRegion }}
 
+# openstack default storage class configuration since this gets created for us regardless now!
+openshift_storageclass_default: "true"
+openshift_storageclass_name: "tier2"
+openshift_storageclass_provisioner: "cinder"
+openshift_storageclass_parameters: 
+  - type: TIER2 
+  - availability: nova
 
 # openshift stats deployment - comment out if no stats deployment is required. this will run on the worker nodes
 openshift_hosted_metrics_deploy=true
