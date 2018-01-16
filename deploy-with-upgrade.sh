@@ -28,6 +28,7 @@ usage() {
     exit 1;
 }
 
+
 PRIVKEY_ARG=''
 if [[ -f ~/id_rsa_jenkins ]] ; then
     PRIVKEY_ARG='--private-key ~/id_rsa_jenkins'
