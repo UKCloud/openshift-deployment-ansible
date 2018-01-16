@@ -1,0 +1,53 @@
+
+# Playbook to Upgrade servers and reboot. Wait for them to come back online
+# after https://github.com/ansible/ansible/issues/14413
+#
+# Usage:
+#      ansible-playbook -i openshift-ansible-hosts upgrade_and_reboot_servers.yml
+
+# TODO
+# [] consider adding it to the pre-installation role
+
+---
+- hosts: nodes, loadbalancers
+  become: yes
+  tasks:
+
+    - name: Identify if OS is Atomic
+      stat: path=/run/ostree-booted
+      register: atomic_host
+
+    # Upgrade: 2 different methods, depending on the OS Type.
+    # N.B. Atomic is detected as 'RedHat' so we need the file test above too.
+    - name: "Upgrade nodes where OS=Atomic (masters, workers)"
+      atomic_host:
+        revision: latest
+      when: atomic_host.stat.exists == True
+
+    - name: "Upgrade nodes where OS=Redhat (loadbalancers)"
+      yum:
+        name: "*"
+        state: latest
+      when: atomic_host.stat.exists == False
+
+    # Reboot is required following upgrade.
+    - name: "Reboot nodes"
+      shell: sleep 2 && /sbin/shutdown -r now "Ansible system package upgraded"
+      become: true
+      async: 1
+      poll: 0
+      ignore_errors: true
+
+    # Print the time, so humans can see when the 10 minutes started.
+    - name: Display the time
+      debug:
+        msg: "Current time is : {{lookup('pipe', 'date \"+%H:%M:%S\"')}}"
+      run_once: true
+
+    # Wait a max of 10 minutes (600s) for the nodes to come back.
+    - name: Waiting for nodes to come back online (max 10 minutes)
+      local_action: wait_for host={{ ansible_default_ipv4.address }} port=22 state=started delay=30 timeout=600
+      become: false
+
+    - name: "Run a simple command on each node"
+      shell: uptime

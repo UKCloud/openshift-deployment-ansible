@@ -21,3 +21,5 @@ group_vars
 openshift-ansible-hosts
 openshift-ansible-hosts-upscale
 
+*.retry
+
