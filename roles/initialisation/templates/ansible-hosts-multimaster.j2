@@ -28,6 +28,8 @@ openshift_master_cluster_method=native
 openshift_master_cluster_hostname=console.{{ localDomainSuffix }}
 openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
 
+openshift_release=v{{ openshiftVersion }}
+
 openshift_set_hostname=true
 
 # Makes the openshift_ip setting in the host groups are below take effect.
@@ -82,6 +84,11 @@ openshift_cloudprovider_openstack_tenant_id={{ osTenantId }}
 openshift_cloudprovider_openstack_tenant_name={{ osTenantName }}
 openshift_cloudprovider_openstack_region={{ osRegion }}
 
+# openstack default storage class configuration since this gets created for us regardless now!
+openshift_storageclass_default= "true"
+openshift_storageclass_name= "tier2"
+openshift_storageclass_provisioner= "cinder"
+openshift_storageclass_parameters={ 'type': 'TIER2', 'availability': 'nova' }
 
 # openshift stats deployment - comment out if no stats deployment is required. this will run on the worker nodes
 openshift_hosted_metrics_deploy=true
@@ -115,13 +122,13 @@ openshift_metrics_cassandra_pvc_size=50Gi
 # Routers are placed only on first 3 workers
 [nodes]
 {% for ip, hostname in master_details.items() %}
-{{ hostname }} openshift_ip={{ ip }}
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endfor %}
 {% for ip, hostname in worker_details.items() %}
 {% if loop.index <= 3 %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','purpose':'tenant'}"
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% else %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'purpose':'tenant'}"
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endif %}
 {% endfor %}
 

@@ -12,11 +12,11 @@
     force: yes
     backup: yes
 
-- name: create tier-1 class 
-  command: /usr/local/bin/oc create -f ~/storage-class-tier1.yml
-
-- name: create tier-2 class 
-  command: /usr/local/bin/oc create -f ~/storage-class-tier2.yml
+#- name: create tier-1 class 
+#  command: /usr/local/bin/oc create -f ~/storage-class-tier1.yml
+#
+#- name: create tier-2 class 
+#  command: /usr/local/bin/oc create -f ~/storage-class-tier2.yml
 
 - name: Give admin rights
   command: /usr/local/bin/oc adm policy --config=/etc/origin/master/admin.kubeconfig add-cluster-role-to-user cluster-admin admin
