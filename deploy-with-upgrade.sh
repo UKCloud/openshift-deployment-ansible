@@ -30,6 +30,11 @@ else
     ADMIN_PASSWORD=$2
 fi
 
+./sanity_tests.sh
+if [[ $? -ne 0 ]]; then
+    echo "FATAL ERROR. Cannot deploy"
+    exit 1
+fi
 
 # Store the password
 echo "SHELL [store and encrypt admin password] ..."
