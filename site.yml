@@ -1,3 +1,4 @@
+- import_playbook: upgrade_and_reboot_servers.yml
 - import_playbook: loadbalancers.yml
 - import_playbook: dns.yml
 - import_playbook: all_servers.yml
