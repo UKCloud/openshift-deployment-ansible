@@ -4,3 +4,4 @@
 - import_playbook: all_servers.yml
 - import_playbook: certbot.yml
 - import_playbook: openshift.yml
+- import_playbook: upgrade_bastion.yml

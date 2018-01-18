@@ -3,12 +3,3 @@
   roles:
     - name: osupgrade
       when: doUpgrades == True
-
-# Also upgrade the Bastion host (but don't reboot it)
-# Not part of the role, because we don't want to reboot localhost just yet.
-- hosts: localhost
-  become: yes
-  tasks:
-    - name: "Upgrade Bastion Host    (DO NOT interrupt)    "
-      local_action: yum name=* state=latest
-      when: doUpgrades == True

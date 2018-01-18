@@ -30,6 +30,7 @@ else
     ADMIN_PASSWORD=$2
 fi
 
+echo "SHELL [run sanity tests] ..."
 ./sanity_tests.sh
 if [[ $? -ne 0 ]]; then
     echo "FATAL ERROR. Cannot deploy"
@@ -61,11 +62,3 @@ if [[ "$3" != "" && "$4" != "" ]]; then
     echo "$3:$4" >> /home/cloud-user/passwords.txt
 fi
 
-# Upgrade the Bastion Host
-if [[ -n $(grep doUpgrades group_vars/all.yml |grep True) ]]; then
-    echo ""
-    echo "Please reboot the bastion host as soon as practical with the following:"
-    echo "     sudo reboot --reboot"
-    echo ""
-
-fi

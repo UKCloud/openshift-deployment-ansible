@@ -1,0 +1,18 @@
+
+# Upgrade the Bastion host
+# Should happen after deploying the cluster
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: "Upgrade Bastion Host    (DO NOT interrupt)    ."
+      local_action: yum name=* state=latest
+      when: doUpgrades == True
+
+    # This isn't the last task in "deploy-with-upgrade", so we can't
+    # reboot just yet. The best we can do is tell the user
+    - debug:
+        msg:
+          - "System Upgraded. Please reboot the bastion host"
+          - "as soon as practical with the following:"
+          - "     sudo reboot --reboot"
+      when: doUpgrades == True
