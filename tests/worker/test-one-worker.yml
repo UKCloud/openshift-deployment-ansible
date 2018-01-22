@@ -22,12 +22,16 @@
   # pod too, so poll until the "-deploy" pod has stopped appearing in the results.
   # 10sec (5*2s) isn't long enough.
   # -----------------------------------------------------------------
+- name: "Wait for the pod to settle down"
+  shell: "oc get pod -o name | grep -v -- '-build$' | wc -l"
+  register: number_of_pods
+  until: number_of_pods.stdout == "1"
+  retries: 15
+  delay: 2
+
 - name: "Get the pod name"
   shell: "oc get pod -o name | grep -v -- '-build$' | sed -e s,pod/,,"
   register: pod_name
-  until: pod_name.stdout.find('-deploy') == -1
-  retries: 15
-  delay: 2
 
 - name: "Ensure we have a valid pod name"
   assert:
@@ -35,7 +39,7 @@
       - pod_name.stdout != ""
 
 - name: "Get the new worker"
-  shell: "oc get pod -o wide {{ pod_name.stdout }} | grep worker | awk '{print $7}'"
+  shell: "oc get -o wide {{ pod_name.stdout }} | grep worker | awk '{print $7}'"
   register: assigned_worker
 
 - name: "Show the vars"
