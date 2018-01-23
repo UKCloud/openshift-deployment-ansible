@@ -12,3 +12,14 @@ __pycache__/
 env/
 venv/
 ENV/
+
+
+.cache
+
+
+# These files appear in the deployment
+group_vars
+openshift-ansible-hosts
+openshift-ansible-hosts-upscale
+
+*.retry
