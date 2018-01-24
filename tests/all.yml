@@ -1,1 +1,2 @@
 - include: ./openshift/openshift-tests.yml
+- include: ./worker/worker-tests.yml

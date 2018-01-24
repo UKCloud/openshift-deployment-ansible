@@ -5,9 +5,9 @@
 #
 # To run this playbook:
 # ansible-playbook -i localhost, -c local tests/worker/worker-tests.yml \
-#          --extra-vars oc_url=$OPENSHIFT_BASE_URL \
-#          --extra-vars oc_user=$OPENSHIFT_USERNAME \
-#          --extra-vars oc_password=$OPENSHIFT_PASSWORD
+#          --extra-vars server=$OPENSHIFT_BASE_URL \
+#          --extra-vars OPENSHIFT_USERNAME=$OPENSHIFT_USERNAME \
+#          --extra-vars OPENSHIFT_PASSWORD=$OPENSHIFT_PASSWORD
 #
 # -----------------------------------------------------------------
 ---
@@ -19,7 +19,7 @@
   tasks:
 
   - name: Log in to OC
-    shell: oc login {{ oc_url }} --username={{ oc_user }} --password={{ oc_password }} --insecure-skip-tls-verify
+    shell: oc login {{ server }} --username={{ OPENSHIFT_USERNAME }} --password={{ OPENSHIFT_PASSWORD }} --insecure-skip-tls-verify
 
   - name: Ensure we're logged in to OC, and record the username
     shell: oc whoami 
