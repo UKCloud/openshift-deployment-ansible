@@ -2,7 +2,7 @@
 
 # Logging into openshift in order to run oc commands later in script.
 
-oc login -u $(cat ~/passwords.txt | cut -d : -f 1) -p $(cat ~/passwords.txt | cut -d : -f 2)
+oc login -u $(cat /home/cloud-user/passwords.txt | cut -d : -f 1) -p $(cat /home/cloud-user/passwords.txt | cut -d : -f 2)
 
 # Variables to store state of master nodes
 master0state=$(oc get node | grep master-0 | awk '{ print $2 }' | cut -d , -f 1)
