@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Logging into openshift in order to run oc commands later in script.
+
+oc login -u $(cat ~/passwords.txt | cut -d : -f 1) -p $(cat ~/passwords.txt | cut -d : -f 2)
+
 # Variables to store state of master nodes
 master0state=$(oc get node | grep master-0 | awk '{ print $2 }' | cut -d , -f 1)
 master1state=$(oc get node | grep master-1 | awk '{ print $2 }' | cut -d , -f 1)
@@ -19,7 +23,7 @@ if [[ $master0state != Ready ]] || [[ $master1state != Ready ]] || [[ $master2st
 then
 	echo "One of more master nodes is not in state "Ready" please correct this and run the script again." 
 	echo
-	exit
+	exit 1
 else
 	ansible-playbook poll.yml > /dev/null 2>&1 &
 	sleep 2
