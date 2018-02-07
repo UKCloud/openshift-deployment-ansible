@@ -4,6 +4,8 @@
 
 oc login -u $ADMIN_USERNAME -p $ADMIN_PASSWORD
 
+oc project default
+
 # Variables to store state of master nodes
 master0state=$(oc get node | grep master-0 | awk '{ print $2 }' | cut -d , -f 1)
 master1state=$(oc get node | grep master-1 | awk '{ print $2 }' | cut -d , -f 1)
