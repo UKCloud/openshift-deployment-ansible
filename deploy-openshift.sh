@@ -15,6 +15,8 @@
 # if $3 is supplied, $4 must also be supplied.
 # All optional args are positional.
 
+set -e
+
 if [[ "$1" == "" && "$2" == "" ]]; then
     ADMIN_USER="admin"
     ADMIN_PASSWORD=$(openssl rand -base64 20 | cut -d= -f1)
