@@ -1,0 +1,5 @@
+- hosts: nodes, loadbalancers
+  become: yes
+  roles:
+    - name: osupgrade
+      when: doUpgrades == True

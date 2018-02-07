@@ -14,8 +14,13 @@
 # If $1 is supplied, $2 must be supplied.
 # if $3 is supplied, $4 must also be supplied.
 # All optional args are positional.
+#
+# TODO: merge with deploy-openshift.sh
 
-set -e
+PRIVKEY_ARG=''
+if [[ -f ~/id_rsa_jenkins ]] ; then
+    PRIVKEY_ARG='--private-key ~/id_rsa_jenkins'
+fi
 
 if [[ "$1" == "" && "$2" == "" ]]; then
     ADMIN_USER="admin"
@@ -25,8 +30,15 @@ else
     ADMIN_PASSWORD=$2
 fi
 
+echo "SHELL [run sanity tests] ..."
+./sanity_tests.sh
+if [[ $? -ne 0 ]]; then
+    echo "FATAL ERROR. Cannot deploy"
+    exit 1
+fi
 
 # Store the password
+echo "SHELL [store and encrypt admin password] ..."
 echo "${ADMIN_USER}:${ADMIN_PASSWORD}" > /home/cloud-user/passwords.txt;
 
 # Turn the plain-text password into an htpasswd password
@@ -40,9 +52,13 @@ rm tmp_htpasswd
 # and install bind-utils
 ansible-playbook -i localhost, -c local bastion.yml
 
-ansible-playbook --private-key ~/id_rsa_jenkins -i openshift-ansible-hosts site.yml
+# Perform the deployment
+ansible-playbook $PRIVKEY_ARG -i openshift-ansible-hosts site.yml
 
+# Create an additional user if $3 and $4 are supplied
 if [[ "$3" != "" && "$4" != "" ]]; then
-    # Create an additional user
+    echo "SHELL [create secondary user] ..."
     (cd tools; ./create-user.sh "$3" "$4")
+    echo "$3:$4" >> /home/cloud-user/passwords.txt
 fi
+
