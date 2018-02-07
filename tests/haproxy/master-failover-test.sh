@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Help with debugging pipeline issues
+pwd
+whoami
+
 # Logging into openshift in order to run oc commands later in script.
 
 oc login -u $ADMIN_USERNAME -p $ADMIN_PASSWORD
