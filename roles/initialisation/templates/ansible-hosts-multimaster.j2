@@ -96,6 +96,10 @@ openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ domainSuffix }}/
 openshift_hosted_metrics_storage_kind=dynamic
 openshift_metrics_cassandra_pvc_size=50Gi
 
+# fix to make the ansible service broker deploy to the correct nodes rather than all or none
+# RH ticket #02020379
+template_service_broker_selector={"purpose":"tenant"}
+
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
 [masters]
