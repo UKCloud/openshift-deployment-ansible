@@ -27,10 +27,14 @@ then
 	echo
 	exit 1
 else
-	ansible-playbook poll.yml > /dev/null 2>&1 &
+	ansible-playbook poll.yml &
 	sleep 2
-	ansible-playbook node_rotate.yml > /dev/null 2>&1 & 
+	ansible-playbook node_rotate.yml & 
 fi
+
+# debugging purposes
+echo $(ps -ef | grep "/[u]sr/bin/ansible-playbook poll.yml")
+echo $(ps -ef | grep "/[u]sr/bin/ansible-playbook node_rotate.yml")
 
 # Loop to wait until the node_rotate playbook is finished and allow the poll playbook to be killed once it is.
 until [[ -z $(ps -ef | grep "/[u]sr/bin/ansible-playbook node_rotate.yml" | awk '{ print $2}') ]]
@@ -39,7 +43,7 @@ do
 done
 
 # Writes output of poll playbook to haproxytest.log determines this from the playbook PID.
-cat ~/ansible.log | grep $(ps -ef | grep "/[u]sr/bin/ansible-playbook poll.yml" | awk '{ print $2}' | head -1) > haproxytest.log
+cat /home/cloud-user/ansible.log | grep $(ps -ef | grep "/[u]sr/bin/ansible-playbook poll.yml" | awk '{ print $2}' | head -1) > haproxytest.log
 
 #Kills poll playbook.
 ps -ef | grep "/[u]sr/bin/ansible-playbook poll.yml" | awk '{ print $2}' | xargs -x kill -9
