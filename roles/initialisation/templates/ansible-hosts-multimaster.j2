@@ -101,8 +101,10 @@ openshift_logging_install_logging={{ installLogging  }}
 openshift_logging_purge_logging=false
 openshift_logging_storage_kind=dynamic
 openshift_logging_kibana_hostname=kibana.{{ domainSuffix }}
-openshift_logging_master_public_url=https://{{ openshift_master_cluster_public_hostname }}:8443
-openshift_logging_master_url=https://{{ openshift_master_cluster_hostname }}:8443
+# Value below was trying to call openshift_master_cluster_public_hostname but unable to as set in this file. Changed to ocp.{{ domainSuffix }}
+openshift_logging_master_public_url=https://ocp.{{ domainSuffix }}:8443
+# Value below was trying to call openshift_master_cluster_hostname but unable to as set in this file. Changed to console.{{ localDomainSuffix }}
+openshift_logging_master_url=https://console.{{ localDomainSuffix }}:8443
 openshift_logging_use_journal=true
 openshift_logging_use_ops=false
 openshift_logging_es_cluster_size={{ loggingClusterSize }}
