@@ -7,7 +7,7 @@ pwd
 
 # Logging into openshift in order to run oc commands later in script.
 
-oc login -u $ADMIN_USERNAME -p $ADMIN_PASSWORD
+oc login -u $ADMIN_USERNAME -p $ADMIN_PASSWORD --server="https://ocp.\$DOMAIN_SUFFIX:8443"
 
 oc project default
 
