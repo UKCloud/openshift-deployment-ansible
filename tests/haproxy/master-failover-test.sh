@@ -4,6 +4,9 @@
 pwd
 whoami
 
+cd openshift-deployment-ansible/tests/haproxy
+pwd
+
 # Logging into openshift in order to run oc commands later in script.
 
 oc login -u $ADMIN_USERNAME -p $ADMIN_PASSWORD
@@ -18,11 +21,11 @@ master2state=$(oc get node | grep master-2 | awk '{ print $2 }' | cut -d , -f 1)
 echo Script starting this will take around 2 minutes to complete.
 echo
 
-# Creates symbolic link to ansible config file in order to send log output to ~/ansible.log
-if [[ ! -L ansible.cfg ]]
-then
-	ln -s ../../ansible.cfg ansible.cfg
-fi
+# Disabled for now as testing creating config file in haproxy directory {Creates symbolic link to ansible config file in order to send log output to ~/ansible.log}
+#if [[ ! -L ansible.cfg ]]
+#then
+#	ln -s ../../ansible.cfg ansible.cfg
+#fi
 
 # Checks the master nodes are in state "Ready" and exits script if not. If they are it runs the ansible playbooks to poll the API and hard reboot the master nodes in turn.
 if [[ $master0state != Ready ]] || [[ $master1state != Ready ]] || [[ $master2state != Ready ]]
@@ -47,7 +50,7 @@ do
 done
 
 # Writes output of poll playbook to haproxytest.log determines this from the playbook PID.
-cat /home/cloud-user/ansible.log | grep $(ps -ef | grep "/[u]sr/bin/ansible-playbook poll.yml" | awk '{ print $2}' | head -1) > haproxytest.log
+cat ansible.log | grep $(ps -ef | grep "/[u]sr/bin/ansible-playbook poll.yml" | awk '{ print $2}' | head -1) > haproxytest.log
 
 #Kills poll playbook.
 ps -ef | grep "/[u]sr/bin/ansible-playbook poll.yml" | awk '{ print $2}' | xargs -x kill -9
