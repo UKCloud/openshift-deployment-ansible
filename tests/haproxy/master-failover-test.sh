@@ -7,7 +7,8 @@ pwd
 
 # Logging into openshift in order to run oc commands later in script.
 
-oc login -u $ADMIN_USERNAME -p $ADMIN_PASSWORD --server="https://ocp.\$DOMAIN_SUFFIX:8443"
+oc login -u admin -p r3dh4t1* --server="https://$(cat /usr/share/ansible/openshift-deployment-ansible/group_vars/all.yml \
+| grep domainSuffix | awk '{print $2}'):8443" --insecure-skip-tls-verify
 
 oc project default
 
