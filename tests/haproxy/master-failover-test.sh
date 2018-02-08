@@ -49,7 +49,8 @@ do
 done
 
 # Writes output of poll playbook to haproxytest.log determines this from the playbook PID.
-cat ansible.log | grep $(ps -ef | grep "/[u]sr/bin/ansible-playbook /tmp/workspace/build-openshift-openshift-build-pipeline/openshift-deployment-ansible/tests/haproxy/poll.yml" | awk '{ print $2}' | head -1) > haproxytest.log
+cat /tmp/workspace/build-openshift-openshift-build-pipeline/openshift-deployment-ansible/tests/haproxy/ansible.log \
+| grep $(ps -ef | grep "/[u]sr/bin/ansible-playbook /tmp/workspace/build-openshift-openshift-build-pipeline/openshift-deployment-ansible/tests/haproxy/poll.yml" | awk '{ print $2}' | head -1) > haproxytest.log
 
 #Kills poll playbook.
 ps -ef | grep "/[u]sr/bin/ansible-playbook /tmp/workspace/build-openshift-openshift-build-pipeline/openshift-deployment-ansible/tests/haproxy/poll.yml" | awk '{ print $2}' | xargs -x kill -9
