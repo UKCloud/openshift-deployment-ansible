@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# Help with debugging pipeline issues
-
-hostname
-pwd
+# Ensuring admin username and admin password are passed to script in Jenkinsfile.
+if  [[ -z $1 ]] || [[ -z $2 ]]
+then
+	echo "Admin username and password not provided. Ending script."
+	exit 1
+fi
 
 # Logging into openshift in order to run oc commands later in script.
-
 oc login -u $1 -p $2 --server="https://ocp.$(cat /usr/share/ansible/openshift-deployment-ansible/group_vars/all.yml \
 | grep domainSuffix | awk '{print $2}'):8443" --insecure-skip-tls-verify
 
@@ -38,10 +39,6 @@ else
 	ansible-playbook node_rotate.yml & 
 fi
 
-# debugging purposes
-echo $(ps -ef | grep "/[u]sr/bin/ansible-playbook poll.yml")
-echo $(ps -ef | grep "/[u]sr/bin/ansible-playbook node_rotate.yml")
-
 # Loop to wait until the node_rotate playbook is finished and allow the poll playbook to be killed once it is.
 until [[ -z $(ps -ef | grep "/[u]sr/bin/ansible-playbook node_rotate.yml" | awk '{ print $2}') ]]
 do
@@ -49,7 +46,7 @@ do
 done
 
 # Writes output of poll playbook to haproxytest.log determines this from the playbook PID.
-cat ~ansible.log | grep $(ps -ef | grep "/[u]sr/bin/ansible-playbook poll.yml" | awk '{ print $2}' | head -1) > haproxytest.log
+cat ~/ansible.log | grep $(ps -ef | grep "/[u]sr/bin/ansible-playbook poll.yml" | awk '{ print $2}' | head -1) > haproxytest.log
 
 #Kills poll playbook.
 ps -ef | grep "/[u]sr/bin/ansible-playbook poll.yml" | awk '{ print $2}' | xargs -x kill -9
