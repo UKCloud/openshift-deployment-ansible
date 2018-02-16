@@ -25,7 +25,7 @@ here=$(dirname "$0")
 inventory=${here}/../openshift-ansible-hosts
 
 # Work out the suffix.
-localDomainSuffix=$(grep master-0 ${inventory} | head -1 | cut -d. -f2)
+localDomainSuffix=$(grep master-0 "${inventory}" | head -1 | cut -d. -f2)
 
 
 # -----------------------------------------------
@@ -123,7 +123,7 @@ wait_for_server_online() {
 # Args:
 #     None
 # Returns:
-#     The status of the node as(capture with $?)
+#     The status of the node (capture with $?)
 #
 wait_for_node_ready() {
     local  __resultvar=$1
@@ -149,6 +149,41 @@ wait_for_node_ready() {
 
 }
 
+# -----------------------------------------------
+# Repeatedly query the haproxy node over ssh until
+# it says that the haproxy service is running
+#
+# Args:
+#     None
+# Returns:
+#     The status of the node - either "Ready" or
+#     "NotReady" as appropriate (capture with $?)
+#
+wait_for_haproxy_ready() {
+    local  __resultvar=$1
+    local count=0
+    local ha_node_status="NotReady"
+    while [[ "${ha_node_status}" != "Ready" ]]; do
+        local st=$(ssh ${targetNode} "ps -ef | grep [h]aproxy")
+
+        if [[ -n "${ha_node_status}" ]]; then
+            ha_node_status="Ready"
+            echo "${targetNode} Ready"
+        else
+            echo "${targetNode} NotReady"
+        fi
+
+        sleep 5
+        count=$(($count+1))
+        if [[ ${count} -gt 5 ]]; then
+            # > 25s minutes? bomb out.
+            echo "Timeout. No longer polling for Haproxy Ready"
+            break
+        fi
+    done
+    eval ${__resultvar}="'${ha_node_status}'"
+
+}
 # -----------------------------------------------
 
 
@@ -194,12 +229,11 @@ date +%H:%M:%S
 node_status=""
 wait_for_server_online node_status
 
-
-if [[ -n "$(echo ${targetNode} | grep haproxy)" ]]; then
-    echo "INFO: Cannot determine state of haproxy application."
-    node_status="Ready"
-else
-    if [[ "${node_status}" == "ACTIVE" ]]; then
+if [[ "${node_status}" == "ACTIVE" ]]; then
+    if [[ -n "$(echo ${targetNode} | grep haproxy)" ]]; then
+        # poll to see if it's Ready - put the answer into $node_status
+        wait_for_haproxy_ready node_status
+    elif [[ "${node_status}" == "ACTIVE" ]]; then
         # openstack says the node is 'ACTIVE' which means the OS is
         # running, but it needs a bit longer before the node is
         # back in the cluster.
