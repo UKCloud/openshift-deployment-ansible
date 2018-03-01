@@ -126,12 +126,27 @@ template_service_broker_selector={"purpose":"tenant"}
 {% endfor %}
 
 [loadbalancers]
-{% for ip, hostname in haproxy_details.items() %}
+{% for ip, hostname in control_plane_details.items() %}
+{{ hostname }}
+{% endfor %}
+
+[loadbalancers-control-plane]
+{% for ip, hostname in control_plane_details.items() %}
+{{ hostname }}
+{% endfor %}
+
+[loadbalancers-internet-data-plane]
+{% for ip, hostname in data_plane_internet.items() %}
+{{ hostname }}
+{% endfor %}
+
+[loadbalancers-net-2-data-plane]
+{% for ip, hostname in data_plane_net2.items() %}
 {{ hostname }}
 {% endfor %}
 
 [dns]
-{% for ip, hostname in haproxy_details.items() %}
+{% for ip, hostname in control_plane_details.items() %}
 {{ hostname }}
 {% endfor %}
 
@@ -141,11 +156,18 @@ template_service_broker_selector={"purpose":"tenant"}
 {% for ip, hostname in master_details.items() %}
 {{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endfor %}
-{% for ip, hostname in worker_details.items() %}
+{% for ip, hostname in worker_details_internet.items() %}
 {% if loop.index <= 3 %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','network':'internet','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% else %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'network':'internet','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{% endif %}
+{% endfor %}
+{% for ip, hostname in worker_details_net2.items() %}
+{% if loop.index <= 3 %}
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','network':'net2','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{% else %}
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'network':'net2','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endif %}
 {% endfor %}
 
