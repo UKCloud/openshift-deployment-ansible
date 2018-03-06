@@ -1,4 +1,22 @@
-- hosts: loadbalancers
+- hosts: loadbalancers_controlplane
+  vars:
+    vip: "{{ haproxy_vip }}"
+  roles:
+    - firewalld
+    - keepalived
+    - haproxy
+
+- hosts: loadbalancers_internet_dataplane
+  vars:
+    vip: "{{ internet_vip }}"
+  roles:
+    - firewalld
+    - keepalived
+    - haproxy
+
+- hosts: loadbalancers_net2_dataplane
+  vars:
+    vip: "{{ net2_vip }}"
   roles:
     - firewalld
     - keepalived
