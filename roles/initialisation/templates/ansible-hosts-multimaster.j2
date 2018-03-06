@@ -125,22 +125,25 @@ template_service_broker_selector={"purpose":"tenant"}
 {{ hostname }}
 {% endfor %}
 
-[loadbalancers]
+[loadbalancers:children]
+loadbalancers_controlplane
+loadbalancers_dataplane
+
+[loadbalancers_dataplane:children]
+loadbalancers_internet_dataplane
+loadbalancers_net2_dataplane
+
+[loadbalancers_controlplane]
 {% for ip, hostname in control_plane_details.items() %}
 {{ hostname }}
 {% endfor %}
 
-[loadbalancers-control-plane]
-{% for ip, hostname in control_plane_details.items() %}
-{{ hostname }}
-{% endfor %}
-
-[loadbalancers-internet-data-plane]
+[loadbalancers_internet_dataplane]
 {% for ip, hostname in data_plane_internet.items() %}
 {{ hostname }}
 {% endfor %}
 
-[loadbalancers-net-2-data-plane]
+[loadbalancers_net2_dataplane]
 {% for ip, hostname in data_plane_net2.items() %}
 {{ hostname }}
 {% endfor %}
