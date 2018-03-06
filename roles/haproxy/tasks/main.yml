@@ -2,12 +2,20 @@
   yum:
     name: haproxy
     state: latest
-- name: Configure haproxy
+- name: Configure haproxy controlplane
   template:
-    src: templates/haproxy.j2
+    src: templates/haproxy-controlplane.j2
     dest: /etc/haproxy/haproxy.cfg
     force: yes
     backup: yes
+  when: inventory_hostname in groups.loadbalancers_controlplane
+- name: Configure haproxy dataplane
+  template:
+    src: templates/haproxy-dataplane.j2
+    dest: /etc/haproxy/haproxy.cfg
+    force: yes
+    backup: yes
+  when: inventory_hostname in groups.loadbalancers_dataplane
 - name: Update rsyslog config
   blockinfile:
     dest: /etc/rsyslog.conf
