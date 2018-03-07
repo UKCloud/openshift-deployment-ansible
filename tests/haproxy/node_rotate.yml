@@ -1,7 +1,7 @@
 # This file sets environment variables needed to run openstack commands on the bastion and then brings down the master nodes in turn, waiting until the last one comes up to bring down the next.
 - hosts: localhost
   environment:
-    OS_AUTH_URL: "{{ openshift_cloudprovider_openstack_auth_url }}"
+    OS_AUTH_URL: "{{ osAuthUrl }}"
     OS_TENANT_ID: "{{ osTenantId }}"
     OS_TENANT_NAME: "{{ osTenantName }}"
     OS_USERNAME: "{{ openstackOpenshiftUsername }}"
