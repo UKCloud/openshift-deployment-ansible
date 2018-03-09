@@ -1,0 +1,14 @@
+zone "." IN {
+    type forward;
+    forwarders {
+        {{ upstream DNS }};
+    };
+};
+
+zone "{{ localDomainSuffix }}" IN {
+    type forward;
+    forwarders {
+        {{ local network dns master }};
+        {{ local network dns slave }};
+    };
+};
