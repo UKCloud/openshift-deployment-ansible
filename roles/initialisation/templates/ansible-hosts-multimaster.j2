@@ -153,6 +153,11 @@ loadbalancers_net2_dataplane
 {{ hostname }}
 {% endfor %}
 
+[dns_net2]
+{% for ip, hostname in loadbalancers_net2_dataplane.items() %}
+{{ hostname }}
+{% endfor %}
+
 # host group for nodes, includes region info
 # Routers are placed only on first 3 workers
 [nodes]
