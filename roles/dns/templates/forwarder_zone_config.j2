@@ -1,14 +1,14 @@
 zone "." IN {
     type forward;
     forwarders {
-        {{ upstream DNS }};
+        {{ net2_dns_server }};
     };
 };
 
 zone "{{ localDomainSuffix }}" IN {
     type forward;
     forwarders {
-        {{ local network dns master }};
-        {{ local network dns slave }};
+        {{ hostvars[groups.dns[0]].ansible_default_ipv4.address }};
+        {{ hostvars[groups.dns[1]].ansible_default_ipv4.address }};
     };
 };
