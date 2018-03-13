@@ -8,7 +8,7 @@
     creates: .set_network_manager_dns
   become: yes
   become_method: sudo
-  when: inventory_hostname in groups.internet_all
+  when: inventory_hostname in groups.internet_all or inventory_hostname == 'localhost'
 - name: Set network manager DNS for net2 hosts
   shell: nmcli c modify 'System eth0' ipv4.ignore-auto-dns yes ipv4.dns {{ hostvars[groups.dns_net2[0]].ansible_default_ipv4.address }},{{ hostvars[groups.dns_net2[1]].ansible_default_ipv4.address }} && nmcli c up "System eth0"  && touch .set_network_manager_dns
   args:
