@@ -35,7 +35,8 @@
     path: /etc/named.conf
     regexp: "dnssec-validation yes;"
     replace: "dnssec-validation no;"
-    backup: yes- name: Enable bind and start service
+    backup: yes
+- name: Enable bind and start service
   systemd:
     name: named
     state: started
