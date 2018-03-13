@@ -1,4 +1,0 @@
-search {{ localDomainSuffix }} localdomain
-{% for hostname in groups.dns %}
-nameserver {{ hostvars[hostname].ansible_default_ipv4.address }}
-{% endfor %}
