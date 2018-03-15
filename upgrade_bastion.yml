@@ -1,11 +1,13 @@
 
 # Upgrade the Bastion host
 # Should happen after deploying the cluster
+# Skip broken added to resolve dependancy issues we are currently facing. 
+# Should be removed when these are fixed via https://bugzilla.redhat.com/show_bug.cgi?id=1497387
 - hosts: localhost
   become: yes
   tasks:
     - name: "Upgrade Bastion Host    (DO NOT interrupt)    ."
-      local_action: yum name=* state=latest
+      local_action: yum name=* state=latest skip_broken=yes
       when: doUpgrades == True
 
     # This isn't the last task in "deploy-with-upgrade", so we can't
