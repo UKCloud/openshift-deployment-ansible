@@ -16,9 +16,10 @@ DOMAINSUFFIX=$(cat ../../group_vars/all.yml | grep domainSuffix | awk '{print $2
 oc login -u $1 -p $2 --server="https://ocp.$DOMAINSUFFIX:8443" --insecure-skip-tls-verify
 
 # Storing master node names (easiest way to do this and ensure future proof for node changes)
-master0name=$(cat ../../openshift-ansible-hosts | fgrep -C3 [masters] | tail -3 | head -1)
-master1name=$(cat ../../openshift-ansible-hosts | fgrep -C3 [masters] | tail -2 | head -1)
-master2name=$(cat ../../openshift-ansible-hosts | fgrep -C3 [masters] | tail -1)
+masters="$(oc get nodes -o custom-columns=NAME:metadata.name --no-headers=true | grep master)"
+master0name=$("${masters}" | grep -- -0.)
+master1name=$("${masters}" | grep -- -1.)
+master2name=$("${masters}" | grep -- -2.)
 
 # Variables to store state of master nodes
 master0state=$(oc get node | grep $master0name | awk '{ print $2 }' | cut -d , -f 1)
@@ -31,7 +32,8 @@ then
 	ln -s ../../ansible.cfg ansible.cfg
 fi
 
-# Check the master nodes are in state "Ready" and exit the script if not. If they are it runs the ansible playbooks to poll the API and hard reboot the master nodes in turn.
+# Check the master nodes are in state "Ready" and exit the script if not. 
+# If they are it runs the ansible playbooks to poll the API and hard reboot the master nodes in turn.
 if [[ $master0state != Ready ]] || [[ $master1state != Ready ]] || [[ $master2state != Ready ]]
 then
 	echo "One of more master nodes is not in state "Ready" please correct this and run the script again." 

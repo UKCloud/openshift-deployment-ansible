@@ -13,39 +13,39 @@
   
   tasks:
   - name: reboot master-0
-    shell: nova reboot --hard "{{ master0 }}"
+    shell: nova reboot --hard {{ master0 }}
 
   - pause:
       seconds: 40
 
   - name: Get status of master-0
-    shell: oc get node | grep "{{ master0 }}"  | awk '{ print $2 }' | cut -d , -f 1
+    shell: oc get node | grep {{ master0 }}  | awk '{ print $2 }' | cut -d , -f 1
     register: master0status
     until: master0status.stdout == "Ready"
     delay: 5
     retries: 5
 
   - name: reboot master-1
-    shell: nova reboot --hard "{{ master1 }}" 
+    shell: nova reboot --hard {{ master1 }}
 
   - pause:
       seconds: 40
  
   - name: Get status of master-1
-    shell: oc get node | grep "{{ master1 }}" | awk '{ print $2 }' | cut -d , -f 1
+    shell: oc get node | grep {{ master1 }} | awk '{ print $2 }' | cut -d , -f 1
     register: master1status
     until: master1status.stdout == "Ready"
     delay: 5
     retries: 5
 
   - name: reboot master-2
-    shell: nova reboot --hard "{{ master2 }}"
+    shell: nova reboot --hard {{ master2 }}
 
   - pause:
       seconds: 40
 
   - name: Get status of master-2
-    shell: oc get node | grep "{{ master2 }}" | awk '{ print $2 }' | cut -d , -f 1
+    shell: oc get node | grep {{ master2 }} | awk '{ print $2 }' | cut -d , -f 1
     register: master2status
     until: master2status.stdout == "Ready"
     delay: 5
