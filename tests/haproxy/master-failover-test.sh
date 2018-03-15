@@ -15,12 +15,15 @@ DOMAINSUFFIX=$(cat ../../group_vars/all.yml | grep domainSuffix | awk '{print $2
 
 oc login -u $1 -p $2 --server="https://ocp.$DOMAINSUFFIX:8443" --insecure-skip-tls-verify
 
-oc project default
+# Storing master node names (easiest way to do this and ensure future proof for node changes)
+master0name=$(cat ../../openshift-ansible-hosts | fgrep -C3 [masters] | tail -3 | head -1)
+master1name=$(cat ../../openshift-ansible-hosts | fgrep -C3 [masters] | tail -2 | head -1)
+master2name=$(cat ../../openshift-ansible-hosts | fgrep -C3 [masters] | tail -1)
 
 # Variables to store state of master nodes
-master0state=$(oc get node | grep master-.*0 | awk '{ print $2 }' | cut -d , -f 1)
-master1state=$(oc get node | grep master-.*1 | awk '{ print $2 }' | cut -d , -f 1)
-master2state=$(oc get node | grep master-.*2 | awk '{ print $2 }' | cut -d , -f 1)
+master0state=$(oc get node | grep $master0name | awk '{ print $2 }' | cut -d , -f 1)
+master1state=$(oc get node | grep $master1name | awk '{ print $2 }' | cut -d , -f 1)
+master2state=$(oc get node | grep $master2name | awk '{ print $2 }' | cut -d , -f 1)
 
 # Create symbolic link to ansible config file in order to send log output to ~/ansible.log
 if [[ ! -L ansible.cfg ]]
