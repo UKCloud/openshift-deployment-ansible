@@ -11,7 +11,7 @@ fi
 cd /usr/share/ansible/openshift-deployment-ansible/tests/haproxy 
 
 # Logging into openshift in order to run oc commands later in script. 
-DOMAINSUFFIX=cat ../../group_vars/all.yml | grep domainSuffix | awk '{print $2}'
+DOMAINSUFFIX=$(cat ../../group_vars/all.yml | grep domainSuffix | awk '{print $2}')
 
 oc login -u $1 -p $2 --server="https://ocp.$DOMAINSUFFIX:8443" --insecure-skip-tls-verify
 
