@@ -41,11 +41,11 @@ then
 else
 	ansible-playbook poll.yml &
 	sleep 2
-	ansible-playbook node_rotate.yml -i ../../openshift-anbsible-hosts & 
+	ansible-playbook -i ../../openshift-anbsible-hosts node_rotate.yml & 
 fi
  
 # Wait until the node_rotate playbook is finished and allow the poll playbook to be killed once it is.
-until [[ -z $(ps -ef | grep "/[u]sr/bin/ansible-playbook node_rotate.yml" | awk '{ print $2}') ]]
+until [[ -z $(ps -ef | grep "/[u]sr/bin/ansible-playbook -i ../../openshift-anbsible-hosts node_rotate.yml" | awk '{ print $2}') ]]
 do
 	sleep 1
 done
