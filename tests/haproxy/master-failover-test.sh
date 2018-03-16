@@ -41,7 +41,7 @@ then
 else
 	ansible-playbook poll.yml &
 	sleep 2
-	ansible-playbook node_rotate.yml & 
+	ansible-playbook node_rotate.yml -i ../../openshift-anbsible-hosts & 
 fi
  
 # Wait until the node_rotate playbook is finished and allow the poll playbook to be killed once it is.
