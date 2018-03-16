@@ -16,10 +16,9 @@ DOMAINSUFFIX=$(cat ../../group_vars/all.yml | grep domainSuffix | awk '{print $2
 oc login -u $1 -p $2 --server="https://ocp.$DOMAINSUFFIX:8443" --insecure-skip-tls-verify
 
 # Storing master node names (easiest way to do this and ensure future proof for node changes)
-masters="$(oc get nodes -o custom-columns=NAME:metadata.name --no-headers=true | grep master)"
-master0name=$("${masters}" | grep -- -0.)
-master1name=$("${masters}" | grep -- -1.)
-master2name=$("${masters}" | grep -- -2.)
+master0name=$(oc get nodes -o custom-columns=NAME:metadata.name --no-headers=true | grep master | grep -- -0.)
+master1name=$(oc get nodes -o custom-columns=NAME:metadata.name --no-headers=true | grep master | grep -- -1.)
+master2name=$(oc get nodes -o custom-columns=NAME:metadata.name --no-headers=true | grep master | grep -- -2.)
 
 # Variables to store state of master nodes
 master0state=$(oc get node | grep $master0name | awk '{ print $2 }' | cut -d , -f 1)
