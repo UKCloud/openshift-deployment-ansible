@@ -28,5 +28,5 @@
     - openshift-infra
     - kube-system
     - openshift
-  when: installLogging == "True"
+  when: installLogging == "true"
 
