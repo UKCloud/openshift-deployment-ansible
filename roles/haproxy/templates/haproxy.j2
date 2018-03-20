@@ -107,6 +107,8 @@ backend atomic-openshift-router-ssl
   backend atomic-openshift-api
     balance source
     mode tcp
+    timeout check 2s
+    timeout connect 2s
     {% for ip, hostname in master_details.items() %}
       server     {{ hostname }} {{ ip }}:8443 check
     {% endfor %}
