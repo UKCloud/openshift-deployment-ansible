@@ -22,7 +22,7 @@
   command: /usr/local/bin/oc adm policy --config=/etc/origin/master/admin.kubeconfig add-cluster-role-to-user cluster-admin admin
 
 - name: Fix kibana URLs
-  command: /usr/local/bin/oc oc annotate ns {{ item }} --overwrite "openshift.io/logging.ui.hostname"="kibana.{{ domainSuffix }}"
+  command: /usr/local/bin/oc annotate ns {{ item }} --overwrite "openshift.io/logging.ui.hostname"="kibana.{{ domainSuffix }}"
   with_items: 
     - default
     - openshift-infra
