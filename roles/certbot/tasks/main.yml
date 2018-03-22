@@ -84,7 +84,7 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK - Setup cluster certificate configuration"
     block: |
       openshift_master_overwrite_named_certificates=true
-      openshift_master_named_certificates=[{"certfile": "/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem", "keyfile": "/home/cloud-user/ocp.{{ domainSuffix }}/privkey1.pem", "names": ["ocp.{{ domainSuffix }}"], "cafile": "/home/cl      oud-user/ocp.{{ domainSuffix }}/chain1.pem"}]
+      openshift_master_named_certificates=[{"certfile": "/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem", "keyfile": "/home/cloud-user/ocp.{{ domainSuffix }}/privkey1.pem", "names": ["ocp.{{ domainSuffix }}"], "cafile": "/home/cloud-user/ocp.{{ domainSuffix }}/chain1.pem"}]      
       openshift_metrics_hawkular_cert="/home/cloud-user/ocp.{{ domainSuffix  }}/fullchain1.pem"
       openshift_metrics_hawkular_key="/home/cloud-user/ocp.{{ domainSuffix  }}/privkey1.pem"
   when: inventory_hostname == 'localhost'
