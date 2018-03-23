@@ -12,8 +12,8 @@
 
 # Test if there are any additional hosts, and
 # build the inventory file for the upscale.
-num_hosts_new=$(grep 'worker-[0-9][0-9]*.openstacklocal' group_vars/all.yml | wc -l)
-num_hosts_old=$(grep 'worker-[0-9][0-9]*.openstacklocal' openshift-ansible-hosts | wc -l)
+num_hosts_new=$(grep 'worker-[0-9][0-9]*' group_vars/all.yml | wc -l)
+num_hosts_old=$(grep 'worker-[0-9][0-9]*' openshift-ansible-hosts | wc -l)
 
 if (( num_hosts_new >  num_hosts_old )) ; then
     echo "Upscale needed: Number of additional hosts: $(expr ${num_hosts_new} - ${num_hosts_old} )"
