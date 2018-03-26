@@ -223,9 +223,9 @@ def write_scale_up_inventory(old_inventory_file, upscaled_inventory_file,
             # Only the first 3 workers (0, 1, 2) have "router: true"
             # N.B. The equivalent compare in the Jinja code is 1-based.
             if host_num < 3:
-                node_labels = "\"{'router':'true','purpose':'tenant'}\""
+                node_labels = "\"{'router':'true','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}\""
             else:
-                node_labels = "\"{'purpose':'tenant'}\""
+                node_labels = "\"{'purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}\""
 
             inventory.set_host_in_section(
                 'new_nodes', host,
