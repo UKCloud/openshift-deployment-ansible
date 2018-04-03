@@ -44,7 +44,7 @@
   when: inventory_hostname == groups.loadbalancers[0]
 
 - name: Run certbot
-  command: certbot certonly -m openshift@ukcloud.com --standalone -d ocp.{{ domainSuffix }},hawkular-metrics.{{ domainSuffix }},registry-console-default.{{ domainSuffix }} --agree-tos -n
+  command: certbot certonly -m openshift@ukcloud.com --standalone -d ocp.{{ domainSuffix }},hawkular-metrics.{{ domainSuffix }},registry-console-default.{{ domainSuffix }},kibana.{{ domainSuffix }} --staging --agree-tos -n
   when: inventory_hostname == groups.loadbalancers[0]
 
 - name: Start HAProxy
@@ -87,6 +87,9 @@
       openshift_master_named_certificates=[{"certfile": "/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem", "keyfile": "/home/cloud-user/ocp.{{ domainSuffix }}/privkey1.pem", "names": ["ocp.{{ domainSuffix }}"], "cafile": "/home/cloud-user/ocp.{{ domainSuffix }}/chain1.pem"}]
       openshift_metrics_hawkular_cert="/home/cloud-user/ocp.{{ domainSuffix  }}/fullchain1.pem"
       openshift_metrics_hawkular_key="/home/cloud-user/ocp.{{ domainSuffix  }}/privkey1.pem"
+      openshift_logging_kibana_cert="/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem"
+      openshift_logging_kibana_key="/home/cloud-user/ocp.{{ domainSuffix }}/privkey1.pem"
+      openshift_logging_kibana_ca="/home/cloud-user/ocp.{{ domainSuffix }}/chain1.pem"
   when: inventory_hostname == 'localhost'
 
 - name: Refresh inventory to pick up additions above
