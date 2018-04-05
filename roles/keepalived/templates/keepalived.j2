@@ -5,11 +5,11 @@ vrrp_script chk_haproxy {
 }
 
 vrrp_instance VI_1 {
-    state {% if ansible_hostname == "{{ inventory_hostname[groups.loadbalancers[0]] }}"%}MASTER
+    state {% if ansible_hostname == "{{ groups.loadbalancers[0]] }}"%}MASTER
     {% else %}BACKUP
     {% endif %}interface eth0
     virtual_router_id 51
-    priority {% if ansible_hostname == "{{ inventory_hostname[groups.loadbalancers[0]] }}"%}101{% else %}100{% endif %} # 101 on haproxy, 100 on haproxy2
+    priority {% if ansible_hostname == "{{ groups.loadbalancers[0]] }}"%}101{% else %}100{% endif %} # 101 on haproxy, 100 on haproxy2
     advert_int 1
     authentication {
         auth_type PASS
