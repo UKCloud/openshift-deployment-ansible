@@ -1,3 +1,6 @@
+#set variable to use in Jinja conditional
+{% set primary = groups.loadbalancers[0] -%}
+
 vrrp_script chk_haproxy {
     script "/usr/bin/killall -0 haproxy"
     interval 2 # every 2 seconds
@@ -5,11 +8,11 @@ vrrp_script chk_haproxy {
 }
 
 vrrp_instance VI_1 {
-    state {% if "-0" in ansible_hostname %}MASTER
+    state {% if ansible_hostname in primary %}MASTER
     {% else %}BACKUP
     {% endif %}interface eth0
     virtual_router_id 51
-    priority {% if "0" in ansible_hostname %}101{% else %}100{% endif %} # 101 on haproxy, 100 on haproxy2
+    priority {% if ansible_hostname in primary  %}101{% else %}100{% endif %} # 101 on haproxy, 100 on haproxy2
     advert_int 1
     authentication {
         auth_type PASS
