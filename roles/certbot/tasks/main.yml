@@ -44,7 +44,7 @@
   when: inventory_hostname == groups.loadbalancers[0]
 
 - name: Run certbot
-  command: certbot certonly -m openshift@ukcloud.com --standalone -d ocp.{{ domainSuffix }},hawkular-metrics.{{ domainSuffix }},registry-console.{{ domainSuffix }},kibana.{{ domainSuffix }} --agree-tos -n
+  command: certbot certonly -m openshift@ukcloud.com --standalone -d ocp.{{ domainSuffix }},hawkular-metrics.{{ domainSuffix }},registry-console-default.{{ domainSuffix }},kibana.{{ domainSuffix }} --staging --agree-tos -n
   when: inventory_hostname == groups.loadbalancers[0]
 
 - name: Start HAProxy
