@@ -35,7 +35,7 @@
   when: getCertificates == True
 
 - name: Move registry.cert across to masters[0]
-  local_action: command scp registry.cert {{ groups.masters[0] }}:/home/cloud-user 
+  local_action: command scp registry.cert cloud-user@{{ groups.masters[0] }}:/home/cloud-user 
   when: getCertificates == True 
 
 - name: Change to default project
