@@ -31,7 +31,7 @@
   when: installLogging == True
 
 - name: Create registry.cert file
-  local_action: command cd /home/cloud-user/ocp.{{ domainSuffix }} ; cat fullchain1.pem privkey1.pem > registry.cert
+  local_action: shell cd /home/cloud-user/ocp.{{ domainSuffix }} ; cat fullchain1.pem privkey1.pem > registry.cert
   when: getCertificates == True
 
 - name: Move registry.cert across to masters[0]
