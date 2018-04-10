@@ -30,3 +30,26 @@
     - openshift
   when: installLogging == True
 
+- name: Create registry.cert file
+  local_action: shell cd /home/cloud-user/ocp.{{ domainSuffix }} ; cat fullchain1.pem privkey1.pem > registry.cert
+  when: getCertificates == True
+
+- name: Move registry.cert across to masters[0]
+  copy:
+    src: /home/cloud-user/ocp.{{ domainSuffix }}/registry.cert
+    dest: /home/cloud-user/registry.cert
+    owner: cloud-user
+    mode: 0644 
+  when: getCertificates == True 
+
+- name: Change to default project
+  command: /usr/local/bin/oc project default
+  when: getCertificates == True
+
+- name: Create registry cert secret
+  command: /usr/local/bin/oc secrets new console-secret /home/cloud-user/registry.cert
+  when: getCertificates == True
+
+- name: Mount secret to registry console container and trigger new deploy
+  command: /usr/local/bin/oc volume dc/registry-console --add --type=secret --secret-name=console-secret -m /etc/cockpit/ws-certs.d
+  when: getCertificates == True
