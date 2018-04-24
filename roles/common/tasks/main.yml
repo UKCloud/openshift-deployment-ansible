@@ -2,6 +2,7 @@
   stat: 
     path: .resolv_conf_set
   register: status
+
 - name: Set network manager DNS for internet hosts
   shell: nmcli c modify 'System eth0' ipv4.ignore-auto-dns yes ipv4.dns {{ hostvars[groups.dns[0]].ansible_default_ipv4.address }},{{ hostvars[groups.dns[1]].ansible_default_ipv4.address }} && nmcli c up "System eth0"  && touch .set_network_manager_dns
   args:
@@ -9,13 +10,23 @@
   become: yes
   become_method: sudo
   when: inventory_hostname in groups.internet_all or inventory_hostname == 'localhost'
+
 - name: Set network manager DNS for net2 hosts
-  shell: nmcli c modify 'System eth0' ipv4.ignore-auto-dns yes ipv4.dns {{ hostvars[groups.dns_net2[0]].ansible_default_ipv4.address }},{{ hostvars[groups.dns_net2[1]].ansible_default_ipv4.address }} && nmcli c up "System eth0"  && touch .set_network_manager_dns
+  shell: nmcli c modify 'System eth0' ipv4.ignore-auto-dns yes ipv4.dns {{ hostvars[groups.dns_net2[0]].ansible_eth0.ipv4.address }},{{ hostvars[groups.dns_net2[1]].ansible_eth0.ipv4.address }} ipv4.gateway {{ net2_gateway }} ipv4.address {{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}/24 ipv4.method manual && nmcli c up "System eth0"  && touch .set_network_manager_dns
   args:
     creates: .set_network_manager_dns
   become: yes
   become_method: sudo
   when: inventory_hostname in groups.net2_all
+
+- name: Remove default route and add specific route to satellite server via internet router
+  shell: ip route add 51.179.219.220/32 via 10.2.1.1
+  args:
+    creates: .net2_ipadd_route
+  become: yes
+  become_method: sudo
+  when: inventory_hostname in groups.net2_all
+
 - name: Tidy up hosts file on bastion
   blockinfile:
     block: |
@@ -26,6 +37,7 @@
   when: inventory_hostname == 'localhost' and not status.stat.exists
   become: yes
   become_method: sudo
+
 - name: disable TTY for sudo on all hosts
   lineinfile:
     path: /etc/sudoers
@@ -34,10 +46,12 @@
     backup: yes
   become: yes
   become_method: sudo
+
 - name: Create a file so we only run once
   file:
     path: .resolv_conf_set
     state: touch
+
 - name: Restart keepalived now the network has been reloaded to bring up the VIP again
   systemd:
     name: keepalived

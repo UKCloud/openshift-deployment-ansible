@@ -76,7 +76,7 @@ backend atomic-openshift-router-http
     balance source
     mode tcp
     {% if ansible_fqdn in groups.loadbalancers_internet_dataplane %}
-    {% for ip, hostname in worker_details_internet.items() %}
+    {% for ip, hostname in infrastructure_node_details.items() %}
       server     {{ hostname }} {{ ip }}:80 check
     {% endfor %}
     {% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}
@@ -84,7 +84,7 @@ backend atomic-openshift-router-http
       server     {{ hostname }} {{ ip }}:80 check
     {% endfor %}
     {% else %}
-    {% for ip, hostname in worker_details.items() %}
+    {% for ip, hostname in infrastructure_node_details.items() %}
       server     {{ hostname }} {{ ip }}:80 check
     {% endfor %}
     {% endif %} 
@@ -106,7 +106,7 @@ backend atomic-openshift-router-ssl
     stick store-response payload_lv(43,1) if serverhello
     option ssl-hello-chk
     {% if ansible_fqdn in groups.loadbalancers_internet_dataplane %}
-    {% for ip, hostname in worker_details_internet.items() %}
+    {% for ip, hostname in infrastructure_node_details.items() %}
       server     {{ hostname }} {{ ip }}:443 check
     {% endfor %}
     {% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}
@@ -114,7 +114,7 @@ backend atomic-openshift-router-ssl
       server     {{ hostname }} {{ ip }}:443 check
     {% endfor %}
     {% else %}
-    {% for ip, hostname in worker_details.items() %}
+    {% for ip, hostname in infrastructure_node_details.items() %}
       server     {{ hostname }} {{ ip }}:443 check
     {% endfor %}
     {% endif %}
