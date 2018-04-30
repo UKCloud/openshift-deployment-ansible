@@ -131,7 +131,9 @@ loadbalancers_dataplane
 
 [loadbalancers_dataplane:children]
 loadbalancers_internet_dataplane
+{% if multinetwork %}
 loadbalancers_net2_dataplane
+{% endif %}
 
 [loadbalancers_controlplane]
 {% for ip, hostname in control_plane_details.items() %}
@@ -144,9 +146,11 @@ loadbalancers_net2_dataplane
 {% endfor %}
 
 [loadbalancers_net2_dataplane]
+{% if multinetwork %}
 {% for ip, hostname in data_plane_net2.items() %}
 {{ hostname }}
 {% endfor %}
+{% endif %}
 
 [dns]
 {% for ip, hostname in control_plane_details.items() %}
@@ -154,13 +158,17 @@ loadbalancers_net2_dataplane
 {% endfor %}
 
 [dns_net2:children]
+{% if multinetwork %}
 loadbalancers_net2_dataplane
+{% endif %}
 
 # host group for nodes, includes region info
 # Routers are placed only on first 3 workers
 [nodes:children]
 nodes_internet
+{% if multinetwork %}
 nodes_net2
+{% endif %}
 
 [nodes_internet]
 {% for ip, hostname in master_details.items() %}
@@ -174,6 +182,7 @@ nodes_net2
 {% endfor %}
 
 [nodes_net2]
+{% if multinetwork %}
 {% for ip, hostname in worker_details_net2.items() %}
 {% if loop.index <= 3 %}
 {{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','network':'net2','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
@@ -181,6 +190,7 @@ nodes_net2
 {{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'network':'net2','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endif %}
 {% endfor %}
+{% endif %}
 
 # groups to capture all of the hosts with connectivity to each network connection
 [internet_all:children]
