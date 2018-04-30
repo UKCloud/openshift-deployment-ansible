@@ -12,7 +12,7 @@
   when: inventory_hostname in groups.internet_all or inventory_hostname == 'localhost'
 
 - name: Set network manager DNS for net2 hosts
-  shell: nmcli c modify 'System eth0' ipv4.ignore-auto-dns yes ipv4.dns {{ hostvars[groups.dns_net2[0]].ansible_eth0.ipv4.address }},{{ hostvars[groups.dns_net2[1]].ansible_eth0.ipv4.address }} ipv4.gateway {{ net2_gateway }} ipv4.address {{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}/24 ipv4.method manual && nmcli c up "System eth0"  && touch .set_network_manager_dns
+  shell: nmcli c modify 'System eth0' ipv4.ignore-auto-dns yes ipv4.dns {{ hostvars[groups.dns_net2[0]].ansible_eth0.ipv4.address }},{{ hostvars[groups.dns_net2[1]].ansible_eth0.ipv4.address }} ipv4.gateway {{ net2_gateway }} ipv4.address {{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}/24 ipv4.method manual 802-3-ethernet.mtu 1450 && nmcli c up "System eth0"  && touch .set_network_manager_dns
   args:
     creates: .set_network_manager_dns
   become: yes
