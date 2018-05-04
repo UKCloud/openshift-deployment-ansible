@@ -39,7 +39,7 @@
     permanent: true
     zone: public
     state: enabled
-  when: inventory_hostname in groups.loadbalancers_dataplane
+  when: inventory_hostname in groups.loadbalancers
 - name: setup firewall - https
   firewalld:
     service: https
@@ -47,7 +47,7 @@
     permanent: true
     zone: public
     state: enabled
-  when: inventory_hostname in groups.loadbalancers_dataplane
+  when: inventory_hostname in groups.loadbalancers
 - name: setup firewall - OpenShift API
   firewalld:
     port: 8443/tcp
