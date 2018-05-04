@@ -95,6 +95,10 @@ openshift_hosted_metrics_deploy=true
 openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ domainSuffix }}/hawkular/metrics
 openshift_hosted_metrics_storage_kind=dynamic
 openshift_metrics_cassandra_pvc_size=50Gi
+# Node selectors for hawkular metrics
+openshift_metrics_cassandra_nodeselector={"purpose":"infra"}
+openshift_metrics_hawkular_nodeselector={"purpose":"infra"}
+openshift_metrics_heapster_nodeselector={"purpose":"infra"}
 
 # openshift aggregated logging deployment - comment out if no aggregated logging  deployment is required. this will run on the worker nodes
 openshift_logging_install_logging={{ installLogging  }}
@@ -108,6 +112,10 @@ openshift_logging_master_url=https://console.{{ localDomainSuffix }}:8443
 openshift_logging_use_journal=true
 openshift_logging_use_ops=false
 openshift_logging_es_cluster_size={{ loggingClusterSize }}
+# Node selectors for aggregated logging
+openshift_logging_curator_nodeselector={"purpose":"infra"}
+openshift_logging_kibana_nodeselector={"purpose":"infra"}
+openshift_logging_es_nodeselector={"purpose":"infra"}
 
 # fix to make the ansible service broker deploy to the correct nodes rather than all or none
 # RH ticket #02020379
