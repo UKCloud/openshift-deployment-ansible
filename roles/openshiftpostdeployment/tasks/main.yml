@@ -30,5 +30,7 @@
   when: multinetwork
 
 - name: Scale up secondary network routers
+  vars:
+    net2_scale: "{{ groups['nodes_net2'] | length }}"
   command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }}
   when: multinetwork
