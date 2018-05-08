@@ -33,4 +33,5 @@ dns{{ count }}	IN	A	{{ hostvars[hostname].ansible_default_ipv4.address }}
 {{ hostname }}.	IN	A	{{ ip }}
 {% endfor %}
 
+bastion-host	IN 	A	10.2.1.101
 console		IN 	A	{{ haproxy_vip }}
