@@ -20,3 +20,15 @@
 
 - name: Give admin rights
   command: /usr/local/bin/oc adm policy --config=/etc/origin/master/admin.kubeconfig add-cluster-role-to-user cluster-admin admin
+
+- name: Setup secondary network routers
+  command: /usr/local/bin/oc adm router router-secondary --replicas=0 --selector='router=secondary' --service-account=router
+  when: multinetwork
+
+- name: Setup secondary network router envs
+  command: /usr/local/bin/oc set env dc/router-secondary ROUTE_LABELS="router=secondary”
+  when: multinetwork
+
+- name: Scale up secondary network routers
+  command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }}
+  when: multinetwork
