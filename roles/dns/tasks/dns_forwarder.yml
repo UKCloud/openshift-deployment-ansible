@@ -4,7 +4,7 @@
     dest: "/etc/named.conf"
     backup: yes
   when: inventory_hostname in groups.dns_net2
-- name: Set corect selinux permissions
+- name: Set correct selinux permissions
   seboolean:
     name: named_write_master_zones
     state: yes
