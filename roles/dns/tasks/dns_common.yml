@@ -24,13 +24,13 @@
     regexp: "allow-query     { localhost; };"
     replace: "allow-query     { any; };"
     backup: yes
-- name: Configure bind to not use dnssec
+- name: Disable dnssec config in bind
   replace:
     path: /etc/named.conf
     regexp: "dnssec-enable yes;"
     replace: "dnssec-enable no;"
     backup: yes
-- name: Configure bind to not use dnssec
+- name: Disable dnssec-validation config in bind
   replace:
     path: /etc/named.conf
     regexp: "dnssec-validation yes;"
