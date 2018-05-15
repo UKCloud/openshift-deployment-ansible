@@ -45,7 +45,7 @@ openshift_docker_options="--mtu=1400  --log-driver=journald"
 openshift_hosted_router_selector='router=true'
 
 # REGISTRY
-openshift_hosted_registry_selector='purpose=tenant'
+openshift_hosted_registry_selector='purpose=infra'
 openshift_hosted_registry_replicas=1
 #openshift_hosted_registry_storage_kind=openstack
 #openshift_hosted_registry_storage_access_modes=['ReadWriteOnce']
@@ -95,6 +95,10 @@ openshift_hosted_metrics_deploy=true
 openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ domainSuffix }}/hawkular/metrics
 openshift_hosted_metrics_storage_kind=dynamic
 openshift_metrics_cassandra_pvc_size=50Gi
+# Node selectors for hawkular metrics
+openshift_metrics_cassandra_nodeselector={"purpose":"infra"}
+openshift_metrics_hawkular_nodeselector={"purpose":"infra"}
+openshift_metrics_heapster_nodeselector={"purpose":"infra"}
 
 # openshift aggregated logging deployment - comment out if no aggregated logging  deployment is required. this will run on the worker nodes
 openshift_logging_install_logging={{ installLogging  }}
@@ -108,10 +112,14 @@ openshift_logging_master_url=https://console.{{ localDomainSuffix }}:8443
 openshift_logging_use_journal=true
 openshift_logging_use_ops=false
 openshift_logging_es_cluster_size={{ loggingClusterSize }}
+# Node selectors for aggregated logging
+openshift_logging_curator_nodeselector={"purpose":"infra"}
+openshift_logging_kibana_nodeselector={"purpose":"infra"}
+openshift_logging_es_nodeselector={"purpose":"infra"}
 
 # fix to make the ansible service broker deploy to the correct nodes rather than all or none
 # RH ticket #02020379
-template_service_broker_selector={"purpose":"tenant"}
+template_service_broker_selector={"purpose":"infra"}
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
@@ -125,27 +133,75 @@ template_service_broker_selector={"purpose":"tenant"}
 {{ hostname }}
 {% endfor %}
 
-[loadbalancers]
-{% for ip, hostname in haproxy_details.items() %}
+[loadbalancers:children]
+loadbalancers_controlplane
+loadbalancers_dataplane
+
+[loadbalancers_dataplane:children]
+loadbalancers_internet_dataplane
+{% if multinetwork %}
+loadbalancers_net2_dataplane
+{% endif %}
+
+[loadbalancers_controlplane]
+{% for ip, hostname in control_plane_details.items() %}
 {{ hostname }}
 {% endfor %}
 
-[dns]
-{% for ip, hostname in haproxy_details.items() %}
+[loadbalancers_internet_dataplane]
+{% for ip, hostname in data_plane_internet.items() %}
 {{ hostname }}
 {% endfor %}
+
+[loadbalancers_net2_dataplane]
+{% if multinetwork %}
+{% for ip, hostname in data_plane_net2.items() %}
+{{ hostname }}
+{% endfor %}
+{% endif %}
+
+[dns]
+{% for ip, hostname in control_plane_details.items() %}
+{{ hostname }}
+{% endfor %}
+
+[dns_net2:children]
+{% if multinetwork %}
+loadbalancers_net2_dataplane
+{% endif %}
 
 # host group for nodes, includes region info
 # Routers are placed only on first 3 workers
-[nodes]
+[nodes:children]
+nodes_internet
+{% if multinetwork %}
+nodes_net2
+{% endif %}
+
+[nodes_internet]
 {% for ip, hostname in master_details.items() %}
 {{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endfor %}
-{% for ip, hostname in worker_details.items() %}
-{% if loop.index <= 3 %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
-{% else %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
-{% endif %}
+{% for ip, hostname in infrastructure_node_details.items() %}
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','network':'internet','purpose':'infra','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{% endfor %}
+{% for ip, hostname in worker_details_internet.items() %}
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'network':'internet','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endfor %}
 
+[nodes_net2]
+{% if multinetwork %}
+{% for ip, hostname in worker_details_net2.items() %}
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'secondary','network':'net2','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{% endfor %}
+{% endif %}
+
+# groups to capture all of the hosts with connectivity to each network connection
+[internet_all:children]
+loadbalancers_controlplane
+loadbalancers_internet_dataplane
+nodes_internet
+
+[net2_all:children]
+loadbalancers_net2_dataplane
+nodes_net2

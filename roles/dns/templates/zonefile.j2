@@ -17,8 +17,12 @@ dns{{ count }}	IN	A	{{ hostvars[hostname].ansible_default_ipv4.address }}
 {% set count = count + 1 %}
 {% endfor %}
 
-{% for ip, hostname in haproxy_details.iteritems() %}
-{{ hostname }}.	IN	A	{{ ip }}
+{% for ip, hostname in control_plane_details.iteritems() %}
+{{ hostname }}. IN      A       {{ ip }}
+{% endfor %}
+
+{% for ip, hostname in data_plane_details.iteritems() %}
+{{ hostname }}. IN      A       {{ ip }}
 {% endfor %}
 
 {% for ip, hostname in worker_details.iteritems() %}
@@ -29,4 +33,5 @@ dns{{ count }}	IN	A	{{ hostvars[hostname].ansible_default_ipv4.address }}
 {{ hostname }}.	IN	A	{{ ip }}
 {% endfor %}
 
+bastion-host	IN 	A	10.2.1.101
 console		IN 	A	{{ haproxy_vip }}

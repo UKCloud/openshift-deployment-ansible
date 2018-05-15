@@ -53,3 +53,17 @@
 - name: Mount secret to registry console container and trigger new deploy
   command: /usr/local/bin/oc volume dc/registry-console --add --type=secret --secret-name=console-secret -m /etc/cockpit/ws-certs.d
   when: getCertificates == True
+
+- name: Setup secondary network routers
+  command: /usr/local/bin/oc adm router router-secondary --replicas=0 --selector='router=secondary' --service-account=router
+  when: multinetwork
+
+- name: Setup secondary network router envs
+  command: /usr/local/bin/oc set env dc/router-secondary ROUTE_LABELS="router=secondary"
+  when: multinetwork
+
+- name: Scale up secondary network routers
+  vars:
+    net2_scale: "{{ groups['nodes_net2'] | length }}"
+  command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }}
+  when: multinetwork

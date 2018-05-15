@@ -2,12 +2,20 @@
   yum:
     name: haproxy
     state: latest
-- name: Configure haproxy
+- name: Configure haproxy controlplane
   template:
-    src: templates/haproxy.j2
+    src: templates/haproxy-controlplane.j2
     dest: /etc/haproxy/haproxy.cfg
     force: yes
     backup: yes
+  when: inventory_hostname in groups.loadbalancers_controlplane
+- name: Configure haproxy dataplane
+  template:
+    src: templates/haproxy-dataplane.j2
+    dest: /etc/haproxy/haproxy.cfg
+    force: yes
+    backup: yes
+  when: inventory_hostname in groups.loadbalancers_dataplane
 - name: Update rsyslog config
   blockinfile:
     dest: /etc/rsyslog.conf
@@ -31,6 +39,7 @@
     permanent: true
     zone: public
     state: enabled
+  when: inventory_hostname in groups.loadbalancers
 - name: setup firewall - https
   firewalld:
     service: https
@@ -38,6 +47,7 @@
     permanent: true
     zone: public
     state: enabled
+  when: inventory_hostname in groups.loadbalancers
 - name: setup firewall - OpenShift API
   firewalld:
     port: 8443/tcp
@@ -45,3 +55,4 @@
     permanent: true
     state: enabled
     zone: public
+  when: inventory_hostname in groups.loadbalancers_controlplane
