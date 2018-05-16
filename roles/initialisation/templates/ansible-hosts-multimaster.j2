@@ -94,7 +94,7 @@ openshift_storageclass_parameters={ 'type': 'TIER2', 'availability': 'nova' }
 openshift_hosted_metrics_deploy=true
 openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ domainSuffix }}/hawkular/metrics
 openshift_hosted_metrics_storage_kind=dynamic
-openshift_metrics_cassandra_pvc_size=50Gi
+openshift_metrics_cassandra_pvc_size=10Gi
 # Node selectors for hawkular metrics
 openshift_metrics_cassandra_nodeselector={"purpose":"infra"}
 openshift_metrics_hawkular_nodeselector={"purpose":"infra"}
@@ -112,6 +112,7 @@ openshift_logging_master_url=https://console.{{ localDomainSuffix }}:8443
 openshift_logging_use_journal=true
 openshift_logging_use_ops=false
 openshift_logging_es_cluster_size={{ loggingClusterSize }}
+openshift_logging_elasticsearch_pvc_size="20Gi"
 # Node selectors for aggregated logging
 openshift_logging_curator_nodeselector={"purpose":"infra"}
 openshift_logging_kibana_nodeselector={"purpose":"infra"}
