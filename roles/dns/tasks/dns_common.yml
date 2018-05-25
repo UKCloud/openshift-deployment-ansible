@@ -5,6 +5,7 @@
   with_items:
     - bind
     - bind-utils
+
 - name: setup firewall - dns
   firewalld:
     service: dns
@@ -12,30 +13,46 @@
     permanent: true
     zone: public
     state: enabled
+
 - name: Configure bind to listen on all addresses
   replace:
     path: /etc/named.conf
     regexp: "listen-on port 53 { 127.0.0.1; }"
     replace: "listen-on port 53 { any; }"
     backup: yes
+
 - name: Configure bind to allow queries
   replace:
     path: /etc/named.conf
     regexp: "allow-query     { localhost; };"
     replace: "allow-query     { any; };"
     backup: yes
+
 - name: Disable dnssec config in bind
   replace:
     path: /etc/named.conf
     regexp: "dnssec-enable yes;"
     replace: "dnssec-enable no;"
     backup: yes
+
 - name: Disable dnssec-validation config in bind
   replace:
     path: /etc/named.conf
     regexp: "dnssec-validation yes;"
     replace: "dnssec-validation no;"
     backup: yes
+
+- name: Add upstream DNS Servers to bind
+  blockinfile:
+    dest: /etc/named.conf
+    backup: yes
+    insertafter: "session-keyfile"
+    marker: "        /* ANSIBLE MANAGED BLOCK - upstream DNS */"
+    block: |2
+              forward first;
+              forwarders { {{ dns_upstream[0] }}; {{ dns_upstream[1] }}; };
+  when: inventory_hostname in groups.dns
+
 - name: Enable bind and start service
   systemd:
     name: named
