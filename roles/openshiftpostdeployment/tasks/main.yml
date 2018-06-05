@@ -67,3 +67,9 @@
     net2_scale: "{{ groups['nodes_net2'] | length }}"
   command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }}
   when: multinetwork
+
+- name: taint infrastructure nodes to prevent customer applications scheduling
+  command: /usr/local/bin/oc adm taint node "{{ item }}" infra=only:NoSchedule
+  with_items:
+    - "{{ groups.nodes_infra }}"
+  when: multinetwork

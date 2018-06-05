@@ -32,6 +32,12 @@ openshift_release=v{{ openshiftVersion }}
 
 openshift_set_hostname=true
 
+{% if multinetwork %}
+# Adding buildoverride values to make build pods target infra nodes in multi-network deployments
+openshift_buildoverrides_nodeselectors={'build':'true'}
+openshift_buildoverrides_tolerations=[{'key':'infra','value':'only','effect':'NoSchedule','operator':'Equal'}]
+{% endif %}
+
 # Makes the openshift_ip setting in the host groups are below take effect.
 # This sets the nodeIP setting in node-config on each host to the correct IP
 openshift_set_node_ip=true
@@ -178,24 +184,51 @@ nodes_internet
 {% if multinetwork %}
 nodes_net2
 {% endif %}
+nodes_infra
+nodes_tenant
+nodes_master
 
 [nodes_internet]
 {% for ip, hostname in master_details.items() %}
 {{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endfor %}
 {% for ip, hostname in infrastructure_node_details.items() %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','network':'internet','purpose':'infra','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','internet':'true','net2':'true','tenant':'true','infra':'true','build':'true','failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endfor %}
 {% for ip, hostname in worker_details_internet.items() %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'network':'internet','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'internet':'true','tenant':'true','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{% endfor %}
+
+[nodes_infra]
+{% for ip, hostname in infrastructure_node_details.items() %}
+{{ hostname }}
 {% endfor %}
 
 [nodes_net2]
 {% if multinetwork %}
 {% for ip, hostname in worker_details_net2.items() %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'secondary','network':'net2','purpose':'tenant','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'secondary','net2':'true','tenant':'true','failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endfor %}
 {% endif %}
+
+[nodes_infra]
+{% for ip, hostname in infrastructure_node_details.items() %}
+{{ hostname }}
+{% endfor %}
+
+[nodes_tenant]
+{% for ip, hostname in worker_details_internet.items() %}
+{{ hostname }}
+{% endfor %}
+{% if multinetwork %}
+{% for ip, hostname in worker_details_net2.items() %}
+{{ hostname }}
+{% endfor %}
+
+[nodes_master]
+{% for ip, hostname in master_details.items() %}
+{{ hostname }}
+{% endfor %}
 
 # groups to capture all of the hosts with connectivity to each network connection
 [internet_all:children]
