@@ -71,5 +71,5 @@
 - name: taint infrastructure nodes to prevent customer applications scheduling
   command: /usr/local/bin/oc adm taint node "{{ item }}" infra=only:NoSchedule
   with_items:
-    - "{{ infrastructure_nodes_details.values() }}"
+    - "{{ infrastructure_node_details.values() }}"
   when: multinetwork

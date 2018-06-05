@@ -51,7 +51,7 @@ openshift_docker_options="--mtu=1400  --log-driver=journald"
 openshift_hosted_router_selector='router=true'
 
 # REGISTRY
-openshift_hosted_registry_selector='purpose=infra'
+openshift_hosted_registry_selector='infra=true'
 openshift_hosted_registry_replicas=1
 #openshift_hosted_registry_storage_kind=openstack
 #openshift_hosted_registry_storage_access_modes=['ReadWriteOnce']
@@ -76,7 +76,7 @@ openshift_hosted_registry_acceptschema2=true
 openshift_hosted_registry_enforcequota=true
 
 
-osm_default_node_selector='purpose=tenant'
+osm_default_node_selector='tenant=true'
 
 # enable ntp on masters to ensure proper failover
 openshift_clock_enabled=true
@@ -102,9 +102,9 @@ openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ domainSuffix }}/
 openshift_hosted_metrics_storage_kind=dynamic
 openshift_metrics_cassandra_pvc_size=10Gi
 # Node selectors for hawkular metrics
-openshift_metrics_cassandra_nodeselector={"purpose":"infra"}
-openshift_metrics_hawkular_nodeselector={"purpose":"infra"}
-openshift_metrics_heapster_nodeselector={"purpose":"infra"}
+openshift_metrics_cassandra_nodeselector={"infra":"true"}
+openshift_metrics_hawkular_nodeselector={"infra":"true"}
+openshift_metrics_heapster_nodeselector={"infra":"true"}
 
 # openshift aggregated logging deployment - comment out if no aggregated logging  deployment is required. this will run on the worker nodes
 openshift_logging_install_logging={{ installLogging  }}
@@ -120,13 +120,13 @@ openshift_logging_use_ops=false
 openshift_logging_es_cluster_size={{ loggingClusterSize }}
 openshift_logging_elasticsearch_pvc_size="20Gi"
 # Node selectors for aggregated logging
-openshift_logging_curator_nodeselector={"purpose":"infra"}
-openshift_logging_kibana_nodeselector={"purpose":"infra"}
-openshift_logging_es_nodeselector={"purpose":"infra"}
+openshift_logging_curator_nodeselector={"infra":"true"}
+openshift_logging_kibana_nodeselector={"infra":"true"}
+openshift_logging_es_nodeselector={"infra":"true"}
 
 # fix to make the ansible service broker deploy to the correct nodes rather than all or none
 # RH ticket #02020379
-template_service_broker_selector={"purpose":"infra"}
+template_service_broker_selector={"infra":"true"}
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
