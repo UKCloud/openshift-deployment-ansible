@@ -190,7 +190,7 @@ nodes_net2
 {{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endfor %}
 {% for ip, hostname in infrastructure_node_details.items() %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','internet':'true','infra:true',{% if multinetwork %}'net2':'true','tenant':'true','build':'true',{% endif %}'failure-domain.beta.kubernetes.io/zone':'nova'}"
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','internet':'true','infra':'true',{% if multinetwork %}'net2':'true','tenant':'true','build':'true',{% endif %}'failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endfor %}
 {% for ip, hostname in worker_details_internet.items() %}
 {{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'internet':'true','tenant':'true','failure-domain.beta.kubernetes.io/zone':'nova'}"
