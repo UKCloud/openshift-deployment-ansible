@@ -40,11 +40,11 @@
   with_items: "{{ node_routes }}"
   when: inventory_hostname in groups.nodes and setNodeRoutes
 
- - name: reload network service to apply routes
-   service:
-     name: network
-     state: restarted
-   when: ( inventory_hostname in groups.nodes and setNodeRoutes ) or inventory_hostname in groups.net2_all
+- name: reload network service to apply routes
+  service:
+    name: network
+    state: restarted
+  when: ( inventory_hostname in groups.nodes and setNodeRoutes ) or inventory_hostname in groups.net2_all
 
 - name: Tidy up hosts file on bastion
   blockinfile:
