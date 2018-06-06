@@ -19,13 +19,32 @@
   become_method: sudo
   when: inventory_hostname in groups.net2_all
 
-- name: Remove default route and add specific route to satellite server via internet router
-  shell: ip route add 51.179.219.220/32 via 10.2.1.1
-  args:
-    creates: .net2_ipadd_route
-  become: yes
-  become_method: sudo
-  when: inventory_hostname in groups.net2_all
+- name: add persistent routes for net2 nodes
+   shell: nmcli connection modify "System eth0" +ipv4.routes {{ item }} ipv4.gateway 10.2.1.1
+   args:
+    creates: .set_net2_nodes_routes
+   with_items: "{{ net2_node_routes }}"
+   when: inventory_hostname in groups.net2_nodes
+
+- name: add persistent routes for all net2 instances
+   shell: nmcli connection modify "System eth0" +ipv4.routes {{ item }} ipv4.gateway 10.2.1.1
+   args:
+    creates: .set_all_net2_routes
+   with_items: "{{ net2_routes }}"
+   when: inventory_hostname in groups.net2_all
+
+- name: add persistent routes for all nodes
+   shell: nmcli connection modify "System eth0" +ipv4.routes {{ item }} ipv4.gateway 10.2.1.1
+   args:
+    creates: .set_all_nodes_routes
+   with_items: "{{ node_routes }}"
+   when: inventory_hostname in groups.nodes and setNodeRoutes
+
+ - name: reload network service to apply routes
+   service:
+     name: network
+     state: restarted
+   when: ( inventory_hostname in groups.nodes and setNodeRoutes ) or inventory_hostname in groups.net2_all
 
 - name: Tidy up hosts file on bastion
   blockinfile:
