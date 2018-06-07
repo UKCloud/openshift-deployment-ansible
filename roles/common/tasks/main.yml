@@ -38,13 +38,13 @@
   args:
    creates: .set_all_nodes_routes
   with_items: "{{ node_routes }}"
-  when: inventory_hostname in groups.nodes and setNodeRoutes
+  when: inventory_hostname in groups.nodes and set_node_routes
 
 - name: reload network service to apply routes
   service:
     name: network
     state: restarted
-  when: ( inventory_hostname in groups.nodes and setNodeRoutes ) or inventory_hostname in groups.net2_all
+  when: ( inventory_hostname in groups.nodes and set_node_routes ) or inventory_hostname in groups.net2_all
 
 - name: Tidy up hosts file on bastion
   blockinfile:
