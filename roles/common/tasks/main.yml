@@ -24,7 +24,7 @@
   args:
    creates: .set_net2_nodes_routes
   with_items: "{{ net2_node_routes }}"
-  when: inventory_hostname in groups.net2_nodes
+  when: inventory_hostname in groups.nodes_net2
 
 - name: add persistent routes for all net2 instances
   shell: nmcli connection modify "System eth0" +ipv4.routes {{ item }} ipv4.gateway 10.2.1.1
