@@ -1,4 +1,5 @@
-- import_playbook: /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml
+- import_playbook: /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml
+- import_playbook: /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml
 
 - hosts: masters[0]
   roles:

@@ -1,15 +1,28 @@
+- name: Add upstream DNS Servers to bind
+  blockinfile:
+    dest: /etc/named.conf
+    backup: yes
+    insertafter: "session-keyfile"
+    marker: "        /* ANSIBLE MANAGED BLOCK - upstream DNS */"
+    block: |2
+              forward first;
+              forwarders { {{ net2_dns_server[0] }}; };
+  when: inventory_hostname in groups.dns_net2
+
 - name: setup forwarder config 
   blockinfile:
     block: "{{ lookup('template', 'templates/forwarder_zone_config.j2') }}"
     dest: "/etc/named.conf"
     backup: yes
   when: inventory_hostname in groups.dns_net2
+
 - name: Set correct selinux permissions
   seboolean:
     name: named_write_master_zones
     state: yes
     persistent: yes
   when: inventory_hostname in groups.dns_net2
+
 - name: Restart bind
   systemd:
     name: named
