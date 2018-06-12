@@ -73,3 +73,9 @@
   with_items:
     - "{{ infrastructure_node_details.values() }}"
   when: multinetwork
+
+- name: Create 'monitoring' serviceaccount for monitoring use
+  shell: /usr/local/bin/oc project openshift-infra && /usr/local/bin/oc create serviceaccount monitoring
+
+- name: Give 'monitoring' service account correct permissions
+  command: /usr/local/bin/oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:monitoring
