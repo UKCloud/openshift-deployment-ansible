@@ -8,6 +8,8 @@
     list=installed
   register: package_list
 
+# package_list returns json array so json_query below is required to fish relevant data
+
 - name: Get installed atomic-openshift-utils version
   set_fact:
     installed_version: "{{ package_list | json_query(package_filter) }}"

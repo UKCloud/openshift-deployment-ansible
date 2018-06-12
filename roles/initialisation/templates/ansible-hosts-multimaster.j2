@@ -29,7 +29,6 @@ openshift_master_cluster_hostname=console.{{ localDomainSuffix }}
 openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
 
 openshift_release=v{{ openshiftVersion }}
-# Sets minor version. installed_version returns data as an array so index is required
 openshift_image_tag=v{{ installed_version[0] }} 
 
 openshift_set_hostname=true
