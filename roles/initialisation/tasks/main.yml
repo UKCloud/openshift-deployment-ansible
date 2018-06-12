@@ -3,6 +3,17 @@
     name: bind-utils
     state: latest
 
+- name: Get list of installed packages
+  yum:
+    list=installed
+  register: package_list
+
+- name: Get installed atomic-openshift-utils version
+  set_fact:
+    installed_version: "{{ package_list | json_query(package_filter) }}"
+  vars: 
+    package_filter: "results[?name=='atomic-openshift-utils'].version"
+
 - set_fact:
     admin_password: "{{ lookup('env', 'OPENSHIFT_PASSWORD') }}"
 
