@@ -30,6 +30,18 @@
     - openshift
   when: installLogging == True
 
+- name: Add default tolerations to infrastructure namespaces
+  command: /usr/local/bin/oc annotate ns {{ item }} scheduler.alpha.kubernetes.io/defaultTolerations='[{"key":"infra","value":"only","effect":"NoSchedule"}]'
+  with_items:
+    - default
+    - logging
+    - openshift-ansible-service-broker
+    - openshift-infra
+    - openshift-template-service-broker
+    - openshift-web-console
+    - kube-service-catalog
+  when: multinetwork
+
 - name: Create registry.cert file
   local_action: shell cd /home/cloud-user/ocp.{{ domainSuffix }} ; cat fullchain1.pem privkey1.pem > registry.cert
   when: getCertificates == True
