@@ -31,7 +31,7 @@
   when: installLogging == True
 
 - name: Add default tolerations to infrastructure namespaces
-  command: /usr/local/bin/oc annotate ns {{ item }} scheduler.alpha.kubernetes.io/defaultTolerations='[{"key":"infra","value":"only","effect":"NoSchedule"}]'
+  command: /usr/local/bin/oc annotate ns {{ item }} scheduler.alpha.kubernetes.io/defaultTolerations='[{"key":"infra","value":"only","effect":"NoSchedule","operator":"Equal"}]'
   with_items:
     - default
     - logging
