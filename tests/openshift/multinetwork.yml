@@ -51,7 +51,7 @@
     when: multinetwork
 
   - name: Ensure deploy pod doesn't schedule
-    shell: /usr/local/bin/oc describe pod $(oc get pods | grep deploy | awk '{ print $1 }') | grep FailedScheduling
+    shell: /usr/local/bin/oc describe pod $(/usr/local/bin/oc get pods | grep deploy | awk '{ print $1 }') | grep FailedScheduling
     register: pod_status
     retries: 10
     delay: 5
