@@ -20,17 +20,17 @@
   when: inventory_hostname in groups.net2_all
 
 - name: add persistent routes for net2 nodes
-  shell: nmcli connection modify "System eth0" +ipv4.routes "{{ item }} 10.2.1.1" && nmcli c up "System eth0"
+  shell: nmcli connection modify "System eth0" +ipv4.routes "{{ item.route }} {{ item.gateway }}" && nmcli c up "System eth0"
   with_items: "{{ net2_node_routes }}"
   when: inventory_hostname in groups.nodes_net2
 
 - name: add persistent routes for all net2 instances
-  shell: nmcli connection modify "System eth0" +ipv4.routes "{{ item }} 10.2.1.1" && nmcli c up "System eth0"
+  shell: nmcli connection modify "System eth0" +ipv4.routes "{{ item.route }} {{ item.gateway }}" && nmcli c up "System eth0"
   with_items: "{{ net2_routes }}"
   when: inventory_hostname in groups.net2_all
 
 - name: add persistent routes for all nodes
-  shell: nmcli connection modify "System eth0" +ipv4.routes "{{ item }} 10.2.1.1" && nmcli c up "System eth0"
+  shell: nmcli connection modify "System eth0" +ipv4.routes "{{ item.route }} {{ item.gateway }}" && nmcli c up "System eth0"
   with_items: "{{ node_routes }}"
   when: inventory_hostname in groups.nodes and set_node_routes
 
