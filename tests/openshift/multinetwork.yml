@@ -1,3 +1,6 @@
+# This file tests the ability to deploy pods to infrastructure nodes when the correct toleration is given to their namespace.
+# It then verifies that a pod cannot be scheduled once the toleration is removed.
+
 - hosts: masters[0]
   tasks:
 
