@@ -1,0 +1,72 @@
+# This file tests the ability to deploy pods to infrastructure nodes when the correct toleration is given to their namespace.
+# It then verifies that a pod cannot be scheduled once the toleration is removed.
+
+- hosts: masters[0]
+  tasks:
+
+  - name: Create test project
+    command: /usr/local/bin/oc new-project pod-test
+    when: multinetwork
+
+  - name: Apply nodeSelector to project
+    command: /usr/local/bin/oc annotate ns pod-test openshift.io/node-selector="infra=true" --overwrite
+    when: multinetwork
+
+  - name: Apply tolerations to project
+    command: /usr/local/bin/oc annotate ns pod-test scheduler.alpha.kubernetes.io/defaultTolerations='[{"key":"infra","value":"only","effect":"NoSchedule","operator":"Equal"}]'
+    when: multinetwork
+
+  - name: Roll out test app
+    command: /usr/local/bin/oc new-app centos/ruby-22-centos7~https://github.com/openshift/ruby-ex.git
+    when: multinetwork
+
+  - name: Wait until app rolled out successfully
+    command: /usr/local/bin/oc rollout status dc ruby-ex
+    register: app_readiness
+    until: "'successfully rolled out' in app_readiness.stdout"
+    retries: 30
+    delay: 2
+    when: multinetwork
+
+  - name: Confirm pod rolled out to the infra node
+    shell: /usr/local/bin/oc describe pod $(/usr/local/bin/oc get pods | grep -v build | grep -v NAME | awk '{print $1}') | grep Node
+    register: node
+    until: "'infra' in node.stdout"
+    retries: 1
+    delay: 1
+    when: multinetwork
+
+  - name: Clean up app
+    command: /usr/local/bin/oc delete all -l app=ruby-ex
+    delay: 15
+    when: multinetwork
+
+  - name: Remove namespace toleration
+    command: /usr/local/bin/oc annotate ns pod-test scheduler.alpha.kubernetes.io/defaultTolerations='' --overwrite
+    when: multinetwork
+
+  - name: Roll out test app
+    command: /usr/local/bin/oc new-app centos/ruby-22-centos7~https://github.com/openshift/ruby-ex.git
+    delay: 30
+    when: multinetwork
+
+  - name: Ensure deploy pod doesn't schedule
+    shell: /usr/local/bin/oc describe pod $(/usr/local/bin/oc get pods | grep deploy | awk '{ print $1 }') | grep FailedScheduling
+    register: pod_status
+    retries: 10
+    delay: 5
+    until: "'PodToleratesNodeTaints' in pod_status.stdout"
+    when: multinetwork
+
+  - name: Clean up app
+    command: /usr/local/bin/oc delete all -l app=ruby-ex
+    delay: 15
+    when: multinetwork
+
+  - name: Switch to default project
+    command: /usr/local/bin/oc project default
+    when: multinetwork
+
+  - name: Remove pod-test project
+    command: /usr/local/bin/oc delete project pod-test
+    when: multinetwork
