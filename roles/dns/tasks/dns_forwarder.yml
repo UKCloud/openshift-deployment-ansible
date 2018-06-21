@@ -3,7 +3,7 @@
     dest: /etc/named.conf
     backup: yes
     insertafter: "session-keyfile"
-    marker: "        /* ANSIBLE MANAGED BLOCK - upstream DNS */"
+    marker: "        /* {mark} ANSIBLE MANAGED BLOCK - upstream DNS */"
     block: |2
               forward first;
               forwarders { {{ net2_dns_server[0] }}; };
