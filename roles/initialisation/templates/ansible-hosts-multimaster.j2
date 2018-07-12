@@ -99,7 +99,7 @@ openshift_storageclass_parameters={ 'type': 'TIER2', 'availability': 'nova' }
 
 # openshift stats deployment - comment out if no stats deployment is required. this will run on the worker nodes
 openshift_hosted_metrics_deploy=true
-openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ domainSuffix }}/hawkular/metrics
+openshift_metrics_hawkular_hostname=hawkular-metrics.{{ domainSuffix }}
 openshift_hosted_metrics_storage_kind=dynamic
 openshift_metrics_cassandra_pvc_size=10Gi
 # Node selectors for hawkular metrics
