@@ -99,7 +99,7 @@ openshift_storageclass_parameters={ 'type': 'TIER2', 'availability': 'nova' }
 
 # openshift stats deployment - comment out if no stats deployment is required. this will run on the worker nodes
 openshift_hosted_metrics_deploy=true
-openshift_hosted_metrics_public_url=https://hawkular-metrics.{{ domainSuffix }}/hawkular/metrics
+openshift_metrics_hawkular_hostname=hawkular-metrics.{{ domainSuffix }}
 openshift_hosted_metrics_storage_kind=dynamic
 openshift_metrics_cassandra_pvc_size=10Gi
 # Node selectors for hawkular metrics
@@ -128,6 +128,9 @@ openshift_logging_es_nodeselector={"infra":"true"}
 # fix to make the ansible service broker deploy to the correct nodes rather than all or none
 # RH ticket #02020379
 template_service_broker_selector={"infra":"true"}
+
+# Ansible service broker node selector
+ansible_service_broker_node_selector={"infra":"true"}
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
