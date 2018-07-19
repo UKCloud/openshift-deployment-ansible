@@ -45,10 +45,7 @@ openshift_set_node_ip=true
 
 openshift_master_default_subdomain={{ domainSuffix }}
 
-# Set the MTU size for the Docker0 bridge and docker native containers
-#openshift_docker_options="--mtu=1400  --log-driver=journald"
-
-# Send Docker logs to journald
+# Set Docker log driver to write to journald
 openshift_docker_options="--log-driver=journald"
 
 # ROUTER
