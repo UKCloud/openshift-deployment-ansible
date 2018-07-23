@@ -30,15 +30,17 @@
   when: inventory_hostname in groups.net2_all
 
 - name: add persistent routes for all nodes
+  debugger: always
   shell: nmcli connection modify "System eth0" +ipv4.routes "{{ item.route }} {{ item.gateway }}" && nmcli c up "System eth0"
   with_items: "{{ node_routes }}"
-  when: inventory_hostname in groups.nodes and set_node_routes
+  when: ( inventory_hostname in groups.nodes or inventory_hostname in groups.loadbalancers_internet_dataplane ) and set_node_routes
 
 - name: reload network service to apply routes
+  debugger: always
   service:
     name: network
     state: restarted
-  when: ( inventory_hostname in groups.nodes and set_node_routes ) or inventory_hostname in groups.net2_all
+  when: ( ( inventory_hostname in groups.nodes or inventory_hostname in groups.loadbalancers_internet_dataplane ) and set_node_routes ) or inventory_hostname in groups.net2_all
 
 - name: Tidy up hosts file on bastion
   blockinfile:
