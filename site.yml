@@ -4,6 +4,7 @@
 - import_playbook: all_servers.yml
 - import_playbook: certbot.yml
 - import_playbook: openshift.yml
+- import_playbook: backup.yml
 # Upgrade bastion being removed for now
 # due to package versioning issues with
 # aggregated logging.

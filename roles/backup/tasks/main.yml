@@ -1,0 +1,15 @@
+- name: Copy /etc/origin/master directory and tar it
+  archive:
+    path: /etc/origin/master
+    dest: /home/cloud-user/master.tar
+    format: tar
+  when: inventory_hostname == groups.masters[0]
+
+- name: Copy /etc/etcd/ca directory and tar it
+  archive:
+    path: /etc/etcd/
+    dest: /home/cloud-user/etcd.tar
+    format: tar
+  when: inventory_hostname == groups.masters[0]
+
+- fetch
