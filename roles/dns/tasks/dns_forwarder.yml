@@ -6,7 +6,7 @@
     marker: "        /* {mark} ANSIBLE MANAGED BLOCK - upstream DNS */"
     block: |2
               forward first;
-              forwarders { {{ net2_dns_server[0] }}; };
+              forwarders { {{ net2_dns_server|join('; ') }}; };
   when: inventory_hostname in groups.dns_net2
 
 - name: setup forwarder config 
