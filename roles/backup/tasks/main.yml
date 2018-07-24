@@ -12,4 +12,16 @@
     format: tar
   when: inventory_hostname == groups.masters[0]
 
-- fetch
+- name: Fetch tar files back to bastion (master)
+  fetch: 
+    src: /home/cloud-user/master.tar
+    dest: /home/cloud-user/master.tar
+    flat: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Fetch tar files back to bastion (etcd)
+  fetch:
+    src: /home/cloud-user/etcd.tar
+    dest: /home/cloud-user/etcd.tar
+    flat: yes
+  when: inventory_hostname == groups.masters[0]
