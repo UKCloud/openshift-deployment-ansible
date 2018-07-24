@@ -50,7 +50,7 @@
     marker: "        /* {mark} ANSIBLE MANAGED BLOCK - upstream DNS */"
     block: |2
               forward first;
-              forwarders { {{ external_dns[0] }}; };
+              forwarders { {{ external_dns|join('; ') }}; };
   when: inventory_hostname in groups.dns
 
 - name: Enable bind and start service
