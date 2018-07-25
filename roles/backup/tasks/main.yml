@@ -25,3 +25,27 @@
     dest: /home/cloud-user/etcd.tar
     flat: yes
   when: inventory_hostname == groups.masters[0]
+
+- name: Send master tar file back to bucket in S3
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: "{{ s3bucketname }}"
+    object: "/backups/master.tar"
+    src: "/home/cloud-user/master.tar"
+    mode: put
+    rgw: true
+  when: inventory_hostname == 'localhost'
+
+- name: Send etcd tar file back to bucket in S3
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: "{{ s3bucketname }}"
+    object: "/backups/etcd.tar"
+    src: "/home/cloud-user/etcd.tar"
+    mode: put
+    rgw: true
+  when: inventory_hostname == 'localhost'
