@@ -42,7 +42,7 @@
 
 - name: Lock down epel repo to pip only
   lineinfile: 
-    path: /etc/yum.repos.d/epel/repo
+    path: /etc/yum.repos.d/epel.repo
     insertafter: '^enabled=1'
     line: includepkgs=python2-pip*
   become: yes
