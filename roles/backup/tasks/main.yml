@@ -31,6 +31,13 @@
   yum:
     name: python-pip
     state: latest
+  become: yes
+  when: inventory_hostname == 'localhost' and not epel_installed
+
+- name: Install boto3 with pip
+  pip:
+    name: boto3
+  become: true
   when: inventory_hostname == 'localhost' and not epel_installed
 
 - name: Lock down epel repo to pip only
