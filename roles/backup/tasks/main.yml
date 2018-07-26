@@ -1,3 +1,44 @@
+- name: Download epel repo rpm
+  get_url:
+    url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    dest: /tmp/epel-release-latest-7.noarch.rpm
+  when: inventory_hostname == 'localhost'
+
+- name: Set permissions on downloaded rpm.
+  file:
+    path: /tmp/epel-release-latest-7.noarch.rpm
+    mode: 0777
+  when: inventory_hostname == 'localhost'
+
+- name: Install epel repo
+  yum:
+    name: /tmp/epel-release-latest-7.noarch.rpm
+    state: present
+  become: yes
+  become_method: sudo
+  when: inventory_hostname == 'localhost'
+
+- name: Remove epel file
+  file:
+    path: /tmp/epel-release-latest-7.noarch.rpm
+    state: absent
+  when: inventory_hostname == 'localhost'
+
+- name: Install pip
+  yum:
+    name: python-pip
+    state: latest
+  when: inventory_hostname == 'localhost'
+
+- name: Lock down epel repo to pip only
+  lineinfile: 
+    path: /etc/yum.repos.d/epel/repo
+    insertafter: '^enabled=1'
+    line: includepkgs=python2-pip*
+  become: yes
+  become_method: sudo
+  when: inventory_hostname == 'localhost'
+
 - name: Copy /etc/origin/master directory and tar it
   archive:
     path: /etc/origin/master
@@ -32,7 +73,7 @@
     aws_secret_key: "{{ s3secretkey }}"
     s3_url: "https://{{ s3regionendpoint }}"
     bucket: "{{ s3bucketname }}"
-    object: "/backups/master.tar"
+    object: "/backups/master.tar-{{ ansible_date_time.date }}"
     src: "/home/cloud-user/master.tar"
     mode: put
     rgw: true
@@ -44,8 +85,20 @@
     aws_secret_key: "{{ s3secretkey }}"
     s3_url: "https://{{ s3regionendpoint }}"
     bucket: "{{ s3bucketname }}"
-    object: "/backups/etcd.tar"
+    object: "/backups/etcd.tar-{{ ansible_date_time.date }}"
     src: "/home/cloud-user/etcd.tar"
+    mode: put
+    rgw: true
+  when: inventory_hostname == 'localhost'
+
+- name: Send ansible hosts file back to bucket in S3
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: "{{ s3bucketname }}"
+    object: "/backups/hostfile-{{ ansible_date_time.date }}"
+    src: "/usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts"
     mode: put
     rgw: true
   when: inventory_hostname == 'localhost'
