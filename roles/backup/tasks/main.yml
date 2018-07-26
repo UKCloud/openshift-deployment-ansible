@@ -1,14 +1,23 @@
+- name: Check if epel file exists and register var
+  stat:
+    path: /tmp/epel-release-latest-7.noarch.rpm
+  register: epel_file_state
+
+- name: Create variable for epel_file_state.stat.exists
+  set_fact:
+    epel_installed: "{{ epel_file_state.stat.exists }}"
+
 - name: Download epel repo rpm
   get_url:
     url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     dest: /tmp/epel-release-latest-7.noarch.rpm
-  when: inventory_hostname == 'localhost'
+  when: inventory_hostname == 'localhost' and not epel_installed
 
 - name: Set permissions on downloaded rpm.
   file:
     path: /tmp/epel-release-latest-7.noarch.rpm
     mode: 0777
-  when: inventory_hostname == 'localhost'
+  when: inventory_hostname == 'localhost' and not epel_installed
 
 - name: Install epel repo
   yum:
@@ -16,19 +25,13 @@
     state: present
   become: yes
   become_method: sudo
-  when: inventory_hostname == 'localhost'
-
-- name: Remove epel file
-  file:
-    path: /tmp/epel-release-latest-7.noarch.rpm
-    state: absent
-  when: inventory_hostname == 'localhost'
+  when: inventory_hostname == 'localhost' and not epel_installed
 
 - name: Install pip
   yum:
     name: python-pip
     state: latest
-  when: inventory_hostname == 'localhost'
+  when: inventory_hostname == 'localhost' and not epel_installed
 
 - name: Lock down epel repo to pip only
   lineinfile: 
@@ -37,7 +40,7 @@
     line: includepkgs=python2-pip*
   become: yes
   become_method: sudo
-  when: inventory_hostname == 'localhost'
+  when: inventory_hostname == 'localhost' and not epel_installed
 
 - name: Copy /etc/origin/master directory and tar it
   archive:
@@ -67,6 +70,13 @@
     flat: yes
   when: inventory_hostname == groups.masters[0]
 
+- name: tar deployment code directory
+  archive:
+    path: /usr/share/ansible/openshift-deployment-ansible
+    dest: /home/cloud-user/deployment-code.tar
+    flat: yes
+  when: inventory_hostname == 'localhost'
+
 - name: Send master tar file back to bucket in S3
   aws_s3:
     aws_access_key: "{{ s3accesskey }}"
@@ -91,14 +101,14 @@
     rgw: true
   when: inventory_hostname == 'localhost'
 
-- name: Send ansible hosts file back to bucket in S3
+- name: Send ansible deployment code tar file back to bucket in S3
   aws_s3:
     aws_access_key: "{{ s3accesskey }}"
     aws_secret_key: "{{ s3secretkey }}"
     s3_url: "https://{{ s3regionendpoint }}"
     bucket: "{{ s3bucketname }}"
-    object: "/backups/hostfile-{{ ansible_date_time.date }}"
-    src: "/usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts"
+    object: "/backups/deployment-code.tar-{{ ansible_date_time.date }}"
+    src: "/home/cloud-user/deployment-code.tar"
     mode: put
     rgw: true
   when: inventory_hostname == 'localhost'
