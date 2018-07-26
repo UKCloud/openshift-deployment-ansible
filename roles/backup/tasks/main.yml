@@ -81,7 +81,7 @@
   archive:
     src: /usr/share/ansible/openshift-deployment-ansible
     dest: /home/cloud-user/deployment-code.tar
-    flat: yes
+    format: tar
   when: inventory_hostname == 'localhost'
 
 - name: Send master tar file back to bucket in S3
