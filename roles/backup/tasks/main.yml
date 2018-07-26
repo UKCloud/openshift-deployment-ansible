@@ -79,7 +79,7 @@
 
 - name: tar deployment code directory
   archive:
-    path: /usr/share/ansible/openshift-deployment-ansible
+    src: /usr/share/ansible/openshift-deployment-ansible
     dest: /home/cloud-user/deployment-code.tar
     flat: yes
   when: inventory_hostname == 'localhost'
