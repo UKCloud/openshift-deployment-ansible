@@ -32,7 +32,7 @@
 - name: add persistent routes for all nodes
   shell: nmcli connection modify "System eth0" +ipv4.routes "{{ item.route }} {{ item.gateway }}" && nmcli c up "System eth0"
   with_items: "{{ node_routes }}"
-  when: set_node_route and inventory_hostname != 'localhost'
+  when: set_node_routes and inventory_hostname != 'localhost'
 
 - name: reload network service to apply routes
   service:
