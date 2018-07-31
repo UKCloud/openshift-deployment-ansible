@@ -119,7 +119,8 @@ openshift_logging_master_url=https://console.{{ localDomainSuffix }}:8443
 openshift_logging_use_journal=true
 openshift_logging_use_ops=false
 openshift_logging_es_cluster_size={{ loggingClusterSize }}
-openshift_logging_elasticsearch_pvc_size="20Gi"
+openshift_logging_es_pvc_size=20Gi
+openshift_logging_curator_default_days=14
 # Node selectors for aggregated logging
 openshift_logging_curator_nodeselector={"infra":"true"}
 openshift_logging_kibana_nodeselector={"infra":"true"}
