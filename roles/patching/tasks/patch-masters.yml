@@ -1,0 +1,20 @@
+- name: Take master[0] out of haproxy backend
+  lineinfile:
+    dest: /etc/haproxy/haproxy.cfg
+    regexp: '^\s*server\s*{{ groups.masters[0] }}.*$'
+    line: '          #server      {{ groups.masters[0] }} {{ hostvars[groups["masters"][0]]["openshift_ip"] }}:8443 check'
+  when: inventory_hostname in groups.loadbalancers_controlplane
+
+- name: Restart haproxy service
+  systemd:
+    name: haproxy
+    state: restarted
+  when: inventory_hostname in groups.loadbalancers_controlplane
+
+- name: Patch master[0]
+  atomic_host:
+    revision: latest
+  when: inventory_hostname == groups.masters[0]
+
+
+  
