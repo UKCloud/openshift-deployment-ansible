@@ -46,7 +46,7 @@ openshift_set_node_ip=true
 openshift_master_default_subdomain={{ domainSuffix }}
 
 # Set Docker log driver to write to journald
-openshift_docker_options="--log-driver=journald"
+openshift_docker_options="--log-driver=json-file --log-opt max-size=1M --log-opt max-file=10"
 
 # ROUTER
 openshift_hosted_router_selector='router=true'
