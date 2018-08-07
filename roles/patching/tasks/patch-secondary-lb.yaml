@@ -1,0 +1,32 @@
+- name: Upgrade secondary LBs
+  yum: 
+    name: "*"
+    state: latest 
+  when: inventory_hostname == loadbalancers_controlplane[0] or inventory_hostname == loadbalancers_internet_dataplane[0] or (multinetwork and inventory_hostname == loadbalancers_net2_dataplane[0])
+
+- name: Reboot secondary LBs
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+  when: inventory_hostname == loadbalancers_controlplane[0] or inventory_hostname == loadbalancers_internet_dataplane[0] or (multinetwork and inventory_hostname == loadbalancers_net2_dataplane[0])
+
+- name: Wait for connection
+  wait_for_connection: 
+    delay: 30
+    sleep: 5
+    connect_timeout: 10
+    timeout: 300
+  when: inventory_hostname == loadbalancers_controlplane[0] or inventory_hostname == loadbalancers_internet_dataplane[0] or (multinetwork and inventory_hostname == loadbalancers_net2_dataplane[0])
+
+- name: Ensure keepalived and haproxy are running
+  systemd:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - haproxy
+    - keepalived
+  when: inventory_hostname == loadbalancers_controlplane[0] or inventory_hostname == loadbalancers_internet_dataplane[0] or (multinetwork and inventory_hostname == loadbalancers_net2_dataplane[0])
+    
+
+
+
