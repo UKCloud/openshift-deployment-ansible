@@ -16,5 +16,33 @@
     revision: latest
   when: inventory_hostname == groups.masters[0]
 
+- name: Reboot master[0]
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+  when: inventory_hostname == groups.masters[0]
 
+- name: Wait for connection
+  wait_for_connection:
+    delay: 30
+    sleep: 5
+    connect_timeout: 10
+    timeout: 300
+  when: inventory_hostname == groups.masters[0]
+
+- name: Wait until master[0] is in 'Ready' state
+  shell: /usr/local/bin/oc get node | grep {{ groups.masters[0] }} | awk '{ print $2 }'
+  register: status
+  until: status.stdout == "Ready"
+  delay: 5
+  retries: 10
+  when: inventory_hostname == groups.masters[1]
+
+- name: Put master[0] back in haproxy backend
+  lineinfile:
+    dest: /etc/haproxy/haproxy.cfg
+    regexp: '^\s*#server\s*{{ groups.masters[0] }}.*$'
+    line: '          server      {{ groups.masters[0] }} {{ hostvars[groups["masters"][0]]["openshift_ip"] }}:8443 check'
+  when: inventory_hostname in groups.loadbalancers_controlplane
+   
   
