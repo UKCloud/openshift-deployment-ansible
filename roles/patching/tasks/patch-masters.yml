@@ -1,8 +1,8 @@
 - name: Take master[0] out of haproxy backend
   lineinfile:
     dest: /etc/haproxy/haproxy.cfg
-    regexp: '^\s*server\s*{{ groups.masters[0] }}.*$'
-    line: '          #server      {{ groups.masters[0] }} {{ hostvars[groups["masters"][0]]["openshift_ip"] }}:8443 check'
+    regexp: '^\s*server\s*{{ master_hostname }}.*$'
+    line: '          #server      {{ master_hostname }} {{ master_ip }}:8443 check'
   when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Restart haproxy service
@@ -14,35 +14,47 @@
 - name: Patch master[0]
   atomic_host:
     revision: latest
-  when: inventory_hostname == groups.masters[0]
+  when: inventory_hostname == master_hostname
 
 - name: Reboot master[0]
   shell: "sleep 5 && reboot"
   async: 1
   poll: 0
-  when: inventory_hostname == groups.masters[0]
+  when: inventory_hostname == master_hostname
 
 - name: Wait for connection
   wait_for_connection:
     delay: 30
     sleep: 5
     connect_timeout: 10
-    timeout: 300
-  when: inventory_hostname == groups.masters[0]
+    timeout: 600
+  when: inventory_hostname == master_hostname
 
 - name: Wait until master[0] is in 'Ready' state
-  shell: /usr/local/bin/oc get node | grep {{ groups.masters[0] }} | awk '{ print $2 }'
+  shell: /usr/local/bin/oc get node | grep {{ master_hostname }} | awk '{ print $2 }'
   register: status
   until: status.stdout == "Ready"
   delay: 5
-  retries: 10
-  when: inventory_hostname == groups.masters[1]
+  retries: 15
+  when: inventory_hostname == command_master
+
+- pause:
+    prompt: "Pausing for a minute"
+    minutes: 1
+
+- name: Re-apply nova zone lable
+  shell: /usr/local/bin/oc label node "{{ master_hostname }}" failure-domain.beta.kubernetes.io/zone=nova --overwrite
+  when: inventory_hostname == command_master
 
 - name: Put master[0] back in haproxy backend
   lineinfile:
     dest: /etc/haproxy/haproxy.cfg
-    regexp: '^\s*#server\s*{{ groups.masters[0] }}.*$'
-    line: '          server      {{ groups.masters[0] }} {{ hostvars[groups["masters"][0]]["openshift_ip"] }}:8443 check'
+    regexp: '^\s*#server\s*{{ master_hostname }}.*$'
+    line: '          server     {{ master_hostname }} {{ master_ip }}:8443 check'
   when: inventory_hostname in groups.loadbalancers_controlplane
-   
-  
+
+- name: Restart haproxy service
+  systemd:
+    name: haproxy
+    state: restarted
+  when: inventory_hostname in groups.loadbalancers_controlplane
