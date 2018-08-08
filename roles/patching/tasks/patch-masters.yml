@@ -1,4 +1,4 @@
-- name: Take master[0] out of haproxy backend
+- name: Take master out of haproxy backend
   lineinfile:
     dest: /etc/haproxy/haproxy.cfg
     regexp: '^\s*server\s*{{ master_hostname }}.*$'
@@ -11,12 +11,12 @@
     state: restarted
   when: inventory_hostname in groups.loadbalancers_controlplane
 
-- name: Patch master[0]
+- name: Patch master
   atomic_host:
     revision: latest
   when: inventory_hostname == master_hostname
 
-- name: Reboot master[0]
+- name: Reboot master
   shell: "sleep 5 && reboot"
   async: 1
   poll: 0
@@ -30,7 +30,7 @@
     timeout: 600
   when: inventory_hostname == master_hostname
 
-- name: Wait until master[0] is in 'Ready' state
+- name: Wait until master is in 'Ready' state
   shell: /usr/local/bin/oc get node | grep {{ master_hostname }} | awk '{ print $2 }'
   register: status
   until: status.stdout == "Ready"
@@ -46,7 +46,7 @@
   shell: /usr/local/bin/oc label node "{{ master_hostname }}" failure-domain.beta.kubernetes.io/zone=nova --overwrite
   when: inventory_hostname == command_master
 
-- name: Put master[0] back in haproxy backend
+- name: Put master back in haproxy backend
   lineinfile:
     dest: /etc/haproxy/haproxy.cfg
     regexp: '^\s*#server\s*{{ master_hostname }}.*$'
