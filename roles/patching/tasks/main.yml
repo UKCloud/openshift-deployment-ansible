@@ -17,3 +17,9 @@
     master_hostname: "{{ groups.masters[2] }}"
     master_ip:  "{{ hostvars[groups['masters'][2]]['openshift_ip'] }}"
     command_master: "{{ groups.masters[0] }}"
+
+- name: Create worker patch file off template
+  template:
+    src: /usr/share/ansible/openshift-deployment-ansible/roles/patching/templates/workers.j2
+    dest: /usr/share/ansible/openshift-deployment-ansible/roles/patching/tasks/patch-workers.yml
+  when: inventory_hostname == 'localhost'
