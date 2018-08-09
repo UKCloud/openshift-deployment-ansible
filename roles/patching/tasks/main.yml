@@ -1,3 +1,5 @@
+- include_tasks: backup-etcd.yml
+
 - include_tasks: patch-lbs.yml
 
 - include_tasks: patch-masters.yml
