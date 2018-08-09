@@ -22,4 +22,7 @@
   template:
     src: /usr/share/ansible/openshift-deployment-ansible/roles/patching/templates/workers.j2
     dest: /usr/share/ansible/openshift-deployment-ansible/roles/patching/tasks/patch-workers.yml
+    force: yes
   when: inventory_hostname == 'localhost'
+
+- include_tasks: patch-workers.yml
