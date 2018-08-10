@@ -1,3 +1,30 @@
+- name: Create patch directory on all hosts to store package lists
+  file:
+    path: /home/cloud-user/patching
+    state: directory
+    owner: cloud-user
+    mode: 0755
+    
+- name: Write output of rpm -qa to file on all hosts
+  shell: rpm -qa | sort > /home/cloud-user/patching/rpm-list-"{{ ansible_date_time.date }}"
+
+- name: Backup htpasswd file
+  copy:
+    src: /etc/origin/master/htpasswd
+    dest: /home/cloud-user/htpasswd.bak
+    owner: cloud-user
+    group: cloud-user
+    mode: 0744
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Fetch htpasswd back to bastion
+  fetch:
+    src: /home/cloud-user/htpasswd.bak
+    dest: /home/cloud-user/htpasswd.bak
+    flat: yes
+  when: inventory_hostname == groups.masters[0]
+
 - name: Backup etcd data dir
   shell: docker exec etcd_container etcdctl backup --data-dir /var/lib/etcd --backup-dir /var/lib/etcd.bak
   become: yes
@@ -90,14 +117,26 @@
   become_method: sudo
   when: inventory_hostname == 'localhost' and not epel_installed
 
-- name: Send pre-patching backup to bucket in S3
+- name: Send pre-patching etcd backup to bucket in S3
   aws_s3:
     aws_access_key: "{{ s3accesskey }}"
     aws_secret_key: "{{ s3secretkey }}"
     s3_url: "https://{{ s3regionendpoint }}"
     bucket: "{{ s3bucketname }}"
-    object: "/backups/patching/etcd.bak.tar-{{ ansible_date_time.date }}"
+    object: "/backups/patching/etcd/etcd-{{ ansible_date_time.date }}.tar"
     src: "/home/cloud-user/etcd.bak.tar"
+    mode: put
+    rgw: true
+  when: inventory_hostname == 'localhost'
+
+- name Send htpasswd backup to bucket in S3
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: "{{ s3bucketname }}"
+    object: "/backups/patching/etcd/etcd-{{ ansible_date_time.date }}.tar"
+    src: "/home/cloud-user/htpasswd.bak"
     mode: put
     rgw: true
   when: inventory_hostname == 'localhost'
