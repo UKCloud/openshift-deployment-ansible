@@ -1,0 +1,90 @@
+- name: Copy /etc/origin/master directory and tar it
+  archive:
+    path: /etc/origin/master
+    dest: /home/cloud-user/master.tar
+    format: tar
+  when: inventory_hostname == groups.masters[0]
+
+- name: Copy /etc/etcd directory and tar it
+  archive:
+    path: /etc/etcd/
+    dest: /home/cloud-user/etcd.tar
+    format: tar
+  when: inventory_hostname == groups.masters[0]
+
+- name: Fetch tar files back to bastion (master)
+  fetch:
+    src: /home/cloud-user/master.tar
+    dest: /home/cloud-user/master.tar
+    flat: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Fetch tar files back to bastion (etcd)
+  fetch:
+    src: /home/cloud-user/etcd.tar
+    dest: /home/cloud-user/etcd.tar
+    flat: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: tar deployment code directory
+  archive:
+    path: /usr/share/ansible/openshift-deployment-ansible
+    dest: /home/cloud-user/deployment-code.tar
+    format: tar
+  when: inventory_hostname == 'localhost'
+
+- name: Send master tar file back to bucket in S3
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: "{{ s3bucketname }}"
+    object: "/backups/node-recovery/master.tar-{{ ansible_date_time.date }}"
+    src: "/home/cloud-user/master.tar"
+    mode: put
+    rgw: true
+  when: inventory_hostname == 'localhost'
+
+- name: Send etcd tar file back to bucket in S3
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: "{{ s3bucketname }}"
+    object: "/backups/node-recovery/etcd.tar-{{ ansible_date_time.date }}"
+    src: "/home/cloud-user/etcd.tar"
+    mode: put
+    rgw: true
+  when: inventory_hostname == 'localhost'
+
+- name: Send ansible deployment code tar file back to bucket in S3
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: "{{ s3bucketname }}"
+    object: "/backups/node-recovery/deployment-code.tar-{{ ansible_date_time.date }}"
+    src: "/home/cloud-user/deployment-code.tar"
+    mode: put
+    rgw: true
+  when: inventory_hostname == 'localhost'
+
+- name: Clean up tar files from bastion
+  file:
+    path: /home/cloud-user/"{{ item }}"
+    state: absent
+  with_items:
+    - master.tar
+    - etcd.tar
+    - deployment-code.tar
+  when: inventory_hostname == 'localhost'
+
+- name: Clean up tar files from master
+  file:
+    path: /home/cloud-user/"{{ item }}"
+    state: absent
+  with_items:
+    - master.tar
+    - etcd.tar
+  when: inventory_hostname == groups.masters[0]
+    
