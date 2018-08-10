@@ -1,0 +1,68 @@
+- name: Backup etcd data dir
+  shell: docker exec etcd_container etcdctl backup --data-dir /var/lib/etcd --backup-dir /var/lib/etcd.bak
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Backup etcd db
+  shell: docker exec etcd_container cp /var/lib/etcd/member/snap/db /var/lib/etcd.bak/member/snap/db
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Copy backup files from container to host
+  shell: docker cp etcd_container:/var/lib/etcd.bak /home/cloud-user/etcd.bak
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Clean up backup file in container
+  shell: docker exec etcd_container rm -rf /var/lib/etcd.bak
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Change permissions of backup
+  file:
+    path: /home/cloud-user/etcd.bak
+    owner: cloud-user
+    group: cloud-user
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: tar etcd backup
+  archive:
+    path: /home/cloud-user/etcd.bak
+    dest: /home/cloud-user/etcd.bak.tar
+    format: tar
+  when: inventory_hostname == groups.masters[0]
+
+- name: Fetch tar file back to bastion
+  fetch:
+    src: /home/cloud-user/etcd.bak.tar
+    dest: /home/cloud-user/etcd.bak.tar
+    flat: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Send pre-patching etcd backup to bucket in S3
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: "{{ s3bucketname }}"
+    object: "/backups/etcd-restore/etcd-{{ ansible_date_time.date }}.tar"
+    src: "/home/cloud-user/etcd.bak.tar"
+    mode: put
+    rgw: true
+  when: inventory_hostname == 'localhost'
+
+- name: Clean up file from bastion
+  file:
+    path: /home/cloud-user/etcd.bak.tar
+    state: absent
+  when: inventory_hostname == 'localhost'
+
+- name: Clean up file from master
+  file:
+    path: /home/cloud-user/"{{ item }}"
+    state: abesent
+  with_items: 
+    - etcd.bak
+    - etcd.bak.tar  
+

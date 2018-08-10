@@ -1,0 +1,40 @@
+- name: Backup htpasswd file
+  copy:
+    src: /etc/origin/master/htpasswd
+    dest: /home/cloud-user/htpasswd.bak
+    owner: cloud-user
+    group: cloud-user
+    mode: 0744
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Fetch htpasswd back to bastion
+  fetch:
+    src: /home/cloud-user/htpasswd.bak
+    dest: /home/cloud-user/htpasswd.bak
+    flat: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Send htpasswd backup to bucket in S3
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: "{{ s3bucketname }}"
+    object: "/backups/patching/etcd/etcd-{{ ansible_date_time.date }}.tar"
+    src: "/home/cloud-user/htpasswd.bak"
+    mode: put
+    rgw: true
+  when: inventory_hostname == 'localhost'
+
+- name: Clean up htpasswd backup on bastion
+  file:
+    path: /home/cloud-user/htpasswd.bak
+    state: absent
+  when: inventory_hostname == 'localhost'
+
+- name: Clean up htpasswd backup on master
+  file:
+    path: /home/cloud-user/htpasswd.bak
+    state: absent
+  when: inventory_hostname == 'localhost'
