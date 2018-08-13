@@ -72,9 +72,11 @@ backend atomic-openshift-router-http
       server     {{ hostname }} {{ ip }}:80 check
     {% endfor %}
     {% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}
+    {% if groups.nodes_net2 |length > 0 %}
     {% for ip, hostname in worker_details_net2.items() %}
       server     {{ hostname }} {{ ip }}:80 check
     {% endfor %}
+    {% endif %}
     {% else %}
     {% for ip, hostname in infrastructure_node_details.items() %}
       server     {{ hostname }} {{ ip }}:80 check
@@ -102,9 +104,11 @@ backend atomic-openshift-router-ssl
       server     {{ hostname }} {{ ip }}:443 check
     {% endfor %}
     {% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}
+    {% if groups.nodes_net2 |length > 0 %}
     {% for ip, hostname in worker_details_net2.items() %}
       server     {{ hostname }} {{ ip }}:443 check
     {% endfor %}
+    {% endif %}
     {% else %}
     {% for ip, hostname in infrastructure_node_details.items() %}
       server     {{ hostname }} {{ ip }}:443 check
