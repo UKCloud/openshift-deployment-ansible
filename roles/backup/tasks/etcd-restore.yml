@@ -57,7 +57,7 @@
   when: inventory_hostname == 'localhost'
 
 - name: Clean up file from master
-  command: rm -f /home/cloud-user/{{ item }}
+  command: rm -rf /home/cloud-user/{{ item }}
   with_items:
     - etcd.bak
     - etcd.bak.tar
