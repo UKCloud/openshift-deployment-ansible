@@ -40,7 +40,7 @@
     flat: yes
   when: inventory_hostname == groups.masters[0]
 
-- name: Send pre-patching etcd backup to bucket in S3
+- name: Send etcd data backup to bucket in S3
   aws_s3:
     aws_access_key: "{{ s3accesskey }}"
     aws_secret_key: "{{ s3secretkey }}"
@@ -54,15 +54,16 @@
 
 - name: Clean up file from bastion
   file:
-    path: /home/cloud-user/etcd.bak.tar
+    path: '/home/cloud-user/etcd.bak.tar'
     state: absent
   when: inventory_hostname == 'localhost'
 
 - name: Clean up file from master
   file:
-    path: /home/cloud-user/"{{ item }}"
+    path: '/home/cloud-user/"{{ item }}"'
     state: absent
   with_items:
     - etcd.bak
     - etcd.bak.tar
+ become: yes
  when: inventory_hostname == groups.masters[0]

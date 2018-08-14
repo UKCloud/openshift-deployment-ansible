@@ -30,12 +30,12 @@
 
 - name: Clean up htpasswd backup on bastion
   file:
-    path: /home/cloud-user/htpasswd.bak
+    path: '/home/cloud-user/htpasswd.bak'
     state: absent
   when: inventory_hostname == 'localhost'
 
 - name: Clean up htpasswd backup on master
   file:
-    path: /home/cloud-user/htpasswd.bak
+    path: '/home/cloud-user/htpasswd.bak'
     state: absent
   when: inventory_hostname == groups.masters[0]
