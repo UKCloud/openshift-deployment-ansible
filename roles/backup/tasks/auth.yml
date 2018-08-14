@@ -22,7 +22,7 @@
     aws_secret_key: "{{ s3secretkey }}"
     s3_url: "https://{{ s3regionendpoint }}"
     bucket: "{{ s3bucketname }}"
-    object: "/backups/patching/etcd/etcd-{{ ansible_date_time.date }}.tar"
+    object: "/backups/htpasswd.bak"
     src: "/home/cloud-user/htpasswd.bak"
     mode: put
     rgw: true
@@ -38,4 +38,4 @@
   file:
     path: /home/cloud-user/htpasswd.bak
     state: absent
-  when: inventory_hostname == 'localhost'
+  when: inventory_hostname == groups.masters[0]

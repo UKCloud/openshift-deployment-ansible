@@ -46,7 +46,7 @@
     aws_secret_key: "{{ s3secretkey }}"
     s3_url: "https://{{ s3regionendpoint }}"
     bucket: "{{ s3bucketname }}"
-    object: "/backups/etcd-restore/etcd-{{ ansible_date_time.date }}.tar"
+    object: "/backups/etcd-data-{{ ansible_date_time.date }}.tar"
     src: "/home/cloud-user/etcd.bak.tar"
     mode: put
     rgw: true
@@ -62,7 +62,7 @@
   file:
     path: /home/cloud-user/"{{ item }}"
     state: absent
-  with_items: 
+  with_items:
     - etcd.bak
-    - etcd.bak.tar  
-
+    - etcd.bak.tar
+ when: inventory_hostname == groups.masters[0]

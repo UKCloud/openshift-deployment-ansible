@@ -39,7 +39,7 @@
     aws_secret_key: "{{ s3secretkey }}"
     s3_url: "https://{{ s3regionendpoint }}"
     bucket: "{{ s3bucketname }}"
-    object: "/backups/node-recovery/master.tar-{{ ansible_date_time.date }}"
+    object: "/backups/master.tar-{{ ansible_date_time.date }}"
     src: "/home/cloud-user/master.tar"
     mode: put
     rgw: true
@@ -51,7 +51,7 @@
     aws_secret_key: "{{ s3secretkey }}"
     s3_url: "https://{{ s3regionendpoint }}"
     bucket: "{{ s3bucketname }}"
-    object: "/backups/node-recovery/etcd.tar-{{ ansible_date_time.date }}"
+    object: "/backups/etcd-conf-dir.tar-{{ ansible_date_time.date }}"
     src: "/home/cloud-user/etcd.tar"
     mode: put
     rgw: true
@@ -63,7 +63,7 @@
     aws_secret_key: "{{ s3secretkey }}"
     s3_url: "https://{{ s3regionendpoint }}"
     bucket: "{{ s3bucketname }}"
-    object: "/backups/node-recovery/deployment-code.tar-{{ ansible_date_time.date }}"
+    object: "/backups/deployment-code.tar-{{ ansible_date_time.date }}"
     src: "/home/cloud-user/deployment-code.tar"
     mode: put
     rgw: true
