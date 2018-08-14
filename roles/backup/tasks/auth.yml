@@ -29,13 +29,10 @@
   when: inventory_hostname == 'localhost'
 
 - name: Clean up htpasswd backup on bastion
-  file:
-    path: '/home/cloud-user/htpasswd.bak'
-    state: absent
+  shell: rm -f /home/cloud-user/htpasswd.bak
   when: inventory_hostname == 'localhost'
 
 - name: Clean up htpasswd backup on master
-  file:
-    path: '/home/cloud-user/htpasswd.bak'
-    state: absent
+  shell: rm -f /home/cloud-user/htpasswd.bak
+  become: true
   when: inventory_hostname == groups.masters[0]

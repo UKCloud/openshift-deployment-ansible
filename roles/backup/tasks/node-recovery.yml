@@ -70,21 +70,19 @@
   when: inventory_hostname == 'localhost'
 
 - name: Clean up tar files from bastion
-  file:
-    path: /home/cloud-user/"{{ item }}"
-    state: absent
+  command: rm -f /home/cloud-user/{{ item }}
   with_items:
     - master.tar
     - etcd.tar
     - deployment-code.tar
+  become: true
   when: inventory_hostname == 'localhost'
 
 - name: Clean up tar files from master
-  file:
-    path: /home/cloud-user/"{{ item }}"
-    state: absent
+  command: rm -f /home/cloud-user/{{ item }}
   with_items:
     - master.tar
     - etcd.tar
+  become: true
   when: inventory_hostname == groups.masters[0]
     

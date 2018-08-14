@@ -53,17 +53,13 @@
   when: inventory_hostname == 'localhost'
 
 - name: Clean up file from bastion
-  file:
-    path: '/home/cloud-user/etcd.bak.tar'
-    state: absent
+  command: rm -f /home/cloud-user/etcd.bak.tar
   when: inventory_hostname == 'localhost'
 
 - name: Clean up file from master
-  file:
-    path: '/home/cloud-user/"{{ item }}"'
-    state: absent
+  shell: rm -f /home/cloud-user/{{ item }}
   with_items:
     - etcd.bak
     - etcd.bak.tar
- become: yes
+ become: true
  when: inventory_hostname == groups.masters[0]
