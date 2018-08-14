@@ -1,12 +1,4 @@
-- name: Create patch directory on all hosts to store package lists
-  file:
-    path: /home/cloud-user/patching
-    state: directory
-    owner: cloud-user
-    mode: 0755
-
-- name: Write output of rpm -qa to file on all hosts
-  shell: rpm -qa | sort > /home/cloud-user/patching/rpm-list-"{{ ansible_date_time.date }}"
+- include_tasks: pre-patch.yml
 
 - include_tasks: patch-lbs.yml
 
