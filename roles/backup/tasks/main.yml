@@ -52,3 +52,5 @@
 - include_tasks: node-recovery.yml
 
 - include_tasks: etcd-restore.yml
+
+- include_tasks: auth.yml

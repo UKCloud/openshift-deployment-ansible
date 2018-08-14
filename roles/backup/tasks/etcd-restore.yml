@@ -61,7 +61,7 @@
 - name: Clean up file from master
   file:
     path: /home/cloud-user/"{{ item }}"
-    state: abesent
+    state: absent
   with_items: 
     - etcd.bak
     - etcd.bak.tar  
