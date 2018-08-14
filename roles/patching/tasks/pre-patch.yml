@@ -16,3 +16,4 @@
 - name: Fail if machines are not subscribed
   fail:
     msg: "Please ensure this machine has a valid subscription and re-run."
+  when: subscription_status.stdout != 'Current'
