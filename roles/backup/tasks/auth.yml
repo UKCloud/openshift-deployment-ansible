@@ -4,7 +4,8 @@
     dest: /home/cloud-user/htpasswd.bak
     owner: cloud-user
     group: cloud-user
-    mode: 0744
+    mode: 0644
+    remote_src: yes
   become: yes
   when: inventory_hostname == groups.masters[0]
 
