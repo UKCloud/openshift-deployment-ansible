@@ -49,6 +49,6 @@
   become_method: sudo
   when: inventory_hostname == 'localhost' and not epel_installed
 
-- include_task: node-recovery.yml
+- include_tasks: node-recovery.yml
 
-- include_task: etcd-restore.yml
+- include_tasks: etcd-restore.yml
