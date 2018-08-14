@@ -50,3 +50,5 @@
   when: inventory_hostname == 'localhost' and not epel_installed
 
 - include_task: node-recovery.yml
+
+- include_task: etcd-restore.yml
