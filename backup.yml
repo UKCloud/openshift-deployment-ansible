@@ -1,4 +1,4 @@
-- hosts: masters[0], localhost
+- hosts: masters, localhost
   roles:
     - backup
   

@@ -28,10 +28,6 @@
     rgw: true
   when: inventory_hostname == 'localhost'
 
-- name: Clean up htpasswd backup on bastion
-  shell: rm -f /home/cloud-user/htpasswd.bak
-  when: inventory_hostname == 'localhost'
-
 - name: Clean up htpasswd backup on master
   shell: rm -f /home/cloud-user/htpasswd.bak
   become: true

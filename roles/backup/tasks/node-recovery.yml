@@ -5,24 +5,10 @@
     format: tar
   when: inventory_hostname == groups.masters[0]
 
-- name: Copy /etc/etcd directory and tar it
-  archive:
-    path: /etc/etcd/
-    dest: /home/cloud-user/etcd.tar
-    format: tar
-  when: inventory_hostname == groups.masters[0]
-
-- name: Fetch tar files back to bastion (master)
+- name: Fetch tar file back to bastion (master)
   fetch:
     src: /home/cloud-user/master.tar
     dest: /home/cloud-user/master.tar
-    flat: yes
-  when: inventory_hostname == groups.masters[0]
-
-- name: Fetch tar files back to bastion (etcd)
-  fetch:
-    src: /home/cloud-user/etcd.tar
-    dest: /home/cloud-user/etcd.tar
     flat: yes
   when: inventory_hostname == groups.masters[0]
 
@@ -45,18 +31,6 @@
     rgw: true
   when: inventory_hostname == 'localhost'
 
-- name: Send etcd tar file back to bucket in S3
-  aws_s3:
-    aws_access_key: "{{ s3accesskey }}"
-    aws_secret_key: "{{ s3secretkey }}"
-    s3_url: "https://{{ s3regionendpoint }}"
-    bucket: "{{ s3bucketname }}"
-    object: "/backups/etcd-conf-dir.tar-{{ ansible_date_time.date }}"
-    src: "/home/cloud-user/etcd.tar"
-    mode: put
-    rgw: true
-  when: inventory_hostname == 'localhost'
-
 - name: Send ansible deployment code tar file back to bucket in S3
   aws_s3:
     aws_access_key: "{{ s3accesskey }}"
@@ -69,20 +43,8 @@
     rgw: true
   when: inventory_hostname == 'localhost'
 
-- name: Clean up tar files from bastion
-  command: rm -f /home/cloud-user/{{ item }}
-  with_items:
-    - master.tar
-    - etcd.tar
-    - deployment-code.tar
-  become: true
-  when: inventory_hostname == 'localhost'
-
-- name: Clean up tar files from master
-  command: rm -f /home/cloud-user/{{ item }}
-  with_items:
-    - master.tar
-    - etcd.tar
+- name: Clean up tar file from master
+  command: rm -f /home/cloud-user/master.tar
   become: true
   when: inventory_hostname == groups.masters[0]
     
