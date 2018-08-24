@@ -1,34 +1,45 @@
+- name: Backup htpasswd file
+  copy:
+    src: /etc/origin/master/htpasswd
+    dest: /home/cloud-user/htpasswd.bak
+    owner: cloud-user
+    group: cloud-user
+    mode: 0644
+    remote_src: yes
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Fetch htpasswd back to bastion
+  fetch:
+    src: /home/cloud-user/htpasswd.bak
+    dest: /home/cloud-user/backups/htpasswd.bak-{{ ansible_date_time.date }}
+    flat: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Clean up htpasswd backup on master
+  shell: rm -f /home/cloud-user/htpasswd.bak
+  become: true
+  when: inventory_hostname == groups.masters[0]
+
 - name: Copy /etc/origin/master directory and tar it
   archive:
     path: /etc/origin/master
-    dest: /home/cloud-user/master.tar
+    dest: /home/cloud-user/origin-master.tar
     format: tar
   when: inventory_hostname == groups.masters[0]
 
 - name: Fetch tar file back to bastion (master)
   fetch:
-    src: /home/cloud-user/master.tar
-    dest: /home/cloud-user/master.tar
+    src: /home/cloud-user/origin-master.tar
+    dest: /home/cloud-user/backups/origin-master-{{ datetime }}.tar
     flat: yes
   when: inventory_hostname == groups.masters[0]
 
 - name: tar deployment code directory
   archive:
     path: /usr/share/ansible/openshift-deployment-ansible
-    dest: /home/cloud-user/deployment-code.tar
+    dest: /home/cloud-user/backups/deployment-code-{{ datetime }}.tar
     format: tar
-  when: inventory_hostname == 'localhost'
-
-- name: Send master tar file back to bucket in S3
-  aws_s3:
-    aws_access_key: "{{ s3accesskey }}"
-    aws_secret_key: "{{ s3secretkey }}"
-    s3_url: "https://{{ s3regionendpoint }}"
-    bucket: "{{ s3bucketname }}"
-    object: "/backups/master.tar-{{ ansible_date_time.date }}"
-    src: "/home/cloud-user/master.tar"
-    mode: put
-    rgw: true
   when: inventory_hostname == 'localhost'
 
 - name: Send ansible deployment code tar file back to bucket in S3
@@ -44,7 +55,7 @@
   when: inventory_hostname == 'localhost'
 
 - name: Clean up tar file from master
-  command: rm -f /home/cloud-user/master.tar
+  command: rm -f /home/cloud-user/origin-master.tar
   become: true
   when: inventory_hostname == groups.masters[0]
     

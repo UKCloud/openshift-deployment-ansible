@@ -29,34 +29,22 @@
 - name: tar etcd backup
   archive:
     path: /home/cloud-user/etcd.bak
-    dest: /home/cloud-user/etcd.bak.tar
+    dest: /home/cloud-user/etcd-data.bak.tar
     format: tar
   when: inventory_hostname == groups.masters[0]
 
 - name: Fetch tar file back to bastion
   fetch:
     src: /home/cloud-user/etcd.bak.tar
-    dest: /home/cloud-user/etcd.bak.tar
+    dest: /home/cloud-user/backups/etcd-data.bak.tar-{{ datetime }}
     flat: yes
   when: inventory_hostname == groups.masters[0]
-
-- name: Send etcd data backup to bucket in S3
-  aws_s3:
-    aws_access_key: "{{ s3accesskey }}"
-    aws_secret_key: "{{ s3secretkey }}"
-    s3_url: "https://{{ s3regionendpoint }}"
-    bucket: "{{ s3bucketname }}"
-    object: "/backups/etcd-data-{{ ansible_date_time.date }}.tar"
-    src: "/home/cloud-user/etcd.bak.tar"
-    mode: put
-    rgw: true
-  when: inventory_hostname == 'localhost'
 
 - name: Clean up file from master
   command: rm -rf /home/cloud-user/{{ item }}
   with_items:
     - etcd.bak
-    - etcd.bak.tar
+    - etcd-data.bak.tar
   become: true
   when: inventory_hostname == groups.masters[0]
 
@@ -72,7 +60,7 @@
 - name: Fetch tar files back to bastion
   fetch:
     src: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar
-    dest: /home/cloud-user/etcd-config-backup/etcd-config-{{ ansible_hostname }}.{{ localDomainSuffix }}.tar
+    dest: /home/cloud-user/backups/etcd-config-{{ ansible_hostname }}-{{ datetime }}.tar
     flat: yes
   when: inventory_hostname in groups.masters
 
@@ -81,19 +69,3 @@
     path: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar
     state: absent
   when: inventory_hostname in groups.masters
-
-- name: Send etcd config tars back to bucket in S3
-  aws_s3:
-    aws_access_key: "{{ s3accesskey }}"
-    aws_secret_key: "{{ s3secretkey }}"
-    s3_url: "https://{{ s3regionendpoint }}"
-    bucket: "{{ s3bucketname }}"
-    object: "/backups/etcd-config-{{ item }}-{{ ansible_date_time.date }}"
-    src: "/home/cloud-user/etcd-config-backup/etcd-config-{{ item }}.tar"
-    mode: put
-    rgw: true
-  with_items:
-    - "{{ groups.masters[0] }}"
-    - "{{ groups.masters[1] }}"
-    - "{{ groups.masters[2] }}"
-  when: inventory_hostname == 'localhost'
