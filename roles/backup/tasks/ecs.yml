@@ -12,6 +12,7 @@
     - "/home/cloud-user/backups/*"
   register: ecs_output
   ignore_errors: true
+  when: inventory_hostname == 'localhost'
 
 - name:
   find:
