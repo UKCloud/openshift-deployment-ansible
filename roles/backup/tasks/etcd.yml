@@ -35,7 +35,7 @@
 
 - name: Fetch tar file back to bastion
   fetch:
-    src: /home/cloud-user/etcd.bak.tar
+    src: /home/cloud-user/etcd-data.bak.tar
     dest: /home/cloud-user/backups/etcd-data.bak.tar-{{ datetime }}
     flat: yes
   when: inventory_hostname == groups.masters[0]
