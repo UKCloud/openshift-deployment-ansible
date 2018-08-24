@@ -27,7 +27,7 @@
 - name: Fail if all files did not get transferred to ECS
   fail:
     msg: "It appears one or more files did not get transferred to ECS. Consider re-running in a more verbose mode to troubleshoot."
-  when: ecs_transfer_status != false
+  when: ecs_transfer_status != false and inventory_hostname == 'localhost'
   with_sequence: start=0 end={{ max_index }} 
 
 - debug:
