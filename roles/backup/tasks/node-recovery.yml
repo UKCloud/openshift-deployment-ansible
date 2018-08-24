@@ -42,18 +42,6 @@
     format: tar
   when: inventory_hostname == 'localhost'
 
-- name: Send ansible deployment code tar file back to bucket in S3
-  aws_s3:
-    aws_access_key: "{{ s3accesskey }}"
-    aws_secret_key: "{{ s3secretkey }}"
-    s3_url: "https://{{ s3regionendpoint }}"
-    bucket: "{{ s3bucketname }}"
-    object: "/backups/deployment-code.tar-{{ ansible_date_time.date }}"
-    src: "/home/cloud-user/deployment-code.tar"
-    mode: put
-    rgw: true
-  when: inventory_hostname == 'localhost'
-
 - name: Clean up tar file from master
   command: rm -f /home/cloud-user/origin-master.tar
   become: true
