@@ -10,3 +10,24 @@
     rgw: true
   with_fileglob:
     - "/home/cloud-user/backups/*"
+  register: ecs_output
+  ignore_errors: true
+
+- name:
+    find:
+      paths: /home/cloud-user/backups/*
+      patterns: '*'
+      age: -10m
+    register: backup_files
+
+- set_fact:
+    max_index: "{{ backup_files.examined - 1 |int }}"
+
+- name: Fail if all files did not get transferred to ECS
+  fail:
+    msg: "It appears one or more files did not get transferred to ECS. Consider re-running in a more verbose mode to troubleshoot."
+  when: ecs_transfer_status != false
+  with_sequence: start=0 end={{ max_index }} 
+
+- debug:
+    var: ecs_transfer_status

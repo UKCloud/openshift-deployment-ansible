@@ -1,6 +1,7 @@
 - hosts: masters, localhost
   vars:
     datetime: "{{ ansible_date_time.date}}-{{ ansible_date_time.time }}"
+    ecs_transfer_status: "ecs_output.results[{{ item|int }}].failed"
   roles:
     - backup
   
