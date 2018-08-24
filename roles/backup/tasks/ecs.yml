@@ -16,7 +16,7 @@
 
 - name:
   find:
-    paths: /home/cloud-user/backups/*
+    paths: /home/cloud-user/backups
     patterns: '*'
     age: -10m
   register: backup_files
