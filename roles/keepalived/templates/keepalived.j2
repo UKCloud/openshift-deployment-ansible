@@ -25,3 +25,24 @@ vrrp_instance VI_1 {
         chk_haproxy
     }
 }
+
+{% if extra_gateway_vip is defined and ansible_fqdn in groups.loadbalancers_internet_dataplane %}
+vrrp_instance VI_2 {
+    state {% if ansible_hostname in primary %}BACKUP
+    {% else %}MASTER
+    {% endif %}interface eth0
+    virtual_router_id 52
+    priority {% if ansible_hostname in primary  %}100{% else %}101{% endif %} # 101 on haproxy, 100 on haproxy2
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass "{{ hostvars[groups.loadbalancers_controlplane[0]].keepalived_password.stdout }}"
+    }
+    virtual_ipaddress {
+        {{ extra_gateway_vip }} dev eth0
+    }
+    track_script {
+        chk_haproxy
+    }
+}
+{% endif %}
