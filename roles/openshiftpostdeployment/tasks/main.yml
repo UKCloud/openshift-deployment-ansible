@@ -78,6 +78,27 @@
   command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }}
   when: multinetwork
 
+- name: Setup routers for private networks (extra gateway)
+  command: /usr/local/bin/oc adm router router-private --replicas=0 --selector='router-private=true' --service-account=router --stats-port=1937 --ports='7080:7080,7443:7443' -n default
+  when: extra_gateway_vip is defined
+
+- name: Setup private network router environment
+  command: /usr/local/bin/oc set env dc/router-private {{ item }} -n default
+  with_items:
+    - ROUTER_SERVICE_HTTP_PORT=7080
+    - ROUTER_SERVICE_HTTPS_PORT=7443
+    - ROUTE_LABELS="router-private=true"
+  when: extra_gateway_vip is defined
+
+- name: Scale up private network routers
+  command: /usr/local/bin/oc scale dc router-private --replicas=2 -n default
+  when: extra_gateway_vip is defined
+
+- name: label nodes for private network routers
+  command: /usr/local/bin/oc label node {{ item }}  'router-private=true'
+  with_items: "{{ infrastructure_node_details.values() }}"
+  when: extra_gateway_vip is defined
+
 - name: taint infrastructure nodes to prevent customer applications scheduling
   command: /usr/local/bin/oc adm taint node "{{ item }}" infra=only:NoSchedule
   with_items:
