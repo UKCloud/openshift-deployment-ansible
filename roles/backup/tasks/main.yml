@@ -53,4 +53,6 @@
 
 - include_tasks: etcd.yml
 
+- include_tasks: masters.yml
+
 - include_tasks: ecs.yml
