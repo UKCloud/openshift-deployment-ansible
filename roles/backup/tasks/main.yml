@@ -49,7 +49,12 @@
   become_method: sudo
   when: inventory_hostname == 'localhost' and not epel_installed
 
-- include_tasks: node-recovery.yml
+- name: tar deployment code directory
+  archive:
+    path: /usr/share/ansible/openshift-deployment-ansible
+    dest: /home/cloud-user/backups/deployment-code-{{ datetime }}.tar
+    format: tar
+  when: inventory_hostname == 'localhost'
 
 - include_tasks: etcd.yml
 
