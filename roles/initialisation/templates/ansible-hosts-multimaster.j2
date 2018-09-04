@@ -202,7 +202,7 @@ nodes_net2
 
 [nodes_infra]
 {% for ip, hostname in infrastructure_node_details.items() %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','internet':'true','infra':'true',{% if multinetwork %}'net2':'true','tenant':'true','build':'true',{% endif %}'failure-domain.beta.kubernetes.io/zone':'nova'}"
+{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','internet':'true','infra':'true',{% if multinetwork %}'net2':'true','tenant':'true','build':'true',{% endif %}{% if extra_gateway_vip is defined %}'router-private':'true',{% endif %}'failure-domain.beta.kubernetes.io/zone':'nova'}"
 {% endfor %}
 
 [nodes_net2]
