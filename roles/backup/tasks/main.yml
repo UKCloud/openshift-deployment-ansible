@@ -1,6 +1,6 @@
 - name: Check if epel file exists and register var
   stat:
-    path: /tmp/epel-release-latest-7.noarch.rpm
+    path: /etc/yum.repos.d/epel.repo
   register: epel_file_state
 
 - name: Create variable for epel_file_state.stat.exists
