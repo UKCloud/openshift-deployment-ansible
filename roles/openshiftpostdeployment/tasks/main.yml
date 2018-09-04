@@ -91,12 +91,9 @@
   when: extra_gateway_vip is defined
 
 - name: Scale up private network routers
-  command: /usr/local/bin/oc scale dc router-private --replicas=2 -n default
-  when: extra_gateway_vip is defined
-
-- name: label nodes for private network routers
-  command: /usr/local/bin/oc label node {{ item }}  'router-private=true'
-  with_items: "{{ infrastructure_node_details.values() }}"
+  vars:
+    infra_scale: "{{ groups['nodes_infra'] | length }}"
+  command: /usr/local/bin/oc scale dc router-private --replicas={{ infra_scale }} -n default
   when: extra_gateway_vip is defined
 
 - name: taint infrastructure nodes to prevent customer applications scheduling
