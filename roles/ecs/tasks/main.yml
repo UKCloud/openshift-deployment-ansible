@@ -26,4 +26,4 @@
   fail:
     msg: "It appears one or more files did not get transferred to ECS. Consider re-running in a more verbose mode to troubleshoot."
   with_sequence: start=0 end={{ max_index }}
-  when: ecs_transfer_status != false
+  when: ecs_output.results[{{ item|int }}].failed != false
