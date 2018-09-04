@@ -2,6 +2,7 @@
   yum:
     list: epel-release
   register: epel_state
+  become: yes
 
 - name: Create variable for epel_file_state.stat.exists
   set_fact:
