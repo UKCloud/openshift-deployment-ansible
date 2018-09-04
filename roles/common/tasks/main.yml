@@ -40,6 +40,19 @@
     state: restarted 
   when: set_node_routes and inventory_hostname != 'localhost'
 
+ name: Configure iptables on infra nodes for extra gateway
+  iptables:
+    chain: OS_FIREWALL_ALLOW
+    protocol: tcp
+    ctstate: NEW
+    destination_port: "{{ item }}"
+    jump: ACCEPT
+    comment: Open port for extra gateway router
+  with_items:
+    - 7080
+    - 7443
+  when: extra_gateway_vip is defined and inventory_hostname in groups.nodes_infra
+
 - name: Tidy up hosts file on bastion
   blockinfile:
     block: |
