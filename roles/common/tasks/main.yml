@@ -40,7 +40,7 @@
     state: restarted 
   when: set_node_routes and inventory_hostname != 'localhost'
 
- name: Configure iptables on infra nodes for extra gateway
+- name: Configure iptables on infra nodes for extra gateway
   iptables:
     chain: OS_FIREWALL_ALLOW
     protocol: tcp
