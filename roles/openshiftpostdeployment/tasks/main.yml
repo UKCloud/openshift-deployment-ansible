@@ -69,7 +69,7 @@
   when: multinetwork
 
 - name: Setup secondary network router envs
-  command: /usr/local/bin/oc set env dc/router-secondary ROUTE_LABELS="router=secondary"
+  command: /usr/local/bin/oc set env dc/router-secondary ROUTE_LABELS="router-secondary=true"
   when: multinetwork
 
 - name: Scale up secondary network routers
