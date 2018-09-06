@@ -7,4 +7,4 @@
 
 - hosts: all
   roles:
-    - allserverspostdeployments
+    - allserverspostdeployment
