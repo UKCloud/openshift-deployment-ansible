@@ -12,9 +12,9 @@
     force: yes
     backup: yes
 
-#- name: create tier-1 class 
-#  command: /usr/local/bin/oc create -f ~/storage-class-tier1.yml
-#
+- name: create tier-1 class 
+  command: /usr/local/bin/oc create -f ~/storage-class-tier1.yml
+
 #- name: create tier-2 class 
 #  command: /usr/local/bin/oc create -f ~/storage-class-tier2.yml
 
@@ -69,7 +69,7 @@
   when: multinetwork
 
 - name: Setup secondary network router envs
-  command: /usr/local/bin/oc set env dc/router-secondary ROUTE_LABELS="router=secondary"
+  command: /usr/local/bin/oc set env dc/router-secondary ROUTE_LABELS="router-secondary=true"
   when: multinetwork
 
 - name: Scale up secondary network routers
@@ -77,6 +77,24 @@
     net2_scale: "{{ groups['nodes_net2'] | length }}"
   command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }}
   when: multinetwork
+
+- name: Setup routers for private networks (extra gateway)
+  command: /usr/local/bin/oc adm router router-private --replicas=0 --selector='router-private=true' --service-account=router --stats-port=1937 --ports='7080:7080,7443:7443' -n default
+  when: extra_gateway_vip is defined
+
+- name: Setup private network router environment
+  command: /usr/local/bin/oc set env dc/router-private {{ item }} -n default
+  with_items:
+    - ROUTER_SERVICE_HTTP_PORT=7080
+    - ROUTER_SERVICE_HTTPS_PORT=7443
+    - ROUTE_LABELS="router-private=true"
+  when: extra_gateway_vip is defined
+
+- name: Scale up private network routers
+  vars:
+    infra_scale: "{{ groups['nodes_infra'] | length }}"
+  command: /usr/local/bin/oc scale dc router-private --replicas={{ infra_scale }} -n default
+  when: extra_gateway_vip is defined
 
 - name: taint infrastructure nodes to prevent customer applications scheduling
   command: /usr/local/bin/oc adm taint node "{{ item }}" infra=only:NoSchedule

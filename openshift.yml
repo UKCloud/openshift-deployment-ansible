@@ -4,3 +4,7 @@
 - hosts: masters[0]
   roles:
     - openshiftpostdeployment
+
+- hosts: all
+  roles:
+    - allserverspostdeployment
