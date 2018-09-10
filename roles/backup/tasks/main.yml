@@ -48,6 +48,13 @@
   become: yes
   become_method: sudo
   when: inventory_hostname == 'localhost' and not epel_installed
+  
+- name: Create backups directory
+  file:
+    path: /home/cloud-user/backups
+    state: directory
+    mode: 0755
+  when: inventory_hostname == 'localhost'
 
 - name: Clean up old backup files
   file:
