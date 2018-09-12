@@ -46,7 +46,7 @@
   when: inventory_hostname == groups.masters[0]
 
 - pause:
-    prompt: "Pause for 10 seconds before looping"
-    seconds: 10
+    prompt: "Pause for 30 seconds before looping"
+    seconds: 30
 
 {% endfor %}
