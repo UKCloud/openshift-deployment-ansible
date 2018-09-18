@@ -40,6 +40,16 @@
     state: restarted 
   when: set_node_routes and inventory_hostname != 'localhost'
 
+- name: Set net2 ntp server
+  shell: tail -n +7 /etc/chrony.conf | sed '1s/^/server {{ net2_ntp_server }} iburst\n/' > /tmp/chrony.conf ; cat /tmp/chrony.conf > /etc/chrony.conf
+  when: multinetwork and inventory_hostname in groups.net2_all
+
+- name: Restart chronyd to apply config changes
+  service:
+    name: chronyd
+    state: restarted
+  when: multinetwork and inventory_hostname in groups.net2_all
+
 - name: Tidy up hosts file on bastion
   blockinfile:
     block: |
