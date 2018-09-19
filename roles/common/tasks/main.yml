@@ -45,20 +45,23 @@
     path: /etc/chrony.conf
     regexp: '^server.*iburst$'
     replace: ''
+  become: yes
   when: multinetwork and inventory_hostname in groups.net2_all
 
-- name: Add net2 server to chrony.conf
-  lineinfile:
+- name: test
+  blockinfile:
     path: /etc/chrony.conf
+    block: server {{ net2_ntp_server }} iburst
+    insertafter: '^#\sPlease\sconsider'
     state: present
-    regexp: '^#\sPlease\sconsider'
-    line: 'server {{ net2_ntp_server }} iburst'
+  become: yes
   when: multinetwork and inventory_hostname in groups.net2_all
 
 - name: Restart chronyd to apply config changes
   service:
     name: chronyd
     state: restarted
+  become: yes
   when: multinetwork and inventory_hostname in groups.net2_all
 
 - name: Tidy up hosts file on bastion
