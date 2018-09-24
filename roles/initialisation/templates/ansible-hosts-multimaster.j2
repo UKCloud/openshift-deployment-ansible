@@ -13,9 +13,6 @@ ansible_become=yes
 
 debug_level=2
 
-# If ansible_ssh_user is not root, ansible_become must be set to true
-#ansible_become=true
-
 openshift_deployment_type=openshift-enterprise
 
 os_sdn_network_plugin_name=redhat/openshift-ovs-multitenant
@@ -29,19 +26,21 @@ openshift_master_cluster_hostname=console.{{ localDomainSuffix }}
 openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
 
 openshift_release=v{{ openshiftVersion }}
-openshift_image_tag=v{{ installed_version[0] }} 
+### review how this is working at the moment - no sign of revisions of minor releases in rh container registry
+# openshift_image_tag=v{{ installed_version[0] }}
+openshift_image_tag=v{{ openshiftVersion }}
 
-openshift_set_hostname=true
+### deprecated - probably can be removed ###
+#openshift_set_hostname=true
+# Makes the openshift_ip setting in the host groups are below take effect.
+# This sets the nodeIP setting in node-config on each host to the correct IP
+#openshift_set_node_ip=true
 
 {% if multinetwork %}
 # Adding buildoverride values to make build pods target infra nodes in multi-network deployments
 openshift_buildoverrides_nodeselectors={'build':'true'}
 openshift_buildoverrides_tolerations=[{'key':'infra','value':'only','effect':'NoSchedule','operator':'Equal'}]
 {% endif %}
-
-# Makes the openshift_ip setting in the host groups are below take effect.
-# This sets the nodeIP setting in node-config on each host to the correct IP
-openshift_set_node_ip=true
 
 openshift_master_default_subdomain={{ domainSuffix }}
 
@@ -52,13 +51,8 @@ openshift_docker_options="--log-driver=json-file --log-opt max-size=50M --log-op
 openshift_hosted_router_selector='router=true'
 
 # REGISTRY
-openshift_hosted_registry_selector='infra=true'
+openshift_hosted_registry_selector='node-role.kubernetes.io/infra=true'
 openshift_hosted_registry_replicas=1
-#openshift_hosted_registry_storage_kind=openstack
-#openshift_hosted_registry_storage_access_modes=['ReadWriteOnce']
-#openshift_hosted_registry_storage_openstack_filesystem=ext4
-#openshift_hosted_registry_storage_openstack_volumeID=
-#openshift_hosted_registry_storage_volume_size=
 
 # Any S3 service (Minio, ExoScale, ...): Basically the same as above
 # but with regionendpoint configured
@@ -76,7 +70,7 @@ openshift_hosted_registry_pullthrough=true
 openshift_hosted_registry_acceptschema2=true
 openshift_hosted_registry_enforcequota=true
 
-
+### sets the default node selector projects will use on pod scheduling
 osm_default_node_selector='tenant=true'
 
 # enable ntp on masters to ensure proper failover
@@ -90,6 +84,7 @@ openshift_cloudprovider_openstack_password={{ openstackOpenshiftPassword }}
 openshift_cloudprovider_openstack_tenant_id={{ osTenantId }}
 openshift_cloudprovider_openstack_tenant_name={{ osTenantName }}
 openshift_cloudprovider_openstack_region={{ osRegion }}
+openshift_cloudprovider_openstack_blockstorage_ignore_volume_az="yes"
 
 # openstack default storage class configuration since this gets created for us regardless now!
 openshift_storageclass_default= "true"
@@ -103,9 +98,9 @@ openshift_metrics_hawkular_hostname=hawkular-metrics.{{ domainSuffix }}
 openshift_hosted_metrics_storage_kind=dynamic
 openshift_metrics_cassandra_pvc_size=10Gi
 # Node selectors for hawkular metrics
-openshift_metrics_cassandra_nodeselector={"infra":"true"}
-openshift_metrics_hawkular_nodeselector={"infra":"true"}
-openshift_metrics_heapster_nodeselector={"infra":"true"}
+openshift_metrics_cassandra_nodeselector={"node-role.kubernetes.io/infra":"true"}
+openshift_metrics_hawkular_nodeselector={"node-role.kubernetes.io/infra":"true"}
+openshift_metrics_heapster_nodeselector={"node-role.kubernetes.io/infra":"true"}
 
 # openshift aggregated logging deployment - comment out if no aggregated logging  deployment is required. this will run on the worker nodes
 openshift_logging_install_logging={{ installLogging  }}
@@ -121,16 +116,19 @@ openshift_logging_use_ops=false
 openshift_logging_es_cluster_size={{ loggingClusterSize }}
 openshift_logging_es_pvc_size=20Gi
 # Node selectors for aggregated logging
-openshift_logging_curator_nodeselector={"infra":"true"}
-openshift_logging_kibana_nodeselector={"infra":"true"}
-openshift_logging_es_nodeselector={"infra":"true"}
+openshift_logging_curator_nodeselector={"node-role.kubernetes.io/infra":"true"}
+openshift_logging_kibana_nodeselector={"node-role.kubernetes.io/infra":"true"}
+openshift_logging_es_nodeselector={"node-role.kubernetes.io/infra":"true"}
 
 # fix to make the ansible service broker deploy to the correct nodes rather than all or none
 # RH ticket #02020379
-template_service_broker_selector={"infra":"true"}
+template_service_broker_selector={"node-role.kubernetes.io/infra":"true"}
 
 # Ansible service broker node selector
-ansible_service_broker_node_selector={"infra":"true"}
+ansible_service_broker_node_selector={"node-role.kubernetes.io/infra":"true"}
+
+### Setup the default node labels for each node type
+openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true']},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','internet=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}{% if multinetwork %},'net2': 'true','build':'true','tenant':'true'{% endif %}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true']},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router':'secondary','net2':'true','tenant':'true']}]
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
@@ -192,23 +190,23 @@ nodes_net2
 
 [nodes_internet]
 {% for ip, hostname in master_details.items() %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'failure-domain.beta.kubernetes.io/zone':'nova'}"
+{{ hostname }} openshift_node_group_name='node-config-master'
 {% endfor %}
 {% if worker_details_internet != None %}
 {% for ip, hostname in worker_details_internet.items() %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'internet':'true','tenant':'true','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{{ hostname }} openshift_node_group_name='node-config-compute'
 {% endfor %}
 {% endif %}
 
 [nodes_infra]
 {% for ip, hostname in infrastructure_node_details.items() %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'true','internet':'true','infra':'true',{% if multinetwork %}'net2':'true','tenant':'true','build':'true',{% endif %}{% if extra_gateway_vip is defined %}'router-private':'true',{% endif %}'failure-domain.beta.kubernetes.io/zone':'nova'}"
+{{ hostname }} openshift_node_group_name='node-config-infra'
 {% endfor %}
 
 [nodes_net2]
 {% if multinetwork %}
 {% for ip, hostname in worker_details_net2.items() %}
-{{ hostname }} openshift_ip={{ ip }} openshift_node_labels="{'router':'secondary','net2':'true','tenant':'true','failure-domain.beta.kubernetes.io/zone':'nova'}"
+{{ hostname }} openshift_node_group_name='node-config-compute-net2'
 {% endfor %}
 {% endif %}
 
