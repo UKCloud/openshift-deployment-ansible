@@ -14,7 +14,7 @@
   set_fact:
     installed_version: "{{ package_list | json_query(package_filter) }}"
   vars: 
-    package_filter: "results[?name=='atomic-openshift-utils'].version"
+    package_filter: "results[?name=='openshift-ansible'].version"
 
 - set_fact:
     admin_password: "{{ lookup('env', 'OPENSHIFT_PASSWORD') }}"
