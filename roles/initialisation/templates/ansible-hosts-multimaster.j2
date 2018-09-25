@@ -18,7 +18,7 @@ openshift_deployment_type=openshift-enterprise
 os_sdn_network_plugin_name=redhat/openshift-ovs-multitenant
 
 # uncomment the following to enable htpasswd authentication; defaults to DenyAllPasswordIdentityProvider
-openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider'}]
 openshift_master_htpasswd_users={'admin': '{{ admin_password }}'}
 
 openshift_master_cluster_method=native
@@ -128,7 +128,7 @@ template_service_broker_selector={"node-role.kubernetes.io/infra":"true"}
 ansible_service_broker_node_selector={"node-role.kubernetes.io/infra":"true"}
 
 ### Setup the default node labels for each node type
-openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true']},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','internet=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}{% if multinetwork %},'net2': 'true','build':'true','tenant':'true'{% endif %}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true']},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router':'secondary','net2':'true','tenant':'true']}]
+openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true']},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','internet=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}{% if multinetwork %},'net2': 'true','build':'true','tenant':'true'{% endif %}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true']},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true']}]
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
