@@ -80,7 +80,7 @@
   when: multinetwork
 
 - name: Allow Source IP to be recived on private router from HAProxy
-  command: /usr/local.bin/oc env dc/router-private ROUTER_USE_PROXY_PROTOCOL=true
+  command: /usr/local/bin/oc env dc/router-private ROUTER_USE_PROXY_PROTOCOL=true
   when: extra_gateway_vip is defined
 
 - name: Scale up secondary network routers
