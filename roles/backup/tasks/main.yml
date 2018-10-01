@@ -56,12 +56,6 @@
     mode: 0755
   when: inventory_hostname == 'localhost'
 
-- name: Clean up old backup files
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_fileglob: '/home/cloud-user/backups/*'
-
 - name: tar deployment code directory
   archive:
     path: /usr/share/ansible/openshift-deployment-ansible
