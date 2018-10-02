@@ -72,14 +72,14 @@
   command: /usr/local/bin/oc set env dc/router-secondary ROUTE_LABELS="router-secondary=true"
   when: multinetwork
 
-- name: Allow Source IP to be recived on primary router from the HAProxy
+- name: Allow Source IP to be received on primary router from the HAProxy
   command: /usr/local/bin/oc env dc/router ROUTER_USE_PROXY_PROTOCOL=true
 
-- name: Allow Source IP to be recived on secondary router from HAProxy
+- name: Allow Source IP to be received on secondary router from HAProxy
   command: /usr/local/bin/oc env dc/router-secondary ROUTER_USE_PROXY_PROTOCOL=true
   when: multinetwork
 
-- name: Allow Source IP to be recived on private router from HAProxy
+- name: Allow Source IP to be received on private router from HAProxy
   command: /usr/local/bin/oc env dc/router-private ROUTER_USE_PROXY_PROTOCOL=true
   when: extra_gateway_vip is defined
 
