@@ -50,8 +50,7 @@
 - name: Add net2 ntp servers to chrony config file
   lineinfile:
     path: /etc/chrony.conf
-    regexp: '^#\sPlease\sconsider'
-    insertafter: '^#\sUse\spublic\sservers'
+    insertafter: '^#\sPlease\sconsider'
     line: server {{ item }} iburst
   with_items: "{{ net2_ntp_servers }}"
   when: multinetwork and inventory_hostname in groups.net2_all
