@@ -4,6 +4,15 @@
     state: latest 
   when: inventory_hostname == groups.loadbalancers_controlplane[1] or inventory_hostname == groups.loadbalancers_internet_dataplane[1] or (multinetwork and inventory_hostname == groups.loadbalancers_net2_dataplane[1])
 
+- name: Ensure keepalived and haproxy are running on primary LBs before reboot
+  systemd:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - haproxy
+    - keepalived
+  when: inventory_hostname == groups.loadbalancers_controlplane[0] or inventory_hostname == groups.loadbalancers_internet_dataplane[0] or (multinetwork and inventory_hostname == groups.loadbalancers_net2_dataplane[0])
+
 - name: Reboot secondary LBs
   shell: "sleep 5 && reboot"
   async: 1
@@ -55,5 +64,4 @@
     - haproxy
     - keepalived
   when: inventory_hostname == groups.loadbalancers_controlplane[0] or inventory_hostname == groups.loadbalancers_internet_dataplane[0] or (multinetwork and inventory_hostname == groups.loadbalancers_net2_dataplane[0])
-
 

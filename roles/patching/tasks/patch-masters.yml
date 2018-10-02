@@ -8,7 +8,7 @@
 - name: Restart haproxy service
   systemd:
     name: haproxy
-    state: restarted
+    state: reloaded
   when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Patch master
@@ -42,7 +42,7 @@
     prompt: "Pausing for a minute"
     minutes: 1
 
-- name: Re-apply nova zone lable
+- name: Re-apply nova zone label
   shell: /usr/local/bin/oc label node "{{ master_hostname }}" failure-domain.beta.kubernetes.io/zone=nova --overwrite
   when: inventory_hostname == command_master
 
@@ -56,5 +56,5 @@
 - name: Restart haproxy service
   systemd:
     name: haproxy
-    state: restarted
+    state: reloaded
   when: inventory_hostname in groups.loadbalancers_controlplane
