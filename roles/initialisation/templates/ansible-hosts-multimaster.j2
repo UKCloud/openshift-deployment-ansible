@@ -25,7 +25,7 @@ openshift_master_cluster_method=native
 openshift_master_cluster_hostname=console.{{ localDomainSuffix }}
 openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
 
-openshift_release=v{{ openshiftVersion }}
+openshift_release=v"{{ openshiftVersion }}"
 ### review how this is working at the moment - no sign of revisions of minor releases in rh container registry
 # openshift_image_tag=v{{ installed_version[0] }}
 openshift_image_tag=v{{ openshiftVersion }}
@@ -128,7 +128,7 @@ template_service_broker_selector={"node-role.kubernetes.io/infra":"true"}
 ansible_service_broker_node_selector={"node-role.kubernetes.io/infra":"true"}
 
 ### Setup the default node labels for each node type
-openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true']},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','internet=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}{% if multinetwork %},'net2': 'true','build':'true','tenant':'true'{% endif %}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true']},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true']}]
+openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true']},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','internet=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}{% if multinetwork %},'net2=true','build=true','tenant=true'{% endif %}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true']},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true']}]
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
