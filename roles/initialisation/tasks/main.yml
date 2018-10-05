@@ -25,3 +25,10 @@
     dest: ./openshift-ansible-hosts
     force: yes
     backup: yes
+
+- name: Replace OpenStack cloud config template with one supporting new AZ feature
+  copy:
+    src: templates/openstack.conf.j2
+    dest: /usr/share/ansible/openshift-ansible/roles/openshift_cloud_provider/templates/openstack.conf.j2
+    force: yes
+    backup: yes
