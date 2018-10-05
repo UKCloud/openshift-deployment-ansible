@@ -44,7 +44,7 @@
   when: inventory_hostname == groups.loadbalancers_controlplane[0]
 
 - name: Run certbot
-  command: certbot certonly -m openshift@ukcloud.com --standalone -d ocp.{{ domainSuffix }},hawkular-metrics.{{ domainSuffix }},registry-console-default.{{ domainSuffix }},kibana.{{ domainSuffix }} --agree-tos -n
+  command: certbot certonly -m openshift@ukcloud.com --standalone -d ocp.{{ domainSuffix }},hawkular-metrics.{{ domainSuffix }},registry-console-default.{{ domainSuffix }},kibana.{{ domainSuffix }},registry-console.{{ domainSuffix }},registry.{{ domainSuffix }} --agree-tos -n
   when: inventory_hostname == groups.loadbalancers_controlplane[0]
 
 - name: Start HAProxy
@@ -90,6 +90,9 @@
       openshift_logging_kibana_cert="/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem"
       openshift_logging_kibana_key="/home/cloud-user/ocp.{{ domainSuffix }}/privkey1.pem"
       openshift_logging_kibana_ca="/home/cloud-user/ocp.{{ domainSuffix }}/chain1.pem"
+      openshift_hosted_registry_routehost=registry.{{ domainSuffix }}
+      openshift_hosted_registry_routecertificates={"certfile": "/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem", "keyfile": "/home/cloud-user/ocp.{{ domainSuffix }}/privkey1.pem", "cafile": "/home/cloud-user/ocp.{{ domainSuffix }}/chain1.pem"}
+      openshift_hosted_registry_routetermination=reencrypt
   when: inventory_hostname == 'localhost'
 
 - name: Refresh inventory to pick up additions above
