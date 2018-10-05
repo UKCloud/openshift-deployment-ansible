@@ -18,7 +18,7 @@ openshift_deployment_type=openshift-enterprise
 os_sdn_network_plugin_name=redhat/openshift-ovs-multitenant
 
 # sets up the correct auth provider - openid integrated SSO or htpasswd as fallback
-{% if sso_details is defined and sso_client_secret is defined and sso_urls is defined %}
+{% if sso_client_id is defined and sso_client_secret is defined and sso_urls is defined %}
 openshift_master_identity_providers=[{"name": "UKCloud-SSO", "login": "true", "challenge": "false", "kind": "OpenIDIdentityProvider", "client_id": "{{ sso_client_id }}", "client_secret": "{{ sso_client_secret }}", "claims": {"id": ["sub"], "preferredUsername": ["preferred_username"], "name": ["name"], "email": ["email"]}, "urls": {{ sso_urls }} }]
 openshift_master_openid_ca_file="/etc/ssl/certs/ca-bundle.crt"
 {% else %}
