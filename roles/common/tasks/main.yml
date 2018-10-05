@@ -39,6 +39,27 @@
     name: network
     state: restarted 
   when: set_node_routes and inventory_hostname != 'localhost'
+  
+- name: Remove servers from chrony.conf
+  replace:
+    path: /etc/chrony.conf
+    regexp: '^server.*iburst$'
+    replace: ''
+  when: multinetwork and inventory_hostname in groups.net2_all
+
+- name: Add net2 ntp servers to chrony config file
+  lineinfile:
+    path: /etc/chrony.conf
+    insertafter: '^#\sPlease\sconsider'
+    line: server {{ item }} iburst
+  with_items: "{{ net2_ntp_servers }}"
+  when: multinetwork and inventory_hostname in groups.net2_all
+
+- name: Restart chronyd to apply config changes
+  service:
+    name: chronyd
+    state: restarted
+  when: multinetwork and inventory_hostname in groups.net2_all
 
 - name: Tidy up hosts file on bastion
   blockinfile:

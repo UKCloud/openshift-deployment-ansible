@@ -87,17 +87,17 @@ backend atomic-openshift-router-http
     mode tcp
     {% if ansible_fqdn in groups.loadbalancers_internet_dataplane %}
     {% for ip, hostname in infrastructure_node_details.items() %}
-      server     {{ hostname }} {{ ip }}:80 check
+      server     {{ hostname }} {{ ip }}:80 check send-proxy-v2
     {% endfor %}
     {% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}
     {% if groups.nodes_net2 |length > 0 %}
     {% for ip, hostname in worker_details_net2.items() %}
-      server     {{ hostname }} {{ ip }}:80 check
+      server     {{ hostname }} {{ ip }}:80 check send-proxy-v2
     {% endfor %}
     {% endif %}
     {% else %}
     {% for ip, hostname in infrastructure_node_details.items() %}
-      server     {{ hostname }} {{ ip }}:80 check
+      server     {{ hostname }} {{ ip }}:80 check send-proxy-v2
     {% endfor %}
     {% endif %} 
  
@@ -119,17 +119,17 @@ backend atomic-openshift-router-ssl
     option ssl-hello-chk
     {% if ansible_fqdn in groups.loadbalancers_internet_dataplane %}
     {% for ip, hostname in infrastructure_node_details.items() %}
-      server     {{ hostname }} {{ ip }}:443 check
+      server     {{ hostname }} {{ ip }}:443 check send-proxy-v2-ssl
     {% endfor %}
     {% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}
     {% if groups.nodes_net2 |length > 0 %}
     {% for ip, hostname in worker_details_net2.items() %}
-      server     {{ hostname }} {{ ip }}:443 check
+      server     {{ hostname }} {{ ip }}:443 check send-proxy-v2-ssl
     {% endfor %}
     {% endif %}
     {% else %}
     {% for ip, hostname in infrastructure_node_details.items() %}
-      server     {{ hostname }} {{ ip }}:443 check
+      server     {{ hostname }} {{ ip }}:443 check send-proxy-v2-ssl
     {% endfor %}
     {% endif %}
 
@@ -140,7 +140,7 @@ backend atomic-openshift-router-http-eg
     balance source
     mode tcp
     {% for ip, hostname in infrastructure_node_details.items() %}
-      server     {{ hostname }} {{ ip }}:7080 check
+      server     {{ hostname }} {{ ip }}:7080 check send-proxy-v2
     {% endfor %}
 
 backend atomic-openshift-router-ssl-eg
@@ -160,7 +160,7 @@ backend atomic-openshift-router-ssl-eg
     stick store-response payload_lv(43,1) if serverhello
     option ssl-hello-chk
     {% for ip, hostname in infrastructure_node_details.items() %}
-      server     {{ hostname }} {{ ip }}:7443 check
+      server     {{ hostname }} {{ ip }}:7443 check send-proxy-v2-ssl
     {% endfor %}
 
 
