@@ -30,7 +30,7 @@ openshift_master_cluster_method=native
 openshift_master_cluster_hostname=console.{{ localDomainSuffix }}
 openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
 
-openshift_release=v"{{ openshiftVersion }}"
+openshift_release=v{{ openshiftVersion }}
 ### review how this is working at the moment - no sign of revisions of minor releases in rh container registry
 # openshift_image_tag=v{{ installed_version[0] }}
 openshift_image_tag=v{{ openshiftVersion }}
