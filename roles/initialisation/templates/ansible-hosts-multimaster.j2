@@ -124,6 +124,8 @@ openshift_logging_es_pvc_size=20Gi
 openshift_logging_curator_nodeselector={"node-role.kubernetes.io/infra":"true"}
 openshift_logging_kibana_nodeselector={"node-role.kubernetes.io/infra":"true"}
 openshift_logging_es_nodeselector={"node-role.kubernetes.io/infra":"true"}
+# Set the default memory limit for elasticsearch so that the pod can be scheduled to an infra node
+openshift_logging_es_memory_limit="8Gi"
 
 # fix to make the ansible service broker deploy to the correct nodes rather than all or none
 # RH ticket #02020379
