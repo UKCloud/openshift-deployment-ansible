@@ -1,3 +1,12 @@
+- name: Get admin password from local file
+  shell: "/usr/bin/cat /home/cloud-user/passwords.txt | cut -d : -f 2"
+  register: openshiftpwd
+  delegate_to: 127.0.0.1
+
+- name: Log bastion into oc
+  shell: /usr/bin/oc login https://{{ domainSuffix }}:8443 -u admin -p {{ openshiftpwd.stdout }}
+  delegate_to: 127.0.0.1
+
 - name: Drain the node
   shell: /usr/bin/oc adm drain {{ inventory_hostname }} --delete-local-data --ignore-daemonsets
   delegate_to: 127.0.0.1
