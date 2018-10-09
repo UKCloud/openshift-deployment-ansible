@@ -1,4 +1,11 @@
-- hosts: all, localhost
+- hosts: loadbalancers, localhost
   any_errors_fatal: true
   roles:
-    - patching
+    - patch_external
+
+- hosts: nodes_internet
+  serial: 1
+  any_errors_fatal: true
+  roles:
+    - patch_nodes
+

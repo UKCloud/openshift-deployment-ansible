@@ -1,0 +1,46 @@
+- name: Drain the node
+  shell: /usr/bin/oc adm drain {{ inventory_hostname }} --delete-local-data --ignore-daemonsets
+  delegate_to: 127.0.0.1
+
+- pause:
+    prompt: "Pausing to allow pods to drain"
+    seconds: 30
+
+- name: Patch worker
+  atomic_host:
+    revision: latest
+
+- name: Reboot worker
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+
+- name: Wait for connection
+  wait_for_connection:
+    delay: 30
+    sleep: 5
+    timeout: 600
+
+- name: Wait until worker is in 'Ready' state
+  shell: /usr/bin/oc get node | grep {{ inventory_hostname }} | awk '{ print $2 }' | cut -d , -f 1
+  register: status
+  until: status.stdout == "Ready"
+  delay: 5
+  retries: 15
+  delegate_to: 127.0.0.1  
+
+- pause:
+    prompt: "Pausing for 30 seconds"
+    seconds: 30
+
+- name: Re-apply nova zone label
+  shell: /usr/bin/oc label node {{ inventory_hostname }} failure-domain.beta.kubernetes.io/zone=nova --overwrite
+  delegate_to: 127.0.0.1
+
+- name: Make worker schedulable again
+  shell: /usr/bin/oc adm manage-node {{ inventory_hostname }} --schedulable
+  delegate_to: 127.0.0.1
+
+- pause:
+    prompt: "Pause for 30 seconds before looping"
+    seconds: 30
