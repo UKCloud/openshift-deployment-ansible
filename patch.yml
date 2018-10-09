@@ -3,7 +3,7 @@
   roles:
     - patch_external
 
-- hosts: nodes_internet
+- hosts: nodes
   serial: 1
   any_errors_fatal: true
   roles:
