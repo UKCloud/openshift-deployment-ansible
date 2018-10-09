@@ -1,0 +1,52 @@
+{% for ip, hostname in worker_details.items() %}
+- name: Drain the worker node
+  shell: /usr/local/bin/oc adm drain {{ hostname }} --delete-local-data --ignore-daemonsets
+  when: inventory_hostname == groups.masters[0]
+
+- pause:
+    prompt: "Pausing to allow pods to drain"
+    seconds: 30
+
+- name: Patch worker
+  atomic_host:
+    revision: latest
+  when: inventory_hostname == '{{ hostname }}'
+
+- name: Reboot worker
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+  when: inventory_hostname == '{{ hostname }}'
+
+- name: Wait for connection
+  wait_for_connection:
+    delay: 30
+    sleep: 5
+    timeout: 600
+  when: inventory_hostname == '{{ hostname }}'
+
+- name: Wait until worker is in 'Ready' state
+  shell: /usr/local/bin/oc get node | grep {{ hostname }} | awk '{ print $2 }' | cut -d , -f 1
+  register: status
+  until: status.stdout == "Ready"
+  delay: 5
+  retries: 15
+  when: inventory_hostname == groups.masters[0]
+
+- pause:
+    prompt: "Pausing for 30 seconds"
+    seconds: 30
+
+- name: Re-apply nova zone label
+  shell: /usr/local/bin/oc label node {{ hostname }} failure-domain.beta.kubernetes.io/zone=nova --overwrite
+  when: inventory_hostname == groups.masters[0]
+
+- name: Make worker schedulable again
+  shell: /usr/local/bin/oc adm manage-node {{ hostname }} --schedulable
+  when: inventory_hostname == groups.masters[0]
+
+- pause:
+    prompt: "Pause for 30 seconds before looping"
+    seconds: 30
+
+{% endfor %}
