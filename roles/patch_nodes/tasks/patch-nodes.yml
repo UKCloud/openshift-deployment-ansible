@@ -6,11 +6,11 @@
     prompt: "Pausing to allow pods to drain"
     seconds: 30
 
-- name: Patch worker
+- name: Patch node
   atomic_host:
     revision: latest
 
-- name: Reboot worker
+- name: Reboot node
   shell: "sleep 5 && reboot"
   async: 1
   poll: 0
@@ -21,7 +21,7 @@
     sleep: 5
     timeout: 600
 
-- name: Wait until worker is in 'Ready' state
+- name: Wait until node is in 'Ready' state
   shell: /usr/bin/oc get node | grep {{ inventory_hostname }} | awk '{ print $2 }' | cut -d , -f 1
   register: status
   until: status.stdout == "Ready"
@@ -37,7 +37,7 @@
   shell: /usr/bin/oc label node {{ inventory_hostname }} failure-domain.beta.kubernetes.io/zone=nova --overwrite
   delegate_to: 127.0.0.1
 
-- name: Make worker schedulable again
+- name: Make node schedulable again
   shell: /usr/bin/oc adm manage-node {{ inventory_hostname }} --schedulable
   delegate_to: 127.0.0.1
 
