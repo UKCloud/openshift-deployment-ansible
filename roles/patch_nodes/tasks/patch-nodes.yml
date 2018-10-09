@@ -4,7 +4,7 @@
   delegate_to: 127.0.0.1
 
 - name: Log bastion into oc
-  shell: /usr/bin/oc login https://{{ domainSuffix }}:8443 -u admin -p {{ openshiftpwd.stdout }}
+  shell: /usr/bin/oc login https://ocp.{{ domainSuffix }}:8443 -u admin -p {{ openshiftpwd.stdout }}
   delegate_to: 127.0.0.1
 
 - name: Drain the node
