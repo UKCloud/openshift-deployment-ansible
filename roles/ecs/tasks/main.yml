@@ -6,7 +6,7 @@
   register: to_delete_json
 
 - set_fact:
-    to_delete: ""{{ to_delete_json | json_query('files[*].path')
+    to_delete: "{{ to_delete_json | json_query('files[*].path') }}"
 
 - name: Delete files
   file:
