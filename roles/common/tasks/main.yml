@@ -92,3 +92,17 @@
     state: restarted
     daemon_reload: yes
   when: inventory_hostname in groups.loadbalancers
+
+- name: Setup kernal bind parameters for tenant/net2 nodes
+  sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: 1
+    state: present
+  when: inventory_hostname in groups.nodes_internet or inventory_hostname in groups.nodes_net2
+
+- name: Setup kernal ip_forward parameters for tenant/net2 nodes
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    state: present
+  when: inventory_hostname in groups.nodes_internet or inventory_hostname in groups.nodes_net2
