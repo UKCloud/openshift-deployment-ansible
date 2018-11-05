@@ -32,8 +32,8 @@ openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
 
 openshift_release=v{{ openshiftVersion }}
 ### review how this is working at the moment - no sign of revisions of minor releases in rh container registry
-# openshift_image_tag=v{{ installed_version[0] }}
-openshift_image_tag=v{{ openshiftVersion }}
+openshift_image_tag=v{{ installed_version[0] }}
+# openshift_image_tag=v{{ openshiftVersion }}
 
 ### deprecated - probably can be removed ###
 #openshift_set_hostname=true
