@@ -25,8 +25,8 @@
     - controllers
   when: inventory_hostname == groups.masters[0]
 
-pause:
-  seconds: 10
+  pause:
+    seconds: 10
 
 - name: Restart master[1] services so config changes take effect
   shell: /usr/local/bin/master-restart {{ item }}
@@ -35,8 +35,8 @@ pause:
     - controllers
   when: inventory_hostname == groups.masters[1]
 
-pause:
-  seconds: 10
+  pause:
+    seconds: 10
 
 - name: Restart master[2] services so config changes take effect
   shell: /usr/local/bin/master-restart {{ item }}
