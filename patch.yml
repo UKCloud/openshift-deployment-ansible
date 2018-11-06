@@ -1,0 +1,21 @@
+- hosts: localhost
+  tasks:
+
+  - name: Get admin password from local file
+    shell: "/usr/bin/cat /home/cloud-user/passwords.txt | cut -d : -f 2"
+    register: openshiftpwd
+
+  - name: Log bastion into oc
+    shell: /usr/bin/oc login https://ocp.{{ domainSuffix }}:8443 -u admin -p {{ openshiftpwd.stdout }}
+
+- hosts: loadbalancers, localhost
+  any_errors_fatal: true
+  roles:
+    - patch_external
+
+- hosts: nodes
+  serial: 1
+  any_errors_fatal: true
+  roles:
+    - patch_nodes
+
