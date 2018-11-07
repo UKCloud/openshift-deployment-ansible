@@ -95,6 +95,8 @@
     - ROUTER_SERVICE_HTTP_PORT=7080
     - ROUTER_SERVICE_HTTPS_PORT=7443
     - ROUTE_LABELS="router-private=true"
+    - ROUTER_SERVICE_NO_SNI_PORT=11443
+    - ROUTER_SERVICE_SNI_PORT=11444
   when: extra_gateway_vip is defined
 
 - name: Scale up private network routers
