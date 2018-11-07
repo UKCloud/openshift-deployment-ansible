@@ -14,6 +14,7 @@
 
 - name: create tier-1 class 
   command: /usr/local/bin/oc create -f ~/storage-class-tier1.yml
+  ignore_errors: True
 
 #- name: create tier-2 class 
 #  command: /usr/local/bin/oc create -f ~/storage-class-tier2.yml
@@ -59,10 +60,12 @@
 - name: Create registry cert secret
   command: /usr/local/bin/oc secrets new console-secret /home/cloud-user/registry.cert
   when: getCertificates == True
+  ignore_errors: True
 
 - name: Mount secret to registry console container and trigger new deploy
   command: /usr/local/bin/oc volume dc/registry-console --add --type=secret --secret-name=console-secret -m /etc/cockpit/ws-certs.d
   when: getCertificates == True
+  ignore_errors: True
 
 - name: Setup secondary network routers
   command: /usr/local/bin/oc adm router router-secondary --replicas=0 --selector='router=secondary' --service-account=router
@@ -117,6 +120,7 @@
 
 - name: Create 'monitoring' serviceaccount for monitoring use
   shell: /usr/local/bin/oc project openshift-infra && /usr/local/bin/oc create serviceaccount monitoring
+  ignore_errors: True
 
 - name: Give 'monitoring' service account correct permissions
   command: /usr/local/bin/oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:monitoring
