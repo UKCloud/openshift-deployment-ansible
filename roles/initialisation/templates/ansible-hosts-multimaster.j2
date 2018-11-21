@@ -50,7 +50,7 @@ openshift_buildoverrides_tolerations=[{'key':'infra','value':'only','effect':'No
 openshift_master_default_subdomain={{ domainSuffix }}
 
 # Set Docker log driver to write to journald
-openshift_docker_options="--log-driver=journald"
+openshift_docker_options="--log-driver=json-file --log-opt max-size=3M --log-opt max-file=5"
 
 # ROUTER
 openshift_hosted_router_selector='router=true'
