@@ -98,9 +98,9 @@ openshift_storageclass_provisioner= "cinder"
 openshift_storageclass_parameters={ 'type': 'TIER2', 'availability': 'nova' }
 
 # openshift stats deployment - comment out if no stats deployment is required. this will run on the worker nodes
-openshift_hosted_metrics_deploy=true
+openshift_metrics_install_metrics=true
 openshift_metrics_hawkular_hostname=hawkular-metrics.{{ domainSuffix }}
-openshift_hosted_metrics_storage_kind=dynamic
+openshift_metrics_cassandra_storage_type=dynamic
 openshift_metrics_cassandra_pvc_size=10Gi
 # Node selectors for hawkular metrics
 openshift_metrics_cassandra_nodeselector={"node-role.kubernetes.io/infra":"true"}
@@ -133,6 +133,26 @@ template_service_broker_selector={"node-role.kubernetes.io/infra":"true"}
 
 # Ansible service broker node selector
 ansible_service_broker_node_selector={"node-role.kubernetes.io/infra":"true"}
+
+# New v3.11 features
+# Monitoring
+openshift_cluster_monitoring_operator_install=true
+openshift_cluster_monitoring_operator_prometheus_storage_enabled=true
+openshift_cluster_monitoring_operator_prometheus_storage_class_name=tier2
+openshift_cluster_monitoring_operator_prometheus_storage_capacity="50Gi"
+openshift_cluster_monitoring_operator_alertmanager_storage_enabled=true
+openshift_cluster_monitoring_operator_alertmanager_storage_class_name=tier2
+openshift_cluster_monitoring_operator_alertmanager_storage_capacity="2Gi"
+#openshift_prometheus_storage_type=pvc
+#openshift_prometheus_alertmanager_storage_type=pvc
+#openshift_prometheus_alertbuffer_storage_type=pvc
+
+# New registry authentication options
+oreg_auth_url=registry.redhat.io
+# this needs parameterised
+oreg_auth_user=6468465|311-deployment-testing
+oreg_auth_password=eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiI1N2Y1OTljNDkwMzc0NzgzYjJhMDE0NmQ5YzQ2YjM0YyJ9.qK6GyMyWJj3tZ3_QCnUp0WcOTWrZZmXlTTNCVdjzJDVkC0ip3xW9wx0diGzxR7G4emYZQ1ZTkCtx1G8oFDCfgkaIJuOJ8zsQ6mk7kyHvm-7ETI6sIUv4v8Zzz_oqFDVe4d5ut_-J91s11SsimzK1noVGQOM4EePOvCoKWw65W8FOSXXS1JNlCNitEh9oXFEr0FLh4FLzkMoVr_BLsLL6a7iQ0w0OIg6XYaK_NFEPCCqlS129kzzj9E97Lwh95PqoEHo79HsYn4hNZ5wTLLIJO7FhGZHCiTfQzP-ms2sp0aF2K0igcHtd0JWQXwaAMd7JNw5yfI0UNWPzGJxVvtpo1u1mxLensxLn9qdr1vZeO67DH0-o7DN2zg5Y0xs3EjcTHIzrPgY2PyKOaYu0HU_PPzbmHUkvPhCmXxIfpshj34FKh3BJ31QfexodZLm_Tx3Cu4DTzw10z-byIbk74qxWLqhtSoASakLsZ005CVqMVV3LzRnAZ4GZEmeSrjealSLDpAeJobsMXPvUG2zPB5pKUA27nRLTTBvwiK11vFYy_hyLGLNU92ofOLROqnMGq5X5qHy4uJB4eApEyQK088RtVuhJBvOK6YPClBlUNSRCfmWo41LKUQKMzh8gyAvtc4I3yE1fGl1Avh2-TfuKu5CwdjK9K1co_hqvayRrr9rmKDY
+
 
 ### Setup the default node labels for each node type
 openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true']},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','internet=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}{% if multinetwork %},'net2=true','build=true','tenant=true'{% endif %}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true']},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true']}]
