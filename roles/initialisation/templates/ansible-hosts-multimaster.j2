@@ -19,7 +19,7 @@ os_sdn_network_plugin_name=redhat/openshift-ovs-multitenant
 
 # sets up the correct auth provider - openid integrated SSO or htpasswd as fallback
 {% if sso_client_id is defined and sso_client_id != "<client ID>"  %}
-openshift_master_identity_providers=[{"name": "UKCloud-SSO", "login": "true", "challenge": "false", "kind": "OpenIDIdentityProvider", "client_id": "{{ sso_client_id }}", "client_secret": "{{ sso_client_secret }}", "claims": {"id": ["sub"], "preferredUsername": ["preferred_username"], "name": ["name"], "email": ["email"]}, "urls": {{ sso_urls|regex_replace('([\w:\/.\-\?\=%\s]*)("logout":\s*"(?1)",\s*|,\s*"logout":\s*"(?1)")','')}} }]
+openshift_master_identity_providers=[{"name": "UKCloud-SSO", "login": "true", "challenge": "false", "kind": "OpenIDIdentityProvider", "client_id": "{{ sso_client_id }}", "client_secret": "{{ sso_client_secret }}", "claims": {"id": ["sub"], "preferredUsername": ["preferred_username"], "name": ["name"], "email": ["email"]}, "urls": {{ sso_urls|regex_replace('("logout":\s*"[\w:\/.\-\?\=%\s]*",\s*|,\s*"logout":\s*"[\w:\/.\-\?\=%\s]*")','') }} }]]]
 openshift_master_openid_ca_file="/etc/ssl/certs/ca-bundle.crt"
 openshift_master_logout_url='{{ (sso_urls|from_json).logout }}'
 {% else %}
