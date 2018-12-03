@@ -5,6 +5,7 @@
     - firewalld
     - keepalived
     - haproxy
+    - squid
 
 - hosts: loadbalancers_internet_dataplane
   vars:
