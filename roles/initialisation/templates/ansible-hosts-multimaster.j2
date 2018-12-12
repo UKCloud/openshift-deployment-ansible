@@ -36,6 +36,10 @@ openshift_release=v{{ openshiftVersion }}
 openshift_image_tag=v{{ installed_version[0] }}
 # openshift_image_tag=v{{ openshiftVersion }}
 
+# Kubelet arguments for nodes
+openshift_node_kubelet_args={'kubelet-reserved':'cpu=200m,memory=512Mi'}
+
+
 ### deprecated - probably can be removed ###
 #openshift_set_hostname=true
 # Makes the openshift_ip setting in the host groups are below take effect.
