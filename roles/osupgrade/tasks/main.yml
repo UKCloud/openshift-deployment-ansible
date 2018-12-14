@@ -13,7 +13,7 @@
 # N.B. Atomic is detected as 'RedHat' so we need the file test above too.
 - name: "Upgrade nodes where OS=Atomic (masters, workers)"
   atomic_host:
-    revision: latest
+    revision: 7.5.4
   when: atomic_host.stat.exists == True
 
 - name: "Upgrade nodes where OS=Redhat (loadbalancers)"
