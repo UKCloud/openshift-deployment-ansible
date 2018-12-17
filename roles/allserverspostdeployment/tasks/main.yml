@@ -11,14 +11,14 @@
     - 7443
   when: extra_gateway_vip is defined and inventory_hostname in groups.nodes_infra
 
-  - name: Block root login via SSH to all instances
-    replace:
-      path: /etc/ssh/sshd_config
-      regexp: '^.*PermitRootLogin.*$'
-      replace: 'PermitRootLogin no'
+- name: Block root login via SSH to all instances
+  replace:
+    path: /etc/ssh/sshd_config
+    regexp: '^.*PermitRootLogin.*$'
+    replace: 'PermitRootLogin no'
 
-  - name: Reload sshd service to apply changes
-    systemd:
-      state: reloaded
-      name: sshd
+- name: Reload sshd service to apply changes
+  systemd:
+    state: reloaded
+    name: sshd
  
