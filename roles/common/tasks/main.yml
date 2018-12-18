@@ -103,6 +103,21 @@
 - debug:
     var: proxy_result
 
+- name: Setup proxys in environment on node
+  blockinfile:
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - proxy config"
+    block: |
+      http_proxy=http://{{ haproxy_vip }}:3128
+      export  http_proxy
+      https_proxy=https://{{ haproxy_vip }}:3128
+      export  https_proxy
+    path: /etc/environment
+    backup: yes
+    create: yes
+  when: multinetwork and inventory_hostname in groups.nodes_net2
+  become: yes
+  become_method: sudo
+
 - name: Setup http_proxy for docker daemon
   blockinfile:
     marker: "# {mark} ANSIBLE MANAGED BLOCK - HTTP_PROXY"
