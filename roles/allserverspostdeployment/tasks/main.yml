@@ -14,7 +14,7 @@
 - name: Block root login via SSH to all instances
   replace:
     path: /etc/ssh/sshd_config
-    regexp: '^.PermitRootLogin.*$|^PermitRootLogin.*$'
+    regexp: '^.?PermitRootLogin.*$'
     replace: 'PermitRootLogin no'
     backup: yes
 
