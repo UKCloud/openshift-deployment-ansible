@@ -122,4 +122,4 @@
   command: /usr/local/bin/oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:monitoring
 
 - name: Patch nodeSelector into metrics-server deployment
-  shell: /usr/local/bin/oc patch deployment.apps/metrics-server -p '{"spec":{"template":{"spec":{"nodeSelector":{"infra":"'"true"'"}}}}}' -n openshift-metrics-server
+  command: /usr/local/bin/oc patch deployment.apps/metrics-server -p '{"spec":{"template":{"spec":{"nodeSelector":{"infra":"'"true"'"}}}}}' -n openshift-metrics-server
