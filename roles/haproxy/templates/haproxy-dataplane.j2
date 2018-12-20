@@ -90,9 +90,8 @@ backend atomic-openshift-router-http
       server     {{ hostname }} {{ ip }}:80 check send-proxy-v2
     {% endfor %}
     {% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}
-    {% if groups.nodes_net2 |length > 0 %}
-    {% for ip, hostname in worker_details_net2.items() %}
-      server     {{ hostname }} {{ ip }}:80 check send-proxy-v2
+    {% for ip, hostname in infrastructure_node_details.items() %}
+      server     {{ hostname }} {{ ip }}:6080 check send-proxy-v2
     {% endfor %}
     {% endif %}
     {% else %}
@@ -122,9 +121,8 @@ backend atomic-openshift-router-ssl
       server     {{ hostname }} {{ ip }}:443 check send-proxy-v2-ssl
     {% endfor %}
     {% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}
-    {% if groups.nodes_net2 |length > 0 %}
-    {% for ip, hostname in worker_details_net2.items() %}
-      server     {{ hostname }} {{ ip }}:443 check send-proxy-v2-ssl
+    {% for ip, hostname in infrastructure_node_details.items() %}
+      server     {{ hostname }} {{ ip }}:6443 check send-proxy-v2-ssl
     {% endfor %}
     {% endif %}
     {% else %}
