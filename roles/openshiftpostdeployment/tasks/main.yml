@@ -65,24 +65,27 @@
   when: getCertificates == True
 
 - name: Setup secondary network routers
-  command: /usr/local/bin/oc adm router router-secondary --replicas=0 --selector='router=secondary' --service-account=router
+  command: /usr/local/bin/oc adm router router-secondary --replicas=0 --selector='router=secondary' --service-account=router --stats-port=1938 --ports='6080:6080,6443:6443' -n default
   when: multinetwork
 
-- name: Setup secondary network router envs
-  command: /usr/local/bin/oc set env dc/router-secondary ROUTE_LABELS="router-secondary=true"
+- name: Setup secondary network router environment
+  command: /usr/local/bin/oc set env dc/router-secondary {{ item }} -n default
+  with_items:
+    - ROUTER_SERVICE_HTTP_PORT=6080
+    - ROUTER_SERVICE_HTTPS_PORT=6443
+    - ROUTE_LABELS="router-secondary=true"
+    - ROUTER_SERVICE_NO_SNI_PORT=13443
+    - ROUTER_SERVICE_SNI_PORT=13444
+    - ROUTER_USE_PROXY_PROTOCOL=true
   when: multinetwork
 
 - name: Allow Source IP to be received on primary router from the HAProxy
   command: /usr/local/bin/oc env dc/router ROUTER_USE_PROXY_PROTOCOL=true
 
-- name: Allow Source IP to be received on secondary router from HAProxy
-  command: /usr/local/bin/oc env dc/router-secondary ROUTER_USE_PROXY_PROTOCOL=true
-  when: multinetwork
-
 - name: Scale up secondary network routers
   vars:
-    net2_scale: "{{ groups['nodes_net2'] | length }}"
-  command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }}
+    infra_scale: "{{ groups['nodes_infra'] | length }}"
+  command: /usr/local/bin/oc scale dc router-secondary --replicas={{ infra_scale }}
   when: multinetwork
 
 - name: Setup routers for private networks (extra gateway)
@@ -97,16 +100,13 @@
     - ROUTE_LABELS="router-private=true"
     - ROUTER_SERVICE_NO_SNI_PORT=11443
     - ROUTER_SERVICE_SNI_PORT=11444
+    - ROUTER_USE_PROXY_PROTOCOL=true
   when: extra_gateway_vip is defined
 
 - name: Scale up private network routers
   vars:
     infra_scale: "{{ groups['nodes_infra'] | length }}"
   command: /usr/local/bin/oc scale dc router-private --replicas={{ infra_scale }} -n default
-  when: extra_gateway_vip is defined
-
-- name: Allow Source IP to be received on private router from HAProxy
-  command: /usr/local/bin/oc env dc/router-private ROUTER_USE_PROXY_PROTOCOL=true
   when: extra_gateway_vip is defined
 
 - name: taint infrastructure nodes to prevent customer applications scheduling

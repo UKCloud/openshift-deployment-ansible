@@ -38,6 +38,14 @@
     - 7080
   when: inventory_hostname in groups.loadbalancers_dataplane
 
+- name: Allow port 6443 and 6080 to use httpd
+  command: semanage port -a -t http_port_t -p tcp "{{ item }}"
+  become: true
+  with_items:
+    - 6443
+    - 6080
+  when: inventory_hostname in groups.loadbalancers_net2_dataplane
+
 - name: Enable haproxy
   command: systemctl enable haproxy
 
