@@ -108,9 +108,9 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK - proxy config"
     block: |
       http_proxy=http://{{ haproxy_vip }}:3128
-      export  http_proxy
+      export http_proxy
       https_proxy=https://{{ haproxy_vip }}:3128
-      export  https_proxy
+      export https_proxy
     path: /etc/environment
     backup: yes
     create: yes
