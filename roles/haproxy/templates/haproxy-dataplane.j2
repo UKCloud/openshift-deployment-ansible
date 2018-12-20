@@ -93,11 +93,6 @@ backend atomic-openshift-router-http
     {% for ip, hostname in infrastructure_node_details.items() %}
       server     {{ hostname }} {{ ip }}:6080 check send-proxy-v2
     {% endfor %}
-    {% endif %}
-    {% else %}
-    {% for ip, hostname in infrastructure_node_details.items() %}
-      server     {{ hostname }} {{ ip }}:80 check send-proxy-v2
-    {% endfor %}
     {% endif %} 
  
 backend atomic-openshift-router-ssl
@@ -123,11 +118,6 @@ backend atomic-openshift-router-ssl
     {% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}
     {% for ip, hostname in infrastructure_node_details.items() %}
       server     {{ hostname }} {{ ip }}:6443 check send-proxy-v2-ssl
-    {% endfor %}
-    {% endif %}
-    {% else %}
-    {% for ip, hostname in infrastructure_node_details.items() %}
-      server     {{ hostname }} {{ ip }}:443 check send-proxy-v2-ssl
     {% endfor %}
     {% endif %}
 
