@@ -15,6 +15,7 @@
   atomic_host:
     revision: 7.5.4
   when: atomic_host.stat.exists == True
+  ignore_errors: yes
 
 - name: "Upgrade nodes where OS=Redhat (loadbalancers)"
   yum:
