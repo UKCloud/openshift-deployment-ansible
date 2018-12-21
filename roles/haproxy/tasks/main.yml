@@ -33,7 +33,6 @@
 - name: Allow port 7443 and 7080 to use httpd
   command: semanage port -a -t http_port_t -p tcp "{{ item }}"
   become: true
-  ignore_errors: true
   with_items:
     - 7443
     - 7080
@@ -42,7 +41,6 @@
 - name: Allow port 5443 and 5080 to use httpd
   command: semanage port -a -t http_port_t -p tcp "{{ item }}"
   become: true
-  ignore_errors: true
   with_items:
     - 5443
     - 5080
