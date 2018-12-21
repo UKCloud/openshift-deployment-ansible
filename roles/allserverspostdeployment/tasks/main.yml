@@ -20,8 +20,8 @@
     jump: ACCEPT
     comment: Open port for secondary network router
   with_items:
-    - 6080
-    - 6443
+    - 5080
+    - 5443
   when: multinetwork and inventory_hostname in groups.nodes_infra
 
 - name: Block root login via SSH to all instances

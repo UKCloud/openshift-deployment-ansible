@@ -91,7 +91,7 @@ backend atomic-openshift-router-http
     {% endfor %}
     {% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}
     {% for ip, hostname in infrastructure_node_details.items() %}
-      server     {{ hostname }} {{ ip }}:6080 check send-proxy-v2
+      server     {{ hostname }} {{ ip }}:5080 check send-proxy-v2
     {% endfor %}
     {% endif %} 
  
@@ -117,7 +117,7 @@ backend atomic-openshift-router-ssl
     {% endfor %}
     {% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}
     {% for ip, hostname in infrastructure_node_details.items() %}
-      server     {{ hostname }} {{ ip }}:6443 check send-proxy-v2-ssl
+      server     {{ hostname }} {{ ip }}:5443 check send-proxy-v2-ssl
     {% endfor %}
     {% endif %}
 

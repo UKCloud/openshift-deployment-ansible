@@ -65,14 +65,14 @@
   when: getCertificates == True
 
 - name: Setup secondary network routers
-  command: /usr/local/bin/oc adm router router-secondary --replicas=0 --selector='router=secondary' --service-account=router --stats-port=1938 --ports='6080:6080,6443:6443' -n default
+  command: /usr/local/bin/oc adm router router-secondary --replicas=0 --selector='router=secondary' --service-account=router --stats-port=1938 --ports='5080:5080,5443:5443' -n default
   when: multinetwork
 
 - name: Setup secondary network router environment
   command: /usr/local/bin/oc set env dc/router-secondary {{ item }} -n default
   with_items:
-    - ROUTER_SERVICE_HTTP_PORT=6080
-    - ROUTER_SERVICE_HTTPS_PORT=6443
+    - ROUTER_SERVICE_HTTP_PORT=5080
+    - ROUTER_SERVICE_HTTPS_PORT=5443
     - ROUTE_LABELS="router-secondary=true"
     - ROUTER_SERVICE_NO_SNI_PORT=13443
     - ROUTER_SERVICE_SNI_PORT=13444
