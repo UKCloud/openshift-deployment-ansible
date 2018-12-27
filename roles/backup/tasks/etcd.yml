@@ -33,10 +33,10 @@
     format: gz
   when: inventory_hostname == groups.masters[0]
 
-- name: Fetch tar file back to bastion
+- name: Fetch tar.gz file back to bastion
   fetch:
     src: /home/cloud-user/etcd-data.bak.tar.gz
-    dest: /home/cloud-user/backups/etcd-data.bak.tar.gz-{{ datetime }}
+    dest: /home/cloud-user/backups/etcd-data.bak-{{ datetime }}.tar.gz
     flat: yes
   when: inventory_hostname == groups.masters[0]
 
@@ -51,21 +51,21 @@
 - name: Backup etcd config on all masters
   archive:
     path: /etc/etcd
-    dest: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar
-    format: tar
+    dest: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar.gz
+    format: gz
     owner: cloud-user
     group: cloud-user
   when: inventory_hostname in groups.masters
 
-- name: Fetch tar files back to bastion
+- name: Fetch tar.gz files back to bastion
   fetch:
-    src: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar
-    dest: /home/cloud-user/backups/etcd-config-{{ ansible_hostname }}-{{ datetime }}.tar
+    src: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar.gz
+    dest: /home/cloud-user/backups/etcd-config-{{ ansible_hostname }}-{{ datetime }}.tar.gz
     flat: yes
   when: inventory_hostname in groups.masters
 
-- name: Remove tar files from masters
+- name: Remove tar.gz files from masters
   file:
-    path: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar
+    path: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar.gz
     state: absent
   when: inventory_hostname in groups.masters
