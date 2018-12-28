@@ -12,6 +12,15 @@
     backup: yes
   when: inventory_hostname in groups.loadbalancers_controlplane
 
+- name: Setup whitelist file
+  copy:
+    dest: /etc/squid/sites.whitelist.txt
+    content: |
+        registry.access.redhat.com
+        registry.redhat.io
+    backup: yes
+  when: inventory_hostname in groups.loadbalancers_controlplane
+
 - name: setup firewall - squid
   firewalld:
     port: 3128/tcp

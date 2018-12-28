@@ -5,7 +5,7 @@
 # Example rule allowing access from your local networks.
 # Adapt to list your (internal) IP networks from where browsing
 # should be allowed
-acl localnet src 10.0.0.0/8	# RFC1918 possible internal network
+#acl localnet src 10.0.0.0/8	# RFC1918 possible internal network
 
 acl SSL_ports port 443
 acl Safe_ports port 80		# http
@@ -33,11 +33,13 @@ http_access deny to_localhost
 #
 # INSERT YOUR OWN RULE(S) HERE TO ALLOW ACCESS FROM YOUR CLIENTS
 #
+acl whitelist dstdomain "/etc/squid/sites.whitelist.txt"
+http_access allow whitelist
 
 # Example rule allowing access from your local networks.
 # Adapt localnet in the ACL section to list your (internal) IP networks
 # from where browsing should be allowed
-http_access allow localnet
+#http_access allow localnet
 http_access allow localhost
 
 # And finally deny all other access to this proxy
