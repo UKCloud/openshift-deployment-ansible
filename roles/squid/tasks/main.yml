@@ -18,6 +18,11 @@
     content: |
         registry.access.redhat.com
         registry.redhat.io
+        .ukcloud.com
+        .docker.io
+        .docker.com
+        .rubygems.org
+        .github.com
     backup: yes
   when: inventory_hostname in groups.loadbalancers_controlplane
 
