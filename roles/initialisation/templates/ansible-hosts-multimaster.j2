@@ -161,7 +161,7 @@ openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kube
 # Proxy variables for use when net2 deployment is in place
 openshift_http_proxy=http://{{ haproxy_vip }}:3128
 openshift_https_proxy=http://{{ haproxy_vip }}:3128
-openshift_no_proxy="frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com"
+openshift_no_proxy='frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com'
 #openshift_generate_no_proxy_hosts=true
 #openshift_builddefaults_git_http_proxy=http://{{ haproxy_vip }}:3128
 #openshift_builddefaults_git_https_proxy=http://{{ haproxy_vip }}:3128
