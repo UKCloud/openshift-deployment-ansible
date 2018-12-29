@@ -92,61 +92,61 @@
     state: restarted
     daemon_reload: yes
   when: inventory_hostname in groups.loadbalancers
-
-- name: Check for docker proxy settings
-  shell: systemctl cat --property=Environment docker | grep HTTPS_PROXY > /dev/null; echo $?
-  register: proxy_result
-  when: multinetwork and inventory_hostname in groups.nodes_net2
-  become: yes
-  become_method: sudo
-
-- debug:
-    var: proxy_result
-
-- name: Setup proxys in environment on node
-  blockinfile:
-    marker: "# {mark} ANSIBLE MANAGED BLOCK - proxy config"
-    block: |
-      http_proxy=http://{{ haproxy_vip }}:3128
-      https_proxy=https://{{ haproxy_vip }}:3128
-    path: /etc/environment
-    backup: yes
-    create: yes
-  when: multinetwork and inventory_hostname in groups.nodes_net2
-  become: yes
-  become_method: sudo
-
-- name: Setup http_proxy for docker daemon
-  blockinfile:
-    marker: "# {mark} ANSIBLE MANAGED BLOCK - HTTP_PROXY"
-    block: |
-      [Service]
-      Environment="HTTP_PROXY=http://{{ haproxy_vip }}:3128"
-    path: /etc/systemd/system/docker.service.d/http-proxy.conf
-    backup: no
-    create: yes
-  when: multinetwork and inventory_hostname in groups.nodes_net2 and proxy_result.stdout == "1"
-  become: yes
-  become_method: sudo
-
-- name: Setup https_proxy for docker daemon
-  blockinfile:
-    marker: "# {mark} ANSIBLE MANAGED BLOCK - HTTPS_PROXY"
-    block: |
-      [Service]
-      Environment="HTTPS_PROXY=https://{{ haproxy_vip }}:3128"
-    path: /etc/systemd/system/docker.service.d/https-proxy.conf
-    backup: no
-    create: yes
-  when: multinetwork and inventory_hostname in groups.nodes_net2 and proxy_result.stdout == "1"
-  become: yes
-  become_method: sudo
-
-- name: Reload and restart the docker daemon after applying the proxy changes
-  systemd:
-    state: restarted
-    name: docker
-    daemon_reload: yes
-  when: (multinetwork and inventory_hostname in groups.nodes_net2) and (proxy_result.stdout == "1")
-  become: yes
-  become_method: sudo
+#
+#- name: Check for docker proxy settings
+#  shell: systemctl cat --property=Environment docker | grep HTTPS_PROXY > /dev/null; echo $?
+#  register: proxy_result
+#  when: multinetwork and inventory_hostname in groups.nodes_net2
+#  become: yes
+#  become_method: sudo
+#
+#- debug:
+#    var: proxy_result
+#
+#- name: Setup proxys in environment on node
+#  blockinfile:
+#    marker: "# {mark} ANSIBLE MANAGED BLOCK - proxy config"
+#    block: |
+#      http_proxy=http://{{ haproxy_vip }}:3128
+#      https_proxy=https://{{ haproxy_vip }}:3128
+#    path: /etc/environment
+#    backup: yes
+#    create: yes
+#  when: multinetwork and inventory_hostname in groups.nodes_net2
+#  become: yes
+#  become_method: sudo
+#
+#- name: Setup http_proxy for docker daemon
+#  blockinfile:
+#    marker: "# {mark} ANSIBLE MANAGED BLOCK - HTTP_PROXY"
+#    block: |
+#      [Service]
+#      Environment="HTTP_PROXY=http://{{ haproxy_vip }}:3128"
+#    path: /etc/systemd/system/docker.service.d/http-proxy.conf
+#    backup: no
+#    create: yes
+#  when: multinetwork and inventory_hostname in groups.nodes_net2 and proxy_result.stdout == "1"
+#  become: yes
+#  become_method: sudo
+#
+#- name: Setup https_proxy for docker daemon
+#  blockinfile:
+#    marker: "# {mark} ANSIBLE MANAGED BLOCK - HTTPS_PROXY"
+#    block: |
+#      [Service]
+#      Environment="HTTPS_PROXY=https://{{ haproxy_vip }}:3128"
+#    path: /etc/systemd/system/docker.service.d/https-proxy.conf
+#    backup: no
+#    create: yes
+#  when: multinetwork and inventory_hostname in groups.nodes_net2 and proxy_result.stdout == "1"
+#  become: yes
+#  become_method: sudo
+#
+#- name: Reload and restart the docker daemon after applying the proxy changes
+#  systemd:
+#    state: restarted
+#    name: docker
+#    daemon_reload: yes
+#  when: (multinetwork and inventory_hostname in groups.nodes_net2) and (proxy_result.stdout == "1")
+#  become: yes
+#  become_method: sudo
