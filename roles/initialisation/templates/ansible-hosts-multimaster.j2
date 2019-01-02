@@ -128,7 +128,7 @@ openshift_logging_es_nodeselector={"node-role.kubernetes.io/infra":"true"}
 # Set the default memory limit for elasticsearch so that the pod can be scheduled to an infra node
 openshift_logging_es_memory_limit="8Gi"
 # Revert to older curator5 image to mitigate https://bugzilla.redhat.com/show_bug.cgi?id=1648453
-openshift_logging_curator_image=registry.redhat.io/openshift3/ose-logging-curator5:v3.11.16
+openshift_logging_curator_image={{ registryUrl }}/openshift3/ose-logging-curator5:v3.11.16
 
 # fix to make the ansible service broker deploy to the correct nodes rather than all or none
 # RH ticket #02020379
