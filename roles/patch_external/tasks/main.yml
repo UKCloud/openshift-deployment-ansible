@@ -1,0 +1,5 @@
+- include_tasks: pre-patch.yml
+
+- include_tasks: patch-lbs.yml
+
+#- include_tasks: patch-bastion.yml

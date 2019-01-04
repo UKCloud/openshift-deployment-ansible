@@ -19,8 +19,9 @@ os_sdn_network_plugin_name=redhat/openshift-ovs-multitenant
 
 # sets up the correct auth provider - openid integrated SSO or htpasswd as fallback
 {% if sso_client_id is defined and sso_client_id != "<client ID>"  %}
-openshift_master_identity_providers=[{"name": "UKCloud-SSO", "login": "true", "challenge": "false", "kind": "OpenIDIdentityProvider", "client_id": "{{ sso_client_id }}", "client_secret": "{{ sso_client_secret }}", "claims": {"id": ["sub"], "preferredUsername": ["preferred_username"], "name": ["name"], "email": ["email"]}, "urls": {{ sso_urls }} }]
+openshift_master_identity_providers=[{"name": "UKCloud-SSO", "login": "true", "challenge": "false", "kind": "OpenIDIdentityProvider", "client_id": "{{ sso_client_id }}", "client_secret": "{{ sso_client_secret }}", "claims": {"id": ["sub"], "preferredUsername": ["preferred_username"], "name": ["name"], "email": ["email"]}, "urls": {{ (sso_urls|from_json)|json_query('{authorize: authorize, token: token, userInfo: userInfo}')|to_json }} }]
 openshift_master_openid_ca_file="/etc/ssl/certs/ca-bundle.crt"
+openshift_master_logout_url='{{ (sso_urls|from_json).logout }}'
 {% else %}
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider'}]
 openshift_master_htpasswd_users={'admin': '{{ admin_password }}'}
@@ -34,8 +35,8 @@ openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
 
 openshift_release=v{{ openshiftVersion }}
 ### review how this is working at the moment - no sign of revisions of minor releases in rh container registry
-# openshift_image_tag=v{{ installed_version[0] }}
-openshift_image_tag=v{{ openshiftVersion }}
+openshift_image_tag=v{{ installed_version[0] }}
+# openshift_image_tag=v{{ openshiftVersion }}
 
 ### deprecated - probably can be removed ###
 #openshift_set_hostname=true
@@ -52,7 +53,7 @@ openshift_buildoverrides_tolerations=[{'key':'infra','value':'only','effect':'No
 openshift_master_default_subdomain={{ domainSuffix }}
 
 # Set Docker log driver to write to journald
-openshift_docker_options="--log-driver=journald"
+openshift_docker_options="--log-driver=json-file --log-opt max-size=3M --log-opt max-file=5"
 
 # ROUTER
 openshift_hosted_router_selector='router=true'
@@ -137,7 +138,7 @@ template_service_broker_selector={"node-role.kubernetes.io/infra":"true"}
 ansible_service_broker_node_selector={"node-role.kubernetes.io/infra":"true"}
 
 ### Setup the default node labels for each node type
-openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true']},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','internet=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}{% if multinetwork %},'net2=true','build=true','tenant=true'{% endif %}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true']},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true']}]
+openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','internet=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}{% if multinetwork %},'net2=true','build=true','tenant=true'{% endif %}], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]}]
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
