@@ -127,6 +127,8 @@ openshift_logging_kibana_nodeselector={"node-role.kubernetes.io/infra":"true"}
 openshift_logging_es_nodeselector={"node-role.kubernetes.io/infra":"true"}
 # Set the default memory limit for elasticsearch so that the pod can be scheduled to an infra node
 openshift_logging_es_memory_limit="8Gi"
+# Revert to older curator5 image to mitigate https://bugzilla.redhat.com/show_bug.cgi?id=1648453
+openshift_logging_curator_image={{ registryUrl }}/openshift3/ose-logging-curator5:v3.11.16
 
 # fix to make the ansible service broker deploy to the correct nodes rather than all or none
 # RH ticket #02020379
@@ -153,9 +155,20 @@ oreg_auth_url={{ registryUrl }}
 oreg_auth_user={{ registryUser }}
 oreg_auth_password={{ registryPassword }}
 
+{% if multinetwork %}
+# Proxy variables for use when net2 deployment is in place
+openshift_http_proxy=http://{{ haproxy_vip }}:3128
+openshift_https_proxy=http://{{ haproxy_vip }}:3128
+openshift_no_proxy='frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,169.254.169.254'
+#openshift_generate_no_proxy_hosts=true
+#openshift_builddefaults_git_http_proxy=http://{{ haproxy_vip }}:3128
+#openshift_builddefaults_git_https_proxy=http://{{ haproxy_vip }}:3128
+#openshift_builddefaults_http_proxy=http://{{ haproxy_vip }}:3128
+#openshift_builddefaults_https_proxy=http://{{ haproxy_vip }}:3128
+{% endif %}
 
 ### Setup the default node labels for each node type
-openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true']},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','internet=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}{% if multinetwork %},'net2=true','build=true','tenant=true'{% endif %}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true']},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true']}]
+openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','internet=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}{% if multinetwork %},'net2=true','build=true','tenant=true'{% endif %}], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]}]
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
