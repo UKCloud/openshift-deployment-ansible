@@ -1,43 +1,43 @@
 - name: Backup /etc/origin directory on masters
   archive:
     path: /etc/origin
-    dest: /home/cloud-user/etc-origin-{{ ansible_hostname }}.tar
-    format: tar
+    dest: /home/cloud-user/etc-origin-{{ ansible_hostname }}.tar.gz
+    format: gz
     owner: cloud-user
     group: cloud-user
   when: inventory_hostname in groups.masters
 
-- name: Fetch tar files back to bastion
+- name: Fetch tar.gz files back to bastion
   fetch:
-    src: /home/cloud-user/etc-origin-{{ ansible_hostname }}.tar
-    dest: /home/cloud-user/backups/etc-origin-{{ ansible_hostname }}-{{ datetime }}.tar
+    src: /home/cloud-user/etc-origin-{{ ansible_hostname }}.tar.gz
+    dest: /home/cloud-user/backups/etc-origin-{{ ansible_hostname }}-{{ datetime }}.tar.gz
     flat: yes
   when: inventory_hostname in groups.masters
 
-- name: Remove tar file from masters
+- name: Remove tar.gz file from masters
   file:
-    path: /home/cloud-user/etc-origin-{{ ansible_hostname }}.tar
+    path: /home/cloud-user/etc-origin-{{ ansible_hostname }}.tar.gz
     state: absent
   when: inventory_hostname in groups.masters
 
 - name: Backup trusted certificates directory on masters
   archive:
     path: /etc/pki/ca-trust/source/anchors
-    dest: /home/cloud-user/trusted-certs-{{ ansible_hostname }}.tar
-    format: tar
+    dest: /home/cloud-user/trusted-certs-{{ ansible_hostname }}.tar.gz
+    format: gz
     owner: cloud-user
     group: cloud-user
   when: inventory_hostname in groups.masters
 
-- name: Fetch tar files back to bastion
+- name: Fetch tar.gz files back to bastion
   fetch:
-    src: /home/cloud-user/trusted-certs-{{ ansible_hostname }}.tar
-    dest: /home/cloud-user/backups/trusted-certs-{{ ansible_hostname }}-{{ datetime }}.tar
+    src: /home/cloud-user/trusted-certs-{{ ansible_hostname }}.tar.gz
+    dest: /home/cloud-user/backups/trusted-certs-{{ ansible_hostname }}-{{ datetime }}.tar.gz
     flat: yes
   when: inventory_hostname in groups.masters
 
-- name: Remove tar file from masters
+- name: Remove tar.gz file from masters
   file:
-    path: /home/cloud-user/trusted-certs-{{ ansible_hostname }}.tar
+    path: /home/cloud-user/trusted-certs-{{ ansible_hostname }}.tar.gz
     state: absent
   when: inventory_hostname in groups.masters

@@ -56,11 +56,11 @@
     mode: 0755
   when: inventory_hostname == 'localhost'
 
-- name: tar deployment code directory
+- name: tar.gz deployment code directory
   archive:
     path: /usr/share/ansible/openshift-deployment-ansible
-    dest: /home/cloud-user/backups/deployment-code-{{ datetime }}.tar
-    format: tar
+    dest: /home/cloud-user/backups/deployment-code-{{ datetime }}.tar.gz
+    format: gz
   when: inventory_hostname == 'localhost'
 
 - include_tasks: etcd.yml
