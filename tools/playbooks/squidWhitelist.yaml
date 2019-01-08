@@ -13,27 +13,6 @@
       object: /squid/sites.whitelist.txt
       dest: /tmp/sites.whitelist.txt
     when: inventory_hostname == 'localhost'
-      
-  - name: Get downloaded file attributes
-    stat:
-      path: /tmp/sites.whitelist.txt
-      checksum_algorithm: sha256
-    register: latest_file
-    when: inventory_hostname == 'localhost'
-
-  - name: Get existing file attributes
-    stat:
-      path: /home/cloud-user/sites.whitelist.txt
-      checksum_algorithm: sha256
-    register: existing_file
-    when: inventory_hostname == 'localhost'
-
-  - name: Copy file if it doesn't exist or has changed
-    copy:
-      src: /tmp/sites.whitelist.txt
-      dest: /home/cloud-user/sites.whitelist.txt    
-    register: file_copy
-    when: inventory_hostname == 'localhost' and (not existing_file.stat.exists or (existing_file.stat.exists and latest_file.stat.checksum != existing_file.stat.checksum))
 
   - name: Insert changed block to /etc/squid/sites.whitelist.txt
     blockinfile:
@@ -42,7 +21,7 @@
       insertafter: EOF
       marker: "# {mark} ANSIBLE MANAGED BLOCK - User whitelisted domains #"
     become: yes
-    when: inventory_hostname in groups.loadbalancers_controlplane and hostvars['localhost']['file_copy']['changed']
+    when: inventory_hostname in groups.loadbalancers_controlplane
     notify:
       - reconfigure squid
 
