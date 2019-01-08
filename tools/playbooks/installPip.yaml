@@ -1,0 +1,53 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Check if epel repo is installed
+    stat:
+      path: /etc/yum.repos.d/epel.repo
+    register: epel_state
+
+  - name: Create variable for epel_state.stat.exists
+    set_fact:
+      epel_installed: "{{ epel_state.stat.exists }}"
+
+  - name: Download epel repo rpm
+    get_url:
+      url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+      dest: /tmp/epel-release-latest-7.noarch.rpm
+    when: inventory_hostname == 'localhost' and not epel_installed
+
+  - name: Set permissions on downloaded rpm.
+    file:
+      path: /tmp/epel-release-latest-7.noarch.rpm
+      mode: 0777
+    when: inventory_hostname == 'localhost' and not epel_installed
+
+  - name: Install epel repo
+    yum:
+      name: /tmp/epel-release-latest-7.noarch.rpm
+      state: present
+    become: yes
+    become_method: sudo
+    when: inventory_hostname == 'localhost' and not epel_installed
+
+  - name: Install pip
+    yum:
+      name: python-pip
+      state: latest
+    become: yes
+    when: inventory_hostname == 'localhost' and not epel_installed
+
+  - name: Install boto3 with pip
+    pip:
+      name: boto3
+    become: true
+    when: inventory_hostname == 'localhost' and not epel_installed
+
+  - name: Lock down epel repo to pip only
+    lineinfile: 
+      path: /etc/yum.repos.d/epel.repo
+      insertafter: '^enabled=1'
+      line: includepkgs=python2-pip*
+    become: yes
+    become_method: sudo
+    when: inventory_hostname == 'localhost' and not epel_installed
