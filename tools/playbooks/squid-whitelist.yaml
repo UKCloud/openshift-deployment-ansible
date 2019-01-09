@@ -1,22 +1,16 @@
 ---
 - import_playbook: install-pip.yaml
 
-- hosts: localhost, loadbalancers_controlplane
+- hosts: localhost, loadbalancers_controlplane, masters[0]
   tasks:
-  - name: Retrieve whitelist from ECS
-    aws_s3:
-      aws_access_key: "{{ s3accesskey }}"
-      aws_secret_key: "{{ s3secretkey }}"
-      s3_url: "https://{{ s3regionendpoint }}"
-      bucket: "{{ s3bucketname }}"
-      mode: get
-      object: /squid/sites.whitelist.txt
-      dest: /tmp/sites.whitelist.txt
-    when: inventory_hostname == 'localhost'
+  - name: Retrieve whitelist from config-map
+    command: /usr/local/bin/oc get configmaps proxy-whitelist -n default -o jsonpath='{.data.*}'
+    when: inventory_hostname in groups.masters[0]
+    register: proxy_whitelist
 
   - name: Insert changed block to /etc/squid/sites.whitelist.txt
     blockinfile:
-      block: "{{ lookup('file', '/home/cloud-user/sites.whitelist.txt') }}"
+      block: "{{ hostvars[groups.masters[0]]['proxy_whitelist']['stdout'] }}"
       path: /etc/squid/sites.whitelist.txt
       insertafter: EOF
       marker: "# {mark} ANSIBLE MANAGED BLOCK - User whitelisted domains #"
