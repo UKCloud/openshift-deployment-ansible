@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Create a cron file for updating proxy whitelist for net2 deployments
+    cron:
+      name: 
+      cron_file: proxy-whitelist
+      minute: 0
+      user: cloud-user
+      job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/tools/playbooks/squid-whitelist.yaml >> /home/cloud-user/proxy-whitelist.log"
