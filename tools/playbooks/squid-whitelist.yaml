@@ -4,7 +4,7 @@
 - hosts: loadbalancers_controlplane, masters[0]
   tasks:
   - name: Retrieve whitelist from config-map
-    command: /usr/local/bin/oc get configmaps proxy-whitelist -n default -o jsonpath='{.data.*}'
+    command: /usr/local/bin/oc get configmaps proxy-whitelist -n default -o jsonpath='{.data.proxy-whitelist\.txt}'
     when: inventory_hostname in groups.masters[0]
     register: proxy_whitelist
 
