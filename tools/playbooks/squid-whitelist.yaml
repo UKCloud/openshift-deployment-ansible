@@ -1,5 +1,5 @@
 ---
-- import_playbook: installPip.yaml
+- import_playbook: install-pip.yaml
 
 - hosts: localhost, loadbalancers_controlplane
   tasks:
