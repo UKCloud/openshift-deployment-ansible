@@ -1,7 +1,7 @@
 ---
 - import_playbook: install-pip.yaml
 
-- hosts: localhost, loadbalancers_controlplane, masters[0]
+- hosts: loadbalancers_controlplane, masters[0]
   tasks:
   - name: Retrieve whitelist from config-map
     command: /usr/local/bin/oc get configmaps proxy-whitelist -n default -o jsonpath='{.data.*}'
