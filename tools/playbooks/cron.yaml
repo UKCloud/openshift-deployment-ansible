@@ -8,3 +8,4 @@
       minute: 0
       user: cloud-user
       job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/tools/playbooks/squid-whitelist.yaml >> /home/cloud-user/proxy-whitelist.log"
+    become: true
