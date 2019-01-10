@@ -44,7 +44,7 @@
   when: inventory_hostname == groups.loadbalancers_controlplane[0]
 
 - name: Run certbot
-  command: certbot certonly -m openshift@ukcloud.com --standalone -d ocp.{{ domainSuffix }},hawkular-metrics.{{ domainSuffix }},registry-console-default.{{ domainSuffix }},kibana.{{ domainSuffix }},registry-console.{{ domainSuffix }},registry.{{ domainSuffix }} --agree-tos -n
+  command: certbot certonly -m openshift@ukcloud.com --standalone -d ocp.{{ domainSuffix }},hawkular-metrics.{{ domainSuffix }},kibana.{{ domainSuffix }},registry-console-default.{{ domainSuffix }},registry-console.{{ domainSuffix }},registry.{{ domainSuffix }},console.{{ domainSuffix }},alertmanager.{{ domainSuffix }},grafana.{{ domainSuffix }},prometheus.{{ domainSuffix }} --agree-tos -n
   when: inventory_hostname == groups.loadbalancers_controlplane[0]
 
 - name: Start HAProxy

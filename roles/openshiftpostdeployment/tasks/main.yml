@@ -123,3 +123,26 @@
 
 - name: Patch nodeSelector into metrics-server deployment
   command: /usr/local/bin/oc patch deployment.apps/metrics-server -p '{"spec":{"template":{"spec":{"nodeSelector":{"infra":"'"true"'"}}}}}' -n openshift-metrics-server
+
+- name: read fullchain cert into var
+  shell: /usr/bin/awk '{printf "%s\n", $0}'  /etc/origin/master/named_certificates/fullchain1.pem
+  register: fullchain
+
+- name: read private key into var
+  shell: /usr/bin/awk '{printf "%s\n", $0}'  /etc/origin/master/named_certificates/privkey1.pem
+  register: privkey
+
+- name: Patch routes for updated hostnames and certs
+  vars:
+    contents: "{{ lookup('file', '/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem') }}"
+  command: /usr/local/bin/oc patch route {{ item.service }} -p '{"spec":{"host":"{{ item.hostname }}.{{ domainSuffix }}","tls":{"certificate":"'"{{ fullchain.stdout_lines | join("\n") }}"'","key":"'"{{ privkey.stdout_lines | join("\n") }}"'"}}}' -n {{ item.namespace }}
+  loop:
+    - service: "alertmanager-main"
+      namespace: "openshift-monitoring"
+      hostname: "alertmanager"
+    - service: "grafana"
+      namespace: "openshift-monitoring"
+      hostname: "grafana"
+    - service: "prometheus-k8s"
+      namespace: "openshift-monitoring"
+      hostname: "prometheus"
