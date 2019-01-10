@@ -93,6 +93,8 @@
       openshift_hosted_registry_routehost=registry.{{ domainSuffix }}
       openshift_hosted_registry_routecertificates={"certfile": "/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem", "keyfile": "/home/cloud-user/ocp.{{ domainSuffix }}/privkey1.pem", "cafile": "/home/cloud-user/ocp.{{ domainSuffix }}/chain1.pem"}
       openshift_hosted_registry_routetermination=reencrypt
+      openshift_console_cert="/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem"
+      openshift_console_key="/home/cloud-user/ocp.{{ domainSuffix }}/privkey1.pem"
   when: inventory_hostname == 'localhost'
 
 - name: Refresh inventory to pick up additions above
