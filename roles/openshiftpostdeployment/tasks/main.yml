@@ -127,12 +127,12 @@
 - name: read fullchain cert into var
   shell: /usr/bin/awk '{printf "%s\n", $0}'  /etc/origin/master/named_certificates/fullchain1.pem
   register: fullchain
-  when: getCertificates
+  when: getCertificates == True
 
 - name: read private key into var
   shell: /usr/bin/awk '{printf "%s\n", $0}'  /etc/origin/master/named_certificates/privkey1.pem
   register: privkey
-  when: getCertificates
+  when: getCertificates == True
 
 - name: Patch routes for updated hostnames and certs
   vars:
@@ -148,4 +148,4 @@
     - service: "prometheus-k8s"
       namespace: "openshift-monitoring"
       hostname: "prometheus"
-  when: getCertificates
+  when: getCertificates == True
