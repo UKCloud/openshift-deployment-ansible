@@ -1,6 +1,4 @@
 ---
-- import_playbook: install-pip.yaml
-
 - hosts: loadbalancers_controlplane, masters[0]
   tasks:
   - name: Retrieve whitelist from config-map
