@@ -5,7 +5,7 @@
   tasks:
   - name: Retrieve whitelist from config-map
     command: /usr/local/bin/oc get configmaps proxy-whitelist -n default -o jsonpath='{.data.proxy-whitelist\.txt}'
-    when: inventory_hostname in groups.masters[0]
+    when: inventory_hostname in groups.masters[0] and multinetwork
     register: proxy_whitelist
 
   - name: Insert changed block to /etc/squid/sites.whitelist.txt
@@ -15,7 +15,7 @@
       insertafter: EOF
       marker: "# {mark} ANSIBLE MANAGED BLOCK - User whitelisted domains #"
     become: yes
-    when: inventory_hostname in groups.loadbalancers_controlplane
+    when: inventory_hostname in groups.loadbalancers_controlplane and multinetwork
     notify:
       - reconfigure squid
 
