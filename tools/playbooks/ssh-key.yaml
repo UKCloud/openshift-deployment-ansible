@@ -1,0 +1,14 @@
+---
+- hosts: localhost, masters[0]
+  tasks:
+  - name: Generate SSH KeyPair
+    command: ssh-keygen -t rsa -N "" -f /home/cloud-user/.ssh/id_rsa
+    no_log: True
+    when: inventory_hostname == 'localhost' 
+
+  - name: Copy generated SSH KeyPair to Master
+    authorized_key:
+      user: cloud-user
+      state: present
+      key: " {{ lookup('file', '/home/cloud-user/.ssh/id_rsa.pub') }}"
+    when: inventory_hostname in groups.masters[0]
