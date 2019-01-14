@@ -3,7 +3,7 @@
   tasks:
   - name: Create a cron file for updating proxy whitelist for net2 deployments
     cron:
-      name: 
+      name: "Update custom sites in Squid Whitelist"
       cron_file: proxy-whitelist
       minute: 0
       user: cloud-user
