@@ -18,6 +18,9 @@
 #- name: create tier-2 class 
 #  command: /usr/local/bin/oc create -f ~/storage-class-tier2.yml
 
+- name: Give admin rights
+  command: /usr/local/bin/oc adm policy --config=/etc/origin/master/admin.kubeconfig add-cluster-role-to-user cluster-admin admin
+
 - name: Fix kibana URLs
   command: /usr/local/bin/oc annotate ns {{ item }} --overwrite "openshift.io/logging.ui.hostname"="kibana.{{ domainSuffix }}"
   with_items: 
