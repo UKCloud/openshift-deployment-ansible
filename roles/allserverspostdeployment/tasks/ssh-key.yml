@@ -1,14 +1,14 @@
 ---
-- hosts: localhost, loadbalancers_controlplane, masters[0]
+- hosts: localhost, loadbalancers_controlplane
   tasks:
   - name: Generate SSH keypair
     command: ssh-keygen -t rsa -N "" -f /home/cloud-user/.ssh/id_rsa
     no_log: True
     when: inventory_hostname == 'localhost' and multinetwork
 
-  - name: Copy generated SSH keypair to master and control plane loadbalancers
+  - name: Copy generated SSH keypair to controlplane loadbalancers
     authorized_key:
       user: cloud-user
       state: present
       key: " {{ lookup('file', '/home/cloud-user/.ssh/id_rsa.pub') }}"
-    when: (inventory_hostname in groups.masters[0] or inventory_hostname in groups.loadbalancers_controlplane) and multinetwork
+    when: inventory_hostname in groups.loadbalancers_controlplane and multinetwork

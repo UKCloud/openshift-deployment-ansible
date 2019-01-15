@@ -1,0 +1,21 @@
+---
+- hosts: masters[0]
+  tasks:
+  - name: Create whitelist project
+    command: /usr/local/bin/oc new-project whitelist
+    
+  - name: Create proxy-whitelist configmap and create empty key
+    command: /usr/local/bin/oc create configmap proxy-whitelist --from-literal=proxy-whitelist.txt= -n whitelist
+
+  - name: Create whitelist-reader serviceaccount
+    command: /usr/local/bin/oc create sa whitelist-reader -n whitelist
+
+  - name: Create read-whitelist role
+    command: /usr/local/bin/oc create role read-whitelist --verb=get,list --resource=configmaps --resource-name=proxy-whitelist -n whitelist
+
+  - name: Add read-whitelist role to whitelist-reader serviceaccount
+    command: /usr/local/bin/oc policy add-role-to-user read-whitelist -z whitelist-reader -n whitelist --role-namespace='whitelist'
+
+  - name: Export whitelist-reader serviceaccount # Maybe using jsonpath to extract token name?
+    command: /usr/local/bin/oc 
+    register: 

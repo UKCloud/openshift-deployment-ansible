@@ -1,7 +1,7 @@
 ---
-- hosts: loadbalancers_controlplane, masters[0]
+- hosts: localhost, loadbalancers_controlplane
   tasks:
-  - name: Retrieve whitelist from config-map
+  - name: Retrieve whitelist from config-map #Change this task to query API from the Bastion instead of Master
     command: /usr/local/bin/oc get configmaps proxy-whitelist -n default -o jsonpath='{.data.proxy-whitelist\.txt}'
     when: inventory_hostname in groups.masters[0] and multinetwork
     register: proxy_whitelist

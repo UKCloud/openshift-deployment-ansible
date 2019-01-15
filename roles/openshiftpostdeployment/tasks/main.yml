@@ -123,3 +123,5 @@
 
 - name: Patch nodeSelector into metrics-server deployment
   command: /usr/local/bin/oc patch deployment.apps/metrics-server -p '{"spec":{"template":{"spec":{"nodeSelector":{"infra":"'"true"'"}}}}}' -n openshift-metrics-server
+
+- include_tasks: setup-whitelist.yml
