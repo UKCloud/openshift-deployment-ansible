@@ -23,6 +23,6 @@
     state: reloaded
     name: sshd
  
-- include: ssh-key.yml
+- include_tasks: ssh-key.yml
 
-- include: cron.yml
+- include_tasks: cron.yml
