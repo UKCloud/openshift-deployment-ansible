@@ -24,5 +24,10 @@
     name: sshd
  
 - include_tasks: ssh-key.yml
+  when: multinetwork
+
+- include_tasks: export-token.yml
+  when: multinetwork
 
 - include_tasks: cron.yml
+  when: multinetwork
