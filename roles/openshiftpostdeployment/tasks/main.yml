@@ -125,3 +125,4 @@
   command: /usr/local/bin/oc patch deployment.apps/metrics-server -p '{"spec":{"template":{"spec":{"nodeSelector":{"infra":"'"true"'"}}}}}' -n openshift-metrics-server
 
 - include_tasks: setup-whitelist.yml
+  when: multinetwork
