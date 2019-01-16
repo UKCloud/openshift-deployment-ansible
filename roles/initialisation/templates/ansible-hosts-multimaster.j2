@@ -42,12 +42,6 @@ openshift_image_tag=v{{ installed_version[0] }}
 # This sets the nodeIP setting in node-config on each host to the correct IP
 #openshift_set_node_ip=true
 
-{% if multinetwork %}
-# Adding buildoverride values to make build pods target infra nodes in multi-network deployments
-openshift_buildoverrides_nodeselectors={'build':'true'}
-openshift_buildoverrides_tolerations=[{'key':'infra','value':'only','effect':'NoSchedule','operator':'Equal'}]
-{% endif %}
-
 openshift_master_default_subdomain={{ domainSuffix }}
 
 # Set Docker log driver to write to journald
