@@ -23,11 +23,5 @@
     state: reloaded
     name: sshd
  
-- include_tasks: ssh-key.yml
-  when: multinetwork
-
-- include_tasks: export-token.yml
-  when: multinetwork
-
-- include_tasks: cron.yml
+- include_tasks: squid-whitelist.yml
   when: multinetwork
