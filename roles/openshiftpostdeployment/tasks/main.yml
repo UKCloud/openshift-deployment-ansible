@@ -30,16 +30,6 @@
     - openshift
   when: installLogging == True
 
-- name: Register variable of infra projects
-  shell: /usr/local/bin/oc get projects | grep -v NAME | awk '{ print $1 }'
-  register: projects
-  when: multinetwork
-
-- name: Add default tolerations to infrastructure namespaces
-  command: /usr/local/bin/oc annotate ns {{ item }} scheduler.alpha.kubernetes.io/defaultTolerations='[{"key":"infra","value":"only","effect":"NoSchedule","operator":"Equal"}]'
-  with_items: "{{ projects.stdout_lines }}" 
-  when: multinetwork
-
 - name: Create registry.cert file
   local_action: shell cd /home/cloud-user/ocp.{{ domainSuffix }} ; cat fullchain1.pem privkey1.pem > registry.cert
   when: getCertificates == True
@@ -52,37 +42,33 @@
     mode: 0644 
   when: getCertificates == True 
 
-- name: Change to default project
-  command: /usr/local/bin/oc project default
-  when: getCertificates == True
-
 - name: Create registry cert secret
-  command: /usr/local/bin/oc secrets new console-secret /home/cloud-user/registry.cert
+  command: /usr/local/bin/oc secrets new console-secret /home/cloud-user/registry.cert -n default
   when: getCertificates == True
 
 - name: Mount secret to registry console container and trigger new deploy
-  command: /usr/local/bin/oc set volume dc/registry-console --add --type=secret --secret-name=console-secret -m /etc/cockpit/ws-certs.d
+  command: /usr/local/bin/oc set volume dc/registry-console --add --type=secret --secret-name=console-secret -m /etc/cockpit/ws-certs.d -n default
   when: getCertificates == True
 
 - name: Setup secondary network routers
-  command: /usr/local/bin/oc adm router router-secondary --replicas=0 --selector='router=secondary' --service-account=router
+  command: /usr/local/bin/oc adm router router-secondary --replicas=0 --selector='router=secondary' --service-account=router -n default
   when: multinetwork
 
 - name: Setup secondary network router envs
-  command: /usr/local/bin/oc set env dc/router-secondary ROUTE_LABELS="router-secondary=true"
+  command: /usr/local/bin/oc set env dc/router-secondary ROUTE_LABELS="router-secondary=true" -n default
   when: multinetwork
 
 - name: Allow Source IP to be received on primary router from the HAProxy
-  command: /usr/local/bin/oc set env dc/router ROUTER_USE_PROXY_PROTOCOL=true
+  command: /usr/local/bin/oc set env dc/router ROUTER_USE_PROXY_PROTOCOL=true -n default
 
 - name: Allow Source IP to be received on secondary router from HAProxy
-  command: /usr/local/bin/oc set env dc/router-secondary ROUTER_USE_PROXY_PROTOCOL=true
+  command: /usr/local/bin/oc set env dc/router-secondary ROUTER_USE_PROXY_PROTOCOL=true -n default
   when: multinetwork
 
 - name: Scale up secondary network routers
   vars:
     net2_scale: "{{ groups['nodes_net2'] | length }}"
-  command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }}
+  command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }} -n default
   when: multinetwork
 
 - name: Setup routers for private networks (extra gateway)
@@ -106,17 +92,11 @@
   when: extra_gateway_vip is defined
 
 - name: Allow Source IP to be received on private router from HAProxy
-  command: /usr/local/bin/oc set env dc/router-private ROUTER_USE_PROXY_PROTOCOL=true
+  command: /usr/local/bin/oc set env dc/router-private ROUTER_USE_PROXY_PROTOCOL=true -n default
   when: extra_gateway_vip is defined
 
-- name: taint infrastructure nodes to prevent customer applications scheduling
-  command: /usr/local/bin/oc adm taint node "{{ item }}" infra=only:NoSchedule
-  with_items:
-    - "{{ infrastructure_node_details.values() }}"
-  when: multinetwork
-
 - name: Create 'monitoring' serviceaccount for monitoring use
-  shell: /usr/local/bin/oc project openshift-infra && /usr/local/bin/oc create serviceaccount monitoring
+  command: /usr/local/bin/oc create serviceaccount monitoring -n openshift-infra
 
 - name: Give 'monitoring' service account correct permissions
   command: /usr/local/bin/oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:monitoring
