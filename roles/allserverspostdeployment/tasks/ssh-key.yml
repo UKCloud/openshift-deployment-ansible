@@ -1,7 +1,8 @@
 - name: Generate SSH keypair
   command: ssh-keygen -t rsa -N "" -f /home/cloud-user/.ssh/id_rsa
   no_log: True
-  when: inventory_hostname == 'localhost'
+  delegate_to: localhost
+  run_once: yes
 
 - name: Copy generated SSH keypair to controlplane loadbalancers
   authorized_key:
