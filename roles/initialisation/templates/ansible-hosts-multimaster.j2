@@ -44,12 +44,6 @@ openshift_image_tag=v{{ installed_version[0] }}
 # This sets the nodeIP setting in node-config on each host to the correct IP
 #openshift_set_node_ip=true
 
-{% if multinetwork %}
-# Adding buildoverride values to make build pods target infra nodes in multi-network deployments
-openshift_buildoverrides_nodeselectors={'build':'true'}
-openshift_buildoverrides_tolerations=[{'key':'infra','value':'only','effect':'NoSchedule','operator':'Equal'}]
-{% endif %}
-
 openshift_master_default_subdomain={{ domainSuffix }}
 
 # Set Docker log driver to write to journald
@@ -101,9 +95,9 @@ openshift_storageclass_provisioner= "cinder"
 openshift_storageclass_parameters={ 'type': 'TIER2', 'availability': 'nova' }
 
 # openshift stats deployment - comment out if no stats deployment is required. this will run on the worker nodes
-openshift_hosted_metrics_deploy=true
+openshift_metrics_install_metrics=true
 openshift_metrics_hawkular_hostname=hawkular-metrics.{{ domainSuffix }}
-openshift_hosted_metrics_storage_kind=dynamic
+openshift_metrics_cassandra_storage_type=dynamic
 openshift_metrics_cassandra_pvc_size=10Gi
 # Node selectors for hawkular metrics
 openshift_metrics_cassandra_nodeselector={"node-role.kubernetes.io/infra":"true"}
@@ -129,6 +123,8 @@ openshift_logging_kibana_nodeselector={"node-role.kubernetes.io/infra":"true"}
 openshift_logging_es_nodeselector={"node-role.kubernetes.io/infra":"true"}
 # Set the default memory limit for elasticsearch so that the pod can be scheduled to an infra node
 openshift_logging_es_memory_limit="8Gi"
+# Specify newer curator5 image to mitigate https://bugzilla.redhat.com/show_bug.cgi?id=1648453
+openshift_logging_curator_image={{ registryUrl }}/openshift3/ose-logging-curator5:v3.11.59-2
 
 # fix to make the ansible service broker deploy to the correct nodes rather than all or none
 # RH ticket #02020379
@@ -137,8 +133,41 @@ template_service_broker_selector={"node-role.kubernetes.io/infra":"true"}
 # Ansible service broker node selector
 ansible_service_broker_node_selector={"node-role.kubernetes.io/infra":"true"}
 
+# New v3.11 features
+# Monitoring
+openshift_cluster_monitoring_operator_install=true
+openshift_cluster_monitoring_operator_prometheus_storage_enabled=true
+openshift_cluster_monitoring_operator_prometheus_storage_class_name=tier2
+openshift_cluster_monitoring_operator_prometheus_storage_capacity="50Gi"
+openshift_cluster_monitoring_operator_alertmanager_storage_enabled=true
+openshift_cluster_monitoring_operator_alertmanager_storage_class_name=tier2
+openshift_cluster_monitoring_operator_alertmanager_storage_capacity="2Gi"
+#openshift_prometheus_storage_type=pvc
+#openshift_prometheus_alertmanager_storage_type=pvc
+#openshift_prometheus_alertbuffer_storage_type=pvc
+
+# Set the v3.11+ console hostname
+openshift_console_hostname=console.{{ domainSuffix }}
+
+# New registry authentication options
+oreg_auth_url={{ registryUrl }}
+oreg_auth_user={{ registryUser }}
+oreg_auth_password={{ registryPassword }}
+
+{% if multinetwork %}
+# Proxy variables for use when net2 deployment is in place
+openshift_http_proxy=http://{{ haproxy_vip }}:3128
+openshift_https_proxy=http://{{ haproxy_vip }}:3128
+openshift_no_proxy='frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,169.254.169.254'
+#openshift_generate_no_proxy_hosts=true
+#openshift_builddefaults_git_http_proxy=http://{{ haproxy_vip }}:3128
+#openshift_builddefaults_git_https_proxy=http://{{ haproxy_vip }}:3128
+#openshift_builddefaults_http_proxy=http://{{ haproxy_vip }}:3128
+#openshift_builddefaults_https_proxy=http://{{ haproxy_vip }}:3128
+{% endif %}
+
 ### Setup the default node labels for each node type
-openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','internet=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}{% if multinetwork %},'net2=true','build=true','tenant=true'{% endif %}], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]}]
+openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]}]
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters

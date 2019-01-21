@@ -14,6 +14,14 @@ zone "ukcloud.com" IN {
     };
 };
 
+zone "redhat.io" IN {
+    type forward;
+    forwarders {
+        {{ hostvars[groups.dns[0]].ansible_default_ipv4.address }};
+        {{ hostvars[groups.dns[1]].ansible_default_ipv4.address }};
+    };
+};
+
 zone "redhat.com" IN {
     type forward;
     forwarders {

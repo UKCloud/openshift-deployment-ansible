@@ -1,0 +1,30 @@
+http_port 3128
+
+acl localnet src {{ internalNetworkCidr }}  # Neutron network
+
+acl SSL_ports port 443
+
+acl Safe_ports port 80                        # http
+acl Safe_ports port 443                       # https
+
+acl CONNECT method CONNECT
+
+http_access deny !Safe_ports
+http_access deny CONNECT !SSL_ports
+http_access allow localhost manager
+http_access deny manager
+http_access deny to_localhost
+
+acl whitelist dstdomain "/etc/squid/sites.whitelist.txt"
+
+http_access allow whitelist localnet
+http_access allow localhost
+http_access deny all
+
+#cache_dir ufs /var/spool/squid 100 16 256
+coredump_dir /var/spool/squid
+
+refresh_pattern ^ftp:           1440    20%     10080
+refresh_pattern ^gopher:        1440    0%      1440
+refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
+refresh_pattern .               0       20%     4320

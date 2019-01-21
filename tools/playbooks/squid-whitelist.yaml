@@ -1,0 +1,26 @@
+---
+- hosts: localhost, loadbalancers_controlplane
+  tasks:
+  - name: Retrieve whitelist from config-map
+    shell: |
+      /usr/bin/oc login https://ocp.{{ domainSuffix }}:8443 --token={{ lookup('file', '/home/cloud-user/whitelist-sa-token') | b64decode }} > /dev/null
+      /usr/bin/oc get configmaps proxy-whitelist -n whitelist -o jsonpath='{.data.proxy-whitelist\.txt}'
+    when: inventory_hostname == 'localhost' and multinetwork
+    register: proxy_whitelist
+
+  - name: Insert changed block to /etc/squid/sites.whitelist.txt
+    blockinfile:
+      block: "{{ hostvars['localhost']['proxy_whitelist']['stdout'] }}"
+      path: /etc/squid/sites.whitelist.txt
+      insertafter: EOF
+      marker: "# {mark} ANSIBLE MANAGED BLOCK - User whitelisted domains #"
+    become: yes
+    when: inventory_hostname in groups.loadbalancers_controlplane and multinetwork
+    notify:
+      - reconfigure squid
+
+  handlers:
+    - name: reconfigure squid
+      command: /usr/sbin/squid -k reconfigure
+      become: yes
+      when: inventory_hostname in groups.loadbalancers_controlplane

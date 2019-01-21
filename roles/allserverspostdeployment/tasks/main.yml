@@ -23,3 +23,5 @@
     state: reloaded
     name: sshd
  
+- include_tasks: squid-whitelist.yml
+  when: multinetwork
