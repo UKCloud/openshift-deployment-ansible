@@ -1,7 +1,7 @@
 $ORIGIN {{ localDomainSuffix }}.
 $TTL 60s 
 @    IN    SOA    dns1.{{ localDomainSuffix }}.    hostmaster.{{ localDomainSuffix }}. (
-            2001062501 ; serial                     
+            {{ ansible_date_time.epoch }} ; serial                     
             21600      ; refresh after 6 hours                     
             3600       ; retry after 1 hour                     
             604800     ; expire after 1 week                     
