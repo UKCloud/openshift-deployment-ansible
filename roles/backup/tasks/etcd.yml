@@ -29,14 +29,14 @@
 - name: Archive etcd backup
   archive:
     path: /home/cloud-user/etcd.bak
-    dest: /home/cloud-user/etcd-data.bak.gz
+    dest: /home/cloud-user/etcd-data.bak.tar.gz
     format: gz
   when: inventory_hostname == groups.masters[0]
 
 - name: Fetch tar.gz file back to bastion
   fetch:
-    src: /home/cloud-user/etcd-data.bak.gz
-    dest: /home/cloud-user/backups/etcd-data.bak-{{ datetime }}.gz
+    src: /home/cloud-user/etcd-data.bak.tar.gz
+    dest: /home/cloud-user/backups/etcd-data.bak-{{ datetime }}.tar.gz
     flat: yes
   when: inventory_hostname == groups.masters[0]
 
@@ -44,7 +44,7 @@
   command: rm -rf /home/cloud-user/{{ item }}
   with_items:
     - etcd.bak
-    - etcd-data.bak.gz
+    - etcd-data.bak.tar.gz
   become: true
   when: inventory_hostname == groups.masters[0]
 
