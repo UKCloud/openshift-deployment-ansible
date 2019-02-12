@@ -44,6 +44,24 @@ openshift_image_tag=v{{ installed_version[0] }}
 
 openshift_master_default_subdomain={{ domainSuffix }}
 
+# OpenShift project template edits
+openshift_project_request_template_edits:
+  - key: objects
+    action: append
+    value:
+      kind: NetworkPolicy
+      apiVersion: networking.k8s.io/v1
+      metadata: 
+        name: allow-from-same-and-privileged-namespaces
+      spec: 
+      ingress: 
+      - from:
+        - podSelector: {}
+      - from:
+        - namespaceSelector: 
+            matchLabels:
+              state: privileged
+
 # Set Docker log driver to write to journald
 openshift_docker_options="--log-driver=json-file --log-opt max-size=3M --log-opt max-file=5"
 
