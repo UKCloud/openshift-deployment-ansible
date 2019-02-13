@@ -20,6 +20,13 @@
     - openshift
   when: installLogging == True
 
+- name: Label privileged namespaces
+  command: /usr/local/bin/oc label namespace {{ item }} state=privleged
+  with_items:
+    - default
+    - kube-service-catalog
+    - openshift-monitoring
+
 - name: Create registry.cert file
   local_action: shell cd /home/cloud-user/ocp.{{ domainSuffix }} ; cat fullchain1.pem privkey1.pem > registry.cert
   when: getCertificates == True
