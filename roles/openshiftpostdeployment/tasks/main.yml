@@ -39,8 +39,8 @@
   register: netpol_projects
 
 - name: Create netpol objects in projects
-  command: /usr/local/bin/oc create -f netpol.yml -n {{ item }}
-  with_items: netpol_projects.stdout_lines
+  command: /usr/local/bin/oc create -f ~/netpol.yml -n {{ item }}
+  with_items: "{{ netpol_projects.stdout_lines }}"
 
 - name: Create registry.cert file
   local_action: shell cd /home/cloud-user/ocp.{{ domainSuffix }} ; cat fullchain1.pem privkey1.pem > registry.cert
