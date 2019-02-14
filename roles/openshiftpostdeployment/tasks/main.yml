@@ -27,6 +27,21 @@
     - kube-service-catalog
     - openshift-monitoring
 
+- name: Setup netpol files
+  template:
+    src: templates/netpol.j2
+    dest: ~/netpol.yml
+    force: yes
+    backup: yes
+
+- name: Register projects to create policy in
+  shell: /usr/local/bin/oc get projects | egrep -v '(default)|(openshift-monitoring)|(kube-service-catalog)|(NAME)' | awk '{print $1}'
+  register: netpol_projects
+
+- name: Create netpol objects in projects
+  command: /usr/local/bin/oc create -f netpol.yml -n {{ item }}
+  with_items: netpol_projects.stdout_lines
+
 - name: Create registry.cert file
   local_action: shell cd /home/cloud-user/ocp.{{ domainSuffix }} ; cat fullchain1.pem privkey1.pem > registry.cert
   when: getCertificates == True
