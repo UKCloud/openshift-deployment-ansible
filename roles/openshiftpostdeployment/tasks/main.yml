@@ -21,7 +21,7 @@
   when: installLogging == True
 
 - name: Label privileged namespaces
-  command: /usr/local/bin/oc label namespace {{ item }} state=privleged
+  command: /usr/local/bin/oc label namespace {{ item }} state=privileged
   with_items:
     - default
     - kube-service-catalog
