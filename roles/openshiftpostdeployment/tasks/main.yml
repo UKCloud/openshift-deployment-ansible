@@ -91,9 +91,6 @@
 - name: Give 'monitoring' service account correct permissions
   command: /usr/local/bin/oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:monitoring
 
-- name: Give ipfailover service account privileged scc to enable host network interaction
-  command: /usr/local/bin/oc adm policy add-scc-to-user privileged -z ipfailover -n default
-
 - name: Patch nodeSelector into metrics-server deployment
   command: /usr/local/bin/oc patch deployment.apps/metrics-server -p '{"spec":{"template":{"spec":{"nodeSelector":{"infra":"'"true"'"}}}}}' -n openshift-metrics-server
 
