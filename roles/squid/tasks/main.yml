@@ -13,16 +13,10 @@
   when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Setup whitelist file
-  copy:
+  template:  
+    src: templates/whitelist.j2
     dest: /etc/squid/sites.whitelist.txt
-    content: |
-        registry.access.redhat.com
-        registry.redhat.io
-        .ukcloud.com
-        .docker.io
-        .docker.com
-        .rubygems.org
-        .github.com
+    force: yes
     backup: yes
   when: inventory_hostname in groups.loadbalancers_controlplane
 
