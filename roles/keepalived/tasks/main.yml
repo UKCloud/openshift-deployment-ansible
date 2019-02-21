@@ -1,10 +1,10 @@
-- name: Setup kernal bind parameters
+- name: Setup kernel bind parameters
   sysctl:
     name: net.ipv4.ip_nonlocal_bind
     value: 1
     state: present
 
-- name: Setup kernal ip_forward parameters
+- name: Setup kernel ip_forward parameters
   sysctl:
     name: net.ipv4.ip_forward
     value: 1
