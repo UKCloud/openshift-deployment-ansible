@@ -1,5 +1,6 @@
 - hosts: loadbalancers_controlplane
   vars:
+    primary: "{{ groups.loadbalancers_controlplane[0] }}"
     vip: "{{ haproxy_vip }}"
   roles:
     - firewalld
@@ -9,6 +10,7 @@
 
 - hosts: loadbalancers_internet_dataplane
   vars:
+    primary: "{{ groups.loadbalancers_internet_dataplane[0] }}"
     vip: "{{ internet_vip }}"
   roles:
     - firewalld
@@ -17,6 +19,7 @@
 
 - hosts: loadbalancers_net2_dataplane
   vars:
+    primary: "{{ groups.loadbalancers_net2_dataplane[0] }}"
     vip: "{{ net2_vip }}"
   roles:
     - firewalld
