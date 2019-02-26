@@ -1,17 +1,20 @@
-- name: Setup kernal bind parameters
+- name: Setup kernel bind parameters
   sysctl:
     name: net.ipv4.ip_nonlocal_bind
     value: 1
     state: present
-- name: Setup kernal ip_forward parameters
+
+- name: Setup kernel ip_forward parameters
   sysctl:
     name: net.ipv4.ip_forward
     value: 1
     state: present
+
 - name: Install kill utils for Keepalived
   yum:
     name: psmisc
     state: latest
+
 - name: setup firewall - Allow VRRP Adverts
   firewalld:
     rich_rule: 'rule protocol value="vrrp" accept'
@@ -19,23 +22,28 @@
     permanent: true
     state: enabled
     zone: public
+
 - name: Create a unique ID
   shell: openssl rand -base64 20
   register: keepalived_password_output
   when: inventory_hostname == groups.loadbalancers_controlplane[0]
+
 - name: Store keepalived password
   set_fact:
     keepalived_password: "{{ keepalived_password_output }}"
+
 - name: Install keepalived
   yum:
     name: keepalived
     state: latest
+
 - name: Configure keepalived
   template:
     src: templates/keepalived.j2
     dest: /etc/keepalived/keepalived.conf
     force: yes
     backup: yes
+
 - name: Enable keepalived
   systemd:
     name: keepalived

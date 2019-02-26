@@ -27,6 +27,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 openshift_master_htpasswd_users={'admin': '{{ admin_password }}'}
 {% endif %}
 
+openshift_master_external_ip_network_cidrs=['{{ external_service_subnet }}']
+
 openshift_master_cluster_method=native
 openshift_master_cluster_hostname=console.{{ localDomainSuffix }}
 openshift_master_cluster_public_hostname=ocp.{{ domainSuffix }}
