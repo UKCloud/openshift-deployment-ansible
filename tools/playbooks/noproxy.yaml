@@ -1,0 +1,52 @@
+---
+- hosts: localhost, masters
+  serial: 1
+  tasks:
+  - name: Create symlink to yedit custom Ansible module
+    file:
+      src: /usr/share/ansible/openshift-ansible/roles/lib_utils/library/yedit.py
+      dest: /usr/share/ansible/plugins/modules/yedit.py
+      state: link
+    when: inventory_hostname == 'localhost'
+
+  - name: Update master-config.yaml
+    yedit:
+      src: /etc/origin/master/master-config.yaml
+      key: admissionConfig.pluginConfig.BuildDefaults.configuration.{{ item }}
+      value: "newdomain.test"
+      separator: ","
+      append: True
+      backup: True
+    with_items:
+      - gitNoProxy
+    when: inventory_hostname in groups.masters
+    become: yes
+    notify: 
+      - restart master
+
+  handlers:
+  - name: restart master
+    command: /usr/local/bin/master-restart "{{ item }}"
+    with_items:
+    - api
+    - controllers
+    retries: 5
+    delay: 5
+    register: result
+    until: result.rc == 0
+    notify: verify API server
+
+  - name: verify API server
+    command: >
+      curl --tlsv1.2 --max-time 2
+      --cacert /etc/origin/master/ca-bundle.crt
+      https://{{ openshift_master_cluster_hostname }}:8443/healthz/ready
+    args:
+      warn: no
+    register: l_api_available_output
+    until: l_api_available_output.stdout == 'ok'
+    retries: 120
+    delay: 1
+    changed_when: false
+    
+    #- include: /usr/share/ansible/openshift-ansible/playbooks/openstack/openshift-cluster/roles/openshift_cloud_provider/handlers/main.yml
