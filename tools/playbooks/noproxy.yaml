@@ -2,27 +2,24 @@
 - hosts: localhost, masters
   serial: 1
   tasks:
-  - name: Create symlink to yedit custom Ansible module
-    file:
-      src: /usr/share/ansible/openshift-ansible/roles/lib_utils/library/yedit.py
-      dest: /usr/share/ansible/plugins/modules/yedit.py
-      state: link
-    when: inventory_hostname == 'localhost'
-
-  - name: Update master-config.yaml
-    yedit:
-      src: /etc/origin/master/master-config.yaml
-      key: admissionConfig.pluginConfig.BuildDefaults.configuration.{{ item }}
-      value: "newdomain.test"
-      separator: ","
-      append: True
-      backup: True
+  - name: Update master-config.yaml 
+    lineinfile:
+      path: /etc/origin/master/master-config.yaml
+      regexp: ^(?:\s+(-\s+name:\s+)?{{ item }}(\s+value:\s+|:\s+)?).*$
+      line: test
+      backup: yes
     with_items:
+      - NO_PROXY
+      - no_proxy
       - gitNoProxy
     when: inventory_hostname in groups.masters
     become: yes
     notify: 
       - restart master
+    register: output
+
+  - debug:
+      var: output
 
   handlers:
   - name: restart master
