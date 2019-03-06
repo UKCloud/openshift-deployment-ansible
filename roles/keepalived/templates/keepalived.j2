@@ -1,6 +1,3 @@
-#set variable to use in Jinja conditional
-{% set primary = groups.loadbalancers[0] -%}
-
 vrrp_script chk_haproxy {
     script "/usr/bin/killall -0 haproxy"
     interval 2 # every 2 seconds
