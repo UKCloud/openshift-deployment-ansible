@@ -1,0 +1,35 @@
+- name: install the Zabbix repository
+  yum:
+    name: http://repo.zabbix.com/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-1.el7.noarch.rpm
+    state: present
+  when: inventory_hostname in groups.loadbalancers
+
+- name: install zabbix-agent
+  yum:
+    name: zabbix-agent
+    state: present
+  when: inventory_hostname in groups.loadbalancers
+
+- name: Configure zabbix-agents
+  template:
+    src: templates/zabbix_agentd.j2
+    dest: /etc/zabbix/zabbix_agentd.d.conf
+    force: yes
+    backup: yes
+  when: inventory_hostname in groups.loadbalancers
+
+- name: setup firewalld - zabbix
+  firewalld:
+    port: 10050/tcp
+    immediate: true
+    permanent: true
+    state: enabled
+    zone: public
+  when: inventory_hostname in groups.loadbalancers
+
+- name: enable and start the zabbix-agent service
+  systemd:
+    name: zabbix
+    state: started
+    enabled: yes
+  when: inventory_hostname in groups.loadbalancers

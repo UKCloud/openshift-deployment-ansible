@@ -1,0 +1,10 @@
+PidFile=/var/run/zabbix/zabbix_agentd.pid
+LogFile=/var/log/zabbix/zabbix_agentd.log
+LogFileSize=0
+DebugLevel=3
+Server=51.179.212.199,51.179.221.82,51.179.212.141,51.179.221.16,51.179.219.161,51.179.212.247,51.179.219.136,51.179.212.138,51.179.204.226,51.179.210.208,51.179.219.69,51.179.212.154,51.179.210.204,51.179.204.209,51.179.204.141,51.179.210.166
+StartAgents=1
+ServerActive=10.2.1.240:10051
+HostnameItem=system.hostname
+HostMetadataItem=system.uname
+Include=/etc/zabbix/zabbix_agentd.d/*.conf

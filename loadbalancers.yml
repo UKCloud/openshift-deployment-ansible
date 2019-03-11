@@ -7,6 +7,7 @@
     - keepalived
     - haproxy
     - squid
+    - zabbix
 
 - hosts: loadbalancers_internet_dataplane
   vars:
@@ -16,6 +17,7 @@
     - firewalld
     - keepalived
     - haproxy
+    - zabbix
 
 - hosts: loadbalancers_net2_dataplane
   vars:
@@ -25,3 +27,4 @@
     - firewalld
     - keepalived
     - haproxy
+    - zabbix
