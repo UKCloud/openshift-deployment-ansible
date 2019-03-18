@@ -13,7 +13,7 @@
 - name: Configure zabbix-agents
   template:
     src: templates/zabbix_agentd.j2
-    dest: /etc/zabbix/zabbix_agentd.d.conf
+    dest: /etc/zabbix/zabbix_agentd.conf
     force: yes
     backup: yes
   when: inventory_hostname in groups.loadbalancers
@@ -29,7 +29,7 @@
 
 - name: enable and start the zabbix-agent service
   systemd:
-    name: zabbix
+    name: zabbix-agent
     state: started
     enabled: yes
   when: inventory_hostname in groups.loadbalancers
