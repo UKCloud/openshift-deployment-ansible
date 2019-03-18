@@ -13,10 +13,6 @@
 - name: Apply read-whitelist role to whitelist-reader serviceaccount
   command: /usr/local/bin/oc policy add-role-to-user read-whitelist -z whitelist-reader -n whitelist --role-namespace='whitelist'
 
-- name: Get whitelist-reader serviceaccount token name
-  command: /usr/local/bin/oc get sa -n whitelist -o jsonpath='{$.items[?(@.metadata.name=="whitelist-reader")].secrets[0].name}'
-  register: whitelist_token_name
-
-- name: Extract base64 whitelist-reader token
-  command: /usr/local/bin/oc get secret {{ whitelist_token_name.stdout }} -n whitelist -o jsonpath='{$.data.token}'
+- name: Get first whitelist-reader serviceaccount token
+  shell: /usr/local/bin/oc get secrets -o jsonpath='{$.items[?(@.metadata.annotations.kubernetes\.io/service-account\.name=="whitelist-reader")].data.token}' -n whitelist | /usr/bin/awk '{print $1}'
   register: whitelist_token_b64
