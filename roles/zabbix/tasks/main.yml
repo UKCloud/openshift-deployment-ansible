@@ -20,7 +20,7 @@
 
 - name: setup firewalld - zabbix
   firewalld:
-    port: 10050/tcp
+    port: 10051/tcp
     immediate: true
     permanent: true
     state: enabled
