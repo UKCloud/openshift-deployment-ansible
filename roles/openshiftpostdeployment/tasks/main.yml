@@ -9,7 +9,7 @@
   command: /usr/local/bin/oc create -f ~/storage-class-tier1.yml
 
 - name: Enable volume expansion for tier2 storage class
-  command: /usr/local/bin/oc patch sc tier2 -p '{"allowVolumeExpansion": true}'
+  command: /usr/local/bin/oc patch sc tier2 -p '{"allowVolumeExpansion":true}'
 
 - name: Give admin rights
   command: /usr/local/bin/oc adm policy --config=/etc/origin/master/admin.kubeconfig add-cluster-role-to-user cluster-admin admin
