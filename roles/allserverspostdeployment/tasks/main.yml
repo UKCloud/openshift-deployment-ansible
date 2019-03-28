@@ -10,6 +10,16 @@
     - 7080
     - 7443
   when: extra_gateway_vip is defined and inventory_hostname in groups.nodes_infra
+  
+- name: Make private-router iptables rules persistent
+  blockinfile:
+    path: /etc/sysconfig/iptables
+    insertbefore: '^COMMIT'
+    marker: "# {mark} private-router rules"
+    block: |
+      -A OS_FIREWALL_ALLOW -p tcp -m tcp --dport 7080 -m comment --comment "Open port for extra gateway router" -m conntrack --ctstate NEW -j ACCEPT
+      -A OS_FIREWALL_ALLOW -p tcp -m tcp --dport 7443 -m comment --comment "Open port for extra gateway router" -m conntrack --ctstate NEW -j ACCEPT
+  when: extra_gateway_vip is defined and inventory_hostname in groups.nodes_infra 
 
 - name: Block root login via SSH to all instances
   replace:
