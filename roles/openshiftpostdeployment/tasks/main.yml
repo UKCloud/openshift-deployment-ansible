@@ -1,12 +1,15 @@
-- name: Setup tier-1 storage class file
+- name: Setup tier1 storage class file
   template:
     src: templates/storage-class-tier1.j2
     dest: ~/storage-class-tier1.yml
     force: yes
     backup: yes
 
-- name: create tier-1 class 
+- name: create tier1 storage class 
   command: /usr/local/bin/oc create -f ~/storage-class-tier1.yml
+
+- name: Enable volume expansion for tier2 storage class
+  command: /usr/local/bin/oc patch sc tier2 -p '{"allowVolumeExpansion":true}'
 
 - name: Give admin rights
   command: /usr/local/bin/oc adm policy --config=/etc/origin/master/admin.kubeconfig add-cluster-role-to-user cluster-admin admin
