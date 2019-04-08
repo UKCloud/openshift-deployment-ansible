@@ -8,13 +8,13 @@
   authorized_key:
     user: cloud-user
     state: present
-    key: " {{ lookup('file', '/home/cloud-user/.ssh/id_rsa.pub') }}"
+    key: "{{ lookup('file', '/home/cloud-user/.ssh/id_rsa.pub') }}"
   when: inventory_hostname in groups.loadbalancers_controlplane
 
-- name: Store whitelist serviceaccount base64 token on Bastion
+- name: Store whitelist serviceaccount token on Bastion
   lineinfile:
     dest: /home/cloud-user/whitelist-sa-token
-    line: "{{ hostvars[groups.masters[0]]['whitelist_token_b64']['stdout'] }}"
+    line: "{{ hostvars[groups.masters[0]]['whitelist_token']['stdout'] }}"
     state: present
     create: yes
   delegate_to: localhost
