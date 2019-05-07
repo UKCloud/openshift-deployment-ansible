@@ -1,4 +1,9 @@
+# Do not remove addresses in this block these are added on deployment
 registry.access.redhat.com
 registry.redhat.io
 {{ s3regionendpoint }}
 idp.ukcloud.com
+# Squid does not support having subdomains of existing domains added
+# if you add any the proxy will not reconfigure correctly and any
+# further domains added will not be whitelisted until the offending
+# entries are removed
