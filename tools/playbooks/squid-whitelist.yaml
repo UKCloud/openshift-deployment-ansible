@@ -1,5 +1,6 @@
 ---
 - hosts: localhost, loadbalancers_controlplane
+  any_errors_fatal: true
   tasks:
   - name: Retrieve whitelist from config-map
     shell: |
