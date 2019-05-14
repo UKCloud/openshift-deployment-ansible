@@ -1,5 +1,6 @@
 ---
 - hosts: localhost, loadbalancers_controlplane
+  any_errors_fatal: true
   tasks:
   - name: Retrieve whitelist from config-map
     shell: |
@@ -13,7 +14,7 @@
       block: "{{ hostvars['localhost']['proxy_whitelist']['stdout'] }}"
       path: /etc/squid/sites.whitelist.txt
       insertafter: EOF
-      marker: "# {mark} ANSIBLE MANAGED BLOCK - User whitelisted domains #"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK - Whitelisted domains #"
     become: yes
     when: inventory_hostname in groups.loadbalancers_controlplane and multinetwork
     notify:

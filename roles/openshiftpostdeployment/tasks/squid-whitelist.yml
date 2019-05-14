@@ -1,8 +1,18 @@
+- name: Create CM template
+  template:
+    src: roles/squid/templates/whitelist.j2
+    dest: /home/cloud-user/whitelist.txt
+
 - name: Create whitelist project
   command: /usr/local/bin/oc new-project whitelist
 
-- name: Create proxy-whitelist configmap and create empty key
-  command: /usr/local/bin/oc create configmap proxy-whitelist --from-literal=proxy-whitelist.txt= -n whitelist
+- name: Create proxy-whitelist configmap and populate from template
+  command: /usr/local/bin/oc create configmap proxy-whitelist --from-file=proxy-whitelist.txt=/home/cloud-user/whitelist.txt -n whitelist
+
+- name: Remove CM template
+  file:
+    path: /home/cloud-user/whitelist.txt
+    state: absent
 
 - name: Create whitelist-reader serviceaccount
   command: /usr/local/bin/oc create sa whitelist-reader -n whitelist

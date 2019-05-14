@@ -20,6 +20,18 @@
     backup: yes
   when: inventory_hostname in groups.loadbalancers_controlplane
 
+- name: Insert ansible marker
+  lineinfile:
+    path: /etc/squid/sites.whitelist.txt
+    insertbefore: BOF
+    line: '# BEGIN ANSIBLE MANAGED BLOCK - Whitelisted domains #'
+
+- name: Insert ansible marker
+  lineinfile:
+    path: /etc/squid/sites.whitelist.txt
+    insertafter: EOF
+    line: '# END ANSIBLE MANAGED BLOCK - Whitelisted domains #'
+
 - name: setup firewall - squid
   firewalld:
     port: 3128/tcp
