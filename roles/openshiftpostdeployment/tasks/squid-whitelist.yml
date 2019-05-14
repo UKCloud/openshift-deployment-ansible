@@ -6,7 +6,7 @@
 - name: Create whitelist project
   command: /usr/local/bin/oc new-project whitelist
 
-- name: Create proxy-whitelist configmap and create empty key
+- name: Create proxy-whitelist configmap and populate from template
   command: /usr/local/bin/oc create configmap proxy-whitelist --from-file=proxy-whitelist.txt=/home/cloud-user/whitelist.txt -n whitelist
 
 - name: Remove CM template
