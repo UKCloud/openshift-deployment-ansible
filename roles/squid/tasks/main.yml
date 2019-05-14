@@ -32,7 +32,6 @@
     insertafter: EOF
     line: '# END ANSIBLE MANAGED BLOCK - Whitelisted domains #'
 
-
 - name: setup firewall - squid
   firewalld:
     port: 3128/tcp
