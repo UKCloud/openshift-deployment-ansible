@@ -18,7 +18,7 @@
   command: /usr/local/bin/oc create sa whitelist-reader -n whitelist
 
 - name: Create read-whitelist role
-  command: /usr/local/bin/oc create role read-whitelist --verb=get,list --resource=configmaps --resource-name=proxy-whitelist -n whitelist
+  command: /usr/local/bin/oc create role read-whitelist --verb=get,list,patch --resource=configmaps --resource-name=proxy-whitelist -n whitelist
 
 - name: Apply read-whitelist role to whitelist-reader serviceaccount
   command: /usr/local/bin/oc policy add-role-to-user read-whitelist -z whitelist-reader -n whitelist --role-namespace='whitelist'

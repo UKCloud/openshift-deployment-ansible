@@ -20,6 +20,13 @@
     notify:
       - reconfigure squid
 
+  - meta: flush_handlers
+
+  - name: Create error configmap if necessary
+    shell: /usr/bin/oc patch cm proxy-whitelist -p '{"data":{"whitelist-error":"{{ reconfigure_status.stderr_lines[0]}}  {{ reconfigure_status.stderr_lines[1]}}"}}' -n whitelist
+    when: reconfigure_status.rc == 1
+    delegate_to: 127.0.0.1
+
   handlers:
     - name: reconfigure squid
       command: /usr/sbin/squid -k reconfigure
