@@ -1,45 +1,3 @@
-# Net2 routers
-- name: Setup secondary network routers
-  command: /usr/local/bin/oc adm router router-secondary --extended-logging=true --replicas=0 --selector='router=secondary' --service-account=router -n default
-  when: multinetwork
-
-- name: Setup secondary network router envs
-  command: /usr/local/bin/oc set env dc/router-secondary {{ item }} -n default
-  with_items:
-    - ROUTE_LABELS="router-secondary=true"
-    - ROUTER_LOG_LEVEL=debug
-    - ROUTER_USE_PROXY_PROTOCOL=true
-  when: multinetwork
-
-- name: Scale up secondary network routers
-  vars:
-    net2_scale: "{{ groups['nodes_net2'] | length }}"
-  command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }} -n default
-  when: multinetwork
-
-# Extra gateway routers
-- name: Setup routers for private networks (extra gateway)
-  command: /usr/local/bin/oc adm router router-private --extended-logging=true --replicas=0 --selector='router-private=true' --service-account=router --stats-port=1937 --ports='7080:7080,7443:7443' -n default
-  when: extra_gateway_vip is defined
-
-- name: Setup private network router environment
-  command: /usr/local/bin/oc set env dc/router-private {{ item }} -n default
-  with_items:
-    - ROUTER_SERVICE_HTTP_PORT=7080
-    - ROUTER_SERVICE_HTTPS_PORT=7443
-    - ROUTE_LABELS="router-private=true"
-    - ROUTER_SERVICE_NO_SNI_PORT=11443
-    - ROUTER_SERVICE_SNI_PORT=11444
-    - ROUTER_USE_PROXY_PROTOCOL=true
-    - ROUTER_LOG_LEVEL=debug
-  when: extra_gateway_vip is defined
-
-- name: Scale up private network routers
-  vars:
-    infra_scale: "{{ groups['nodes_infra'] | length }}"
-  command: /usr/local/bin/oc scale dc router-private --replicas={{ infra_scale }} -n default
-  when: extra_gateway_vip is defined
-
 # Default routers
 - name: Setup default router environment
   command: /usr/local/bin/oc set env dc/router {{ item }} -n default
@@ -64,3 +22,51 @@
 
 - name: Patch router deployment
   command: /usr/local/bin/oc patch dc/router -p '{"spec":{"template":{"spec":{"containers":[{"name":"router","env":[{"name":"ROUTER_SYSLOG_ADDRESS","value":"/var/lib/rsyslog/rsyslog.sock"}],"volumeMounts":[{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]},{"name":"syslog","command":["/sbin/rsyslogd","-n","-i","/tmp/rsyslog.pid","-f","/etc/rsyslog/rsyslog.conf"],"image":"registry.redhat.io/openshift3/ose-haproxy-router:v3.11","imagePullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"100m","memory":"256Mi"}},"volumeMounts":[{"mountPath":"/etc/rsyslog","name":"rsyslog-config"},{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]}],"volumes":[{"configMap":{"name":"rsyslog-config"},"name":"rsyslog-config"},{"emptyDir":{},"name":"rsyslog-socket"}]}}}}' -n default
+
+# Net2 routers
+- name: Setup secondary network routers
+  command: /usr/local/bin/oc adm router router-secondary --replicas=0 --selector='router=secondary' --service-account=router -n default
+  when: multinetwork
+
+- name: Setup secondary network router envs
+  command: /usr/local/bin/oc set env dc/router-secondary {{ item }} -n default
+  with_items:
+    - ROUTE_LABELS="router-secondary=true"
+    - ROUTER_LOG_LEVEL=debug
+    - ROUTER_USE_PROXY_PROTOCOL=true
+  when: multinetwork
+
+- name: Patch secondary router deployment to use extended logging
+  command: /usr/local/bin/oc patch dc/router-secondary -p '{"spec":{"template":{"spec":{"containers":[{"name":"router","env":[{"name":"ROUTER_SYSLOG_ADDRESS","value":"/var/lib/rsyslog/rsyslog.sock"}],"volumeMounts":[{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]},{"name":"syslog","command":["/sbin/rsyslogd","-n","-i","/tmp/rsyslog.pid","-f","/etc/rsyslog/rsyslog.conf"],"image":"registry.redhat.io/openshift3/ose-haproxy-router:v3.11","imagePullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"100m","memory":"256Mi"}},"volumeMounts":[{"mountPath":"/etc/rsyslog","name":"rsyslog-config"},{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]}],"volumes":[{"configMap":{"name":"rsyslog-config"},"name":"rsyslog-config"},{"emptyDir":{},"name":"rsyslog-socket"}]}}}}' -n default
+
+- name: Scale up secondary network routers
+  vars:
+    net2_scale: "{{ groups['nodes_net2'] | length }}"
+  command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }} -n default
+  when: multinetwork
+
+# Extra gateway routers
+- name: Setup routers for private networks (extra gateway)
+  command: /usr/local/bin/oc adm router router-private --replicas=0 --selector='router-private=true' --service-account=router --stats-port=1937 --ports='7080:7080,7443:7443' -n default
+  when: extra_gateway_vip is defined
+
+- name: Setup private network router environment
+  command: /usr/local/bin/oc set env dc/router-private {{ item }} -n default
+  with_items:
+    - ROUTER_SERVICE_HTTP_PORT=7080
+    - ROUTER_SERVICE_HTTPS_PORT=7443
+    - ROUTE_LABELS="router-private=true"
+    - ROUTER_SERVICE_NO_SNI_PORT=11443
+    - ROUTER_SERVICE_SNI_PORT=11444
+    - ROUTER_USE_PROXY_PROTOCOL=true
+    - ROUTER_LOG_LEVEL=debug
+  when: extra_gateway_vip is defined
+
+- name: Patch private router deployment to use extended logging
+  command: /usr/local/bin/oc patch dc/router-private -p '{"spec":{"template":{"spec":{"containers":[{"name":"router","env":[{"name":"ROUTER_SYSLOG_ADDRESS","value":"/var/lib/rsyslog/rsyslog.sock"}],"volumeMounts":[{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]},{"name":"syslog","command":["/sbin/rsyslogd","-n","-i","/tmp/rsyslog.pid","-f","/etc/rsyslog/rsyslog.conf"],"image":"registry.redhat.io/openshift3/ose-haproxy-router:v3.11","imagePullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"100m","memory":"256Mi"}},"volumeMounts":[{"mountPath":"/etc/rsyslog","name":"rsyslog-config"},{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]}],"volumes":[{"configMap":{"name":"rsyslog-config"},"name":"rsyslog-config"},{"emptyDir":{},"name":"rsyslog-socket"}]}}}}' -n default
+
+- name: Scale up private network routers
+  vars:
+    infra_scale: "{{ groups['nodes_infra'] | length }}"
+  command: /usr/local/bin/oc scale dc router-private --replicas={{ infra_scale }} -n default
+  when: extra_gateway_vip is defined
