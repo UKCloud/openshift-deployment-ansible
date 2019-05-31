@@ -1,0 +1,11 @@
+apiVersion: v1
+data:
+  rsyslog.conf: |
+    $ModLoad imuxsock
+    $SystemLogSocketName /var/lib/rsyslog/rsyslog.sock
+    $ModLoad omstdout.so
+    *.* :omstdout:
+kind: ConfigMap
+metadata:
+  name: rsyslog-config
+  namespace: default

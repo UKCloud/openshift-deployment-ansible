@@ -65,51 +65,6 @@
   command: /usr/local/bin/oc set volume dc/registry-console --add --type=secret --secret-name=console-secret -m /etc/cockpit/ws-certs.d -n default
   when: getCertificates == True
 
-- name: Setup secondary network routers
-  command: /usr/local/bin/oc adm router router-secondary --replicas=0 --selector='router=secondary' --service-account=router -n default
-  when: multinetwork
-
-- name: Setup secondary network router envs
-  command: /usr/local/bin/oc set env dc/router-secondary ROUTE_LABELS="router-secondary=true" -n default
-  when: multinetwork
-
-- name: Allow Source IP to be received on primary router from the HAProxy
-  command: /usr/local/bin/oc set env dc/router ROUTER_USE_PROXY_PROTOCOL=true -n default
-
-- name: Allow Source IP to be received on secondary router from HAProxy
-  command: /usr/local/bin/oc set env dc/router-secondary ROUTER_USE_PROXY_PROTOCOL=true -n default
-  when: multinetwork
-
-- name: Scale up secondary network routers
-  vars:
-    net2_scale: "{{ groups['nodes_net2'] | length }}"
-  command: /usr/local/bin/oc scale dc router-secondary --replicas={{ net2_scale }} -n default
-  when: multinetwork
-
-- name: Setup routers for private networks (extra gateway)
-  command: /usr/local/bin/oc adm router router-private --replicas=0 --selector='router-private=true' --service-account=router --stats-port=1937 --ports='7080:7080,7443:7443' -n default
-  when: extra_gateway_vip is defined
-
-- name: Setup private network router environment
-  command: /usr/local/bin/oc set env dc/router-private {{ item }} -n default
-  with_items:
-    - ROUTER_SERVICE_HTTP_PORT=7080
-    - ROUTER_SERVICE_HTTPS_PORT=7443
-    - ROUTE_LABELS="router-private=true"
-    - ROUTER_SERVICE_NO_SNI_PORT=11443
-    - ROUTER_SERVICE_SNI_PORT=11444
-  when: extra_gateway_vip is defined
-
-- name: Scale up private network routers
-  vars:
-    infra_scale: "{{ groups['nodes_infra'] | length }}"
-  command: /usr/local/bin/oc scale dc router-private --replicas={{ infra_scale }} -n default
-  when: extra_gateway_vip is defined
-
-- name: Allow Source IP to be received on private router from HAProxy
-  command: /usr/local/bin/oc set env dc/router-private ROUTER_USE_PROXY_PROTOCOL=true -n default
-  when: extra_gateway_vip is defined
-
 - name: Create 'monitoring' serviceaccount for monitoring use
   command: /usr/local/bin/oc create serviceaccount monitoring -n openshift-infra
 
@@ -144,6 +99,8 @@
       namespace: "openshift-monitoring"
       hostname: "prometheus"
   when: getCertificates == True
+
+- include_tasks: routers.yml
 
 - include_tasks: squid-whitelist.yml
   when: multinetwork
