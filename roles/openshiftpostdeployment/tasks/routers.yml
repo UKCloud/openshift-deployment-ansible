@@ -38,6 +38,7 @@
 
 - name: Patch secondary router deployment to use extended logging
   command: /usr/local/bin/oc patch dc/router-secondary -p '{"spec":{"template":{"spec":{"containers":[{"name":"router","env":[{"name":"ROUTER_SYSLOG_ADDRESS","value":"/var/lib/rsyslog/rsyslog.sock"}],"volumeMounts":[{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]},{"name":"syslog","command":["/sbin/rsyslogd","-n","-i","/tmp/rsyslog.pid","-f","/etc/rsyslog/rsyslog.conf"],"image":"registry.redhat.io/openshift3/ose-haproxy-router:v3.11","imagePullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"100m","memory":"256Mi"}},"volumeMounts":[{"mountPath":"/etc/rsyslog","name":"rsyslog-config"},{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]}],"volumes":[{"configMap":{"name":"rsyslog-config"},"name":"rsyslog-config"},{"emptyDir":{},"name":"rsyslog-socket"}]}}}}' -n default
+  when: multinetwork
 
 - name: Scale up secondary network routers
   vars:
@@ -64,6 +65,7 @@
 
 - name: Patch private router deployment to use extended logging
   command: /usr/local/bin/oc patch dc/router-private -p '{"spec":{"template":{"spec":{"containers":[{"name":"router","env":[{"name":"ROUTER_SYSLOG_ADDRESS","value":"/var/lib/rsyslog/rsyslog.sock"}],"volumeMounts":[{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]},{"name":"syslog","command":["/sbin/rsyslogd","-n","-i","/tmp/rsyslog.pid","-f","/etc/rsyslog/rsyslog.conf"],"image":"registry.redhat.io/openshift3/ose-haproxy-router:v3.11","imagePullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"100m","memory":"256Mi"}},"volumeMounts":[{"mountPath":"/etc/rsyslog","name":"rsyslog-config"},{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]}],"volumes":[{"configMap":{"name":"rsyslog-config"},"name":"rsyslog-config"},{"emptyDir":{},"name":"rsyslog-socket"}]}}}}' -n default
+  when: extra_gateway_vip is defined
 
 - name: Scale up private network routers
   vars:
