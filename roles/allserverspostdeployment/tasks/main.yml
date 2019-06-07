@@ -48,3 +48,5 @@
  
 - include_tasks: squid-whitelist.yml
   when: multinetwork
+
+- include_tasks: docker-prune.yml
