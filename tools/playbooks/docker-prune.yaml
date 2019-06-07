@@ -1,6 +1,0 @@
-# Perform docker prune on all nodes
----
-- hosts: nodes
-  tasks:
-    - name: Prune docker on all nodes
-      shell: "docker system prune -a -f"
