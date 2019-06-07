@@ -4,8 +4,8 @@
     name: "Docker Prune"
     cron_file: docker-prune
     minute: 15
-	hour: 2
-	weekday: 0
+    hour: 2
+    weekday: 0
     user: cloud-user
     job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/tools/playbooks/docker-prune.yaml >> /home/cloud-user/docker-prune.log 2>&1"
   become: true
