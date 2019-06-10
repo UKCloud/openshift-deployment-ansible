@@ -11,7 +11,7 @@
 - name: Set permissions on downloaded rpm.
   file:
     path: /tmp/epel-release-latest-7.noarch.rpm
-    mode: 0777
+    mode: 0644
 
 - name: Install epel repo
   yum:
