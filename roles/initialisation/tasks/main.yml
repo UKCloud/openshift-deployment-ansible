@@ -3,6 +3,37 @@
     name: bind-utils
     state: latest
 
+- name: Download epel repo rpm
+  get_url:
+    url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    dest: /tmp/epel-release-latest-7.noarch.rpm
+
+- name: Set permissions on downloaded rpm.
+  file:
+    path: /tmp/epel-release-latest-7.noarch.rpm
+    mode: 0777
+
+- name: Install epel repo
+  yum:
+    name: /tmp/epel-release-latest-7.noarch.rpm
+    state: present
+  become: yes
+  become_method: sudo
+
+- name: Install pip
+  yum:
+    name: python-pip
+    state: latest
+  become: yes
+
+- name: Lock down epel repo to pip only
+  lineinfile: 
+    path: /etc/yum.repos.d/epel.repo
+    insertafter: '^enabled=1'
+    line: includepkgs=python2-pip*
+  become: yes
+  become_method: sudo
+
 - name: Get list of installed packages
   yum:
     list=installed
