@@ -3,7 +3,7 @@
   cron:
     name: "Docker Prune"
     cron_file: docker-prune
-    minute: "{{ ( inventory_hostname | hash | list | map('int',0,16) | sum ) % 60 }}"
+    minute: "{{ 59 |random(seed=domainSuffix) }}"
     hour: 2
     weekday: 0
     user: cloud-user
