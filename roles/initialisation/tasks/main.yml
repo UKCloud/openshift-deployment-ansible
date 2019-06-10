@@ -19,6 +19,11 @@
     state: present
   become: yes
   become_method: sudo
+  
+- name: Remove epel file
+  file:
+    path: /tmp/epel-release-latest-7.noarch.rpm
+    state: absent
 
 - name: Install pip
   yum:
