@@ -50,4 +50,3 @@
   when: multinetwork
 
 - include_tasks: docker-prune.yml
-  when: inventory_hostname == 'localhost'
