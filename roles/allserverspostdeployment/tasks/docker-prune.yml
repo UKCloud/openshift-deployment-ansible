@@ -1,0 +1,13 @@
+# Add bastion cronjob to run weekly docker prune
+- name: Create a cron file for weekly docker prune
+  cron:
+    name: "Docker Prune"
+    cron_file: docker-prune
+    minute: "{{ 59|random(seed=domainSuffix) }}"
+    hour: 2
+    weekday: 0
+    user: cloud-user
+    job: "/usr/bin/ansible-playbook -v -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/tools/playbooks/docker-prune.yaml >> /home/cloud-user/docker-prune.log 2>&1"
+  become: true
+  delegate_to: localhost
+  run_once: yes
