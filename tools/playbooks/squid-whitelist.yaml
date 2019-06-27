@@ -1,6 +1,5 @@
 ---
 - hosts: localhost, loadbalancers_controlplane
-  any_errors_fatal: true
   tasks:
   - name: Retrieve whitelist from config-map
     shell: |
@@ -8,6 +7,11 @@
       /usr/bin/oc get configmaps proxy-whitelist -n whitelist -o jsonpath='{.data.proxy-whitelist\.txt}'
     when: inventory_hostname == 'localhost' and multinetwork
     register: proxy_whitelist
+
+  - name: Fail play if task to retrieve whitelist fails
+    fail:
+      msg: "Failing to avoid blank whitelist update"
+    when: hostvars['localhost'].proxy_whitelist.rc != 0
 
   - name: Insert changed block to /etc/squid/sites.whitelist.txt
     blockinfile:
@@ -20,8 +24,17 @@
     notify:
       - reconfigure squid
 
+  - meta: flush_handlers
+
+  - name: Create error configmap if necessary
+    shell: /usr/bin/oc patch cm proxy-whitelist -p '{"data":{"whitelist-error":"{{ reconfigure_status.stderr_lines[0]}}  {{ reconfigure_status.stderr_lines[1]}}"}}' -n whitelist
+    when: reconfigure_status.rc == 1
+    delegate_to: 127.0.0.1
+
   handlers:
     - name: reconfigure squid
       command: /usr/sbin/squid -k reconfigure
       become: yes
+      ignore_errors: true
       when: inventory_hostname in groups.loadbalancers_controlplane
+      register: reconfigure_status
