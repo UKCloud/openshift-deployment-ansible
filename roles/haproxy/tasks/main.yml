@@ -30,6 +30,14 @@
       # Save haproxy logs to haproxy.log
       local2.* /var/log/haproxy.log
 
+- name: Change rsyslog config to avoid haproxy logs going to messages      
+  lineinfile:
+      path: /etc/rsyslog.conf
+      regexp: '^\*.info;mail.none;authpriv.none;cron.none\s*\/var\/log\/messages'
+      line: '*.info;mail.none;authpriv.none;cron.none;local2.none    /var/log/messages'
+      backrefs: true
+
+
 - name: Allow port 7443 and 7080 to use httpd
   command: semanage port -a -t http_port_t -p tcp "{{ item }}"
   become: true
