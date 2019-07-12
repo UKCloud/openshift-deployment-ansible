@@ -4,7 +4,7 @@ registry.redhat.io
 {{ s3regionendpoint }}
 idp.ukcloud.com
 
-{% if deploy_portworx_storage %}
+{% if deploy_portworx_storage is defined and deploy_portworx_storage %}
 #Portworx requirements:
 .quay.io
 registry.centos.org
