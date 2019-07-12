@@ -247,17 +247,17 @@ nodes_net2
 {{ hostname }} openshift_node_group_name='node-config-master'
 {% endfor %}
 {% if deploy_portworx_storage %}
- {% if worker_details_internet != None %}
-  {% for ip, hostname in worker_details_internet.items() %}
+{%  if worker_details_internet != None %}
+{%   for ip, hostname in worker_details_internet.items() %}
 {{ hostname }} openshift_node_group_name='node-config-compute-{{ hostname }}'
-  {% endfor %}
- {% endif %}
+{%   endfor %}
+{%  endif %}
 {% else %}
- {% if worker_details_internet != None %}
-  {% for ip, hostname in worker_details_internet.items() %}
+{%  if worker_details_internet != None %}
+{%   for ip, hostname in worker_details_internet.items() %}
 {{ hostname }} openshift_node_group_name='node-config-compute'
-  {% endfor %}
- {% endif %}
+{%   endfor %}
+{%  endif %}
 {% endif %}
 
 [nodes_infra]
@@ -267,15 +267,15 @@ nodes_net2
 
 [nodes_net2]
 {% if multinetwork %}
- {% if deploy_portworx_storage %}
-  {% for ip, hostname in worker_details_net2.items() %}
+{%  if deploy_portworx_storage %}
+{%   for ip, hostname in worker_details_net2.items() %}
 {{ hostname }} openshift_node_group_name='node-config-compute-net2-{{ hostname }}'
-  {% endfor %}
- {% else %}
-  {% for ip, hostname in worker_details_net2.items() %}
+{%   endfor %}
+{%  else %}
+{%   for ip, hostname in worker_details_net2.items() %}
 {{ hostname }} openshift_node_group_name='node-config-compute-net2'
-  {% endfor %}
- {% endif %}
+{%   endfor %}
+{%  endif %}
 {% endif %}
 
 # groups to capture all of the hosts with connectivity to each network connection
