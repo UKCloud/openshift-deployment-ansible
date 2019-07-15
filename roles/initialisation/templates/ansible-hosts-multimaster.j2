@@ -87,6 +87,9 @@ osm_default_node_selector='tenant=true'
 # enable ntp on masters to ensure proper failover
 openshift_clock_enabled=true
 
+# disable certificate expiry check so upgrades don't fail - CNAP-971
+openshift_certificate_expiry_fail_on_warn=false
+
 # openstack cinder integration for persistant volume claims
 openshift_cloudprovider_kind=openstack
 openshift_cloudprovider_openstack_auth_url={{ osAuthUrl }}
