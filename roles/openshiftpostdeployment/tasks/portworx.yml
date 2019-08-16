@@ -16,7 +16,7 @@
     /usr/local/bin/oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:px-csi-account
 
 - name: Create docker registry credentials secret
-  command: /usr/local/bin/oc create secret docker-registry pwx-regcred --docker-server='{{ registryUrl }}'' --docker-username='{{ registryUser }}'' --docker-password='{{ registryPassword }}'' --docker-email='openshift@ukcloud.com' -n kube-system
+  command: /usr/local/bin/oc create secret docker-registry pwx-regcred --docker-server='{{ registryUrl }}' --docker-username='{{ registryUser }}' --docker-password='{{ registryPassword }}' --docker-email='openshift@ukcloud.com' -n kube-system
 
 - name: Create alertmanager file from template
   template:
