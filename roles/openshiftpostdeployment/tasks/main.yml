@@ -104,3 +104,6 @@
 
 - include_tasks: squid-whitelist.yml
   when: multinetwork
+
+- include_tasks: portworx.yml
+  when: deploy_portworx_storage
