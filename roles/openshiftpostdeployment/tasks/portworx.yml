@@ -1,3 +1,13 @@
+- name: Retrieve pods on Portworx storage networks
+  shell: /usr/local/bin/oc get pods -o wide --all-namespaces | awk 'BEGIN { OFS = " -n " } /10.254.253.|10.254.254./ {print $2, $1}'
+  register: portworx_storage_network_pods
+
+- name: Delete pods on Portworx storage networks
+  command: /usr/local/bin/oc delete pod {{ item }}
+  with_items: "{{ portworx_storage_network_pods.stdout_lines }}"
+  loop_control:
+    pause: 15
+
 - name: Generate Portworx cluster UUID
   command: /usr/bin/uuidgen | tr '[:upper:]' '[:lower:]'
   register: portworx_cluster_uuid
