@@ -43,7 +43,7 @@
 
 - name: Create Portworx spec from template
   template:
-    src: templates/portworx.j2
+    src: templates/portworx-2.1.3.j2
     dest: /home/cloud-user/portworx.yaml
 
 - name: Deploy Portworx
