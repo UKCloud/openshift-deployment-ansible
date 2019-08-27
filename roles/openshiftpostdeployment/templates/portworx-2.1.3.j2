@@ -183,12 +183,12 @@ spec:
                   name: "pwx-regcred"
             - name: CSI_ENDPOINT
               value: unix:///var/lib/kubelet/plugins/com.openstorage.pxd/csi.sock
-            {% if multinetwork %}
+{% if multinetwork %}
             - name: "PX_HTTP_PROXY"
               value: "http://{{ haproxy_vip }}:3128"
             - name: "PX_HTTPS_PROXY"
               value: "http://{{ haproxy_vip }}:3128"
-            {% endif %}
+{% endif %}
 {% raw %}
           livenessProbe:
             periodSeconds: 30
