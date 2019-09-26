@@ -2,7 +2,6 @@ zone"{{ localDomainSuffix }}" IN {
     type slave;
     masters { {{ hostvars[groups.dns[0]].ansible_default_ipv4.address }}; };
     file "{{ localDomainSuffix }}.zone";
-    allow-update { none; };
     allow-transfer { none; };
 };
 
