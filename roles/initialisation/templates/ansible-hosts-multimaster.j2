@@ -158,7 +158,7 @@ openshift_cluster_monitoring_operator_alertmanager_storage_capacity="2Gi"
 # Set the v3.11+ console hostname
 openshift_console_hostname=console.{{ domainSuffix }}
 
-{% if ocp_branding is defined and ocp_branding and ocp_branding_url is defined %}
+{% if ocpBranding is defined and ocpBranding and ocpBrandingUrl is defined %}
 # Brand the ocp web console
 openshift_web_console_extension_stylesheet_urls=['{{ ocp_branding_url }}']
 {% endif %}
