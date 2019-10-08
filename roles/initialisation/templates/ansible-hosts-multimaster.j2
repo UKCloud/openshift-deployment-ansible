@@ -160,7 +160,7 @@ openshift_console_hostname=console.{{ domainSuffix }}
 
 {% if ocpBranding is defined and ocpBranding and ocpBrandingUrl is defined %}
 # Brand the ocp web console
-openshift_web_console_extension_stylesheet_urls=['{{ ocp_branding_url }}']
+openshift_web_console_extension_stylesheet_urls=['{{ ocpBrandingUrl }}']
 {% endif %}
 
 # New registry authentication options
