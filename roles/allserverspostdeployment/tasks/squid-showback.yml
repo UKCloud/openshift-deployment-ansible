@@ -95,5 +95,15 @@
   command: /usr/local/bin/oc annotate ns squid-showback openshift.io/node-selector=node-role.kubernetes.io/infra=true
   when: inventory_hostname == groups.masters[0]
 
+- name: Setup deployment config for fluent
+  template:
+    src: squid-deployment.j2
+    dest: /home/cloud-user/squid-deployment.yml
+  when: inventory_hostname == groups.masters[0]
+
+- name: Create squid deployment
+  command: /usr/local/bin/oc create -f /home/cloud-user/squid-deployment.yml
+  when: inventory_hostname == groups.masters[0] 
+
 
   
