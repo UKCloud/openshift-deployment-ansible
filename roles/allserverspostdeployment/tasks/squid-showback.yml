@@ -100,6 +100,46 @@
   command: /usr/local/bin/oc annotate ns squid-showback openshift.io/node-selector=node-role.kubernetes.io/infra=true
   when: inventory_hostname == groups.masters[0]
 
+- name: Add .docker.io and .docker.com for fluentd image import
+  lineinfile:
+    path: /etc/squid/sites.whitelist.txt
+    insertafter: EOF
+    line: "{{ item }}"
+  when: inventory_hostname in groups.loadbalancers_controlplane
+  with_items:
+    - ".docker.io"
+    - ".docker.com"
+
+- name: reconfigure squid
+  command: squid -k reconfigure
+  when: inventory_hostname in groups.loadbalancers_controlplane
+
+- name: import fluentd image to the local registry
+  command: /usr/local/bin/oc import-image docker.io/fluent/fluentd:v1.5-1 --confirm --reference-policy=local
+  when: inventory_hostname == groups.masters[0]
+
+- name: pause to allow image import
+  pause:
+    seconds: 30
+
+- name: Remove .docker.io and .docker.com for fluentd image import
+  lineinfile:
+    path: /etc/squid/sites.whitelist.txt
+    state: absent
+    regexp: '^{{ item }}'
+  when: inventory_hostname in groups.loadbalancers_controlplane
+  with_items:
+    - ".docker.io"
+    - ".docker.com"
+
+- name: reconfigure squid
+  command: squid -k reconfigure
+  when: inventory_hostname in groups.loadbalancers_controlplane
+
+- name: allow imagestream to be used in deployment
+  command: /usr/local/bin/oc set image-lookup fluentd
+  when: inventory_hostname == groups.masters[0]
+
 - name: Setup deployment config for fluent
   template:
     src: squid-deployment.j2
@@ -109,6 +149,3 @@
 - name: Create squid deployment
   command: /usr/local/bin/oc create -f /home/cloud-user/squid-deployment.yml
   when: inventory_hostname == groups.masters[0] 
-
-
-  
