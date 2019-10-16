@@ -42,6 +42,10 @@
   shell: curl -L https://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | sh
   when: inventory_hostname in groups.loadbalancers_controlplane
 
+- name: wait for install script to run
+  pause:
+    minutes: 1
+  
 - name: install gcc needed for http out plugin
   yum:
     name: gcc-c++
@@ -76,7 +80,7 @@
   systemd:
     daemon_reload: yes
     name: td-agent
-    state: started
+    state: restarted
     enabled: yes
   when: inventory_hostname in groups.loadbalancers_controlplane
 
