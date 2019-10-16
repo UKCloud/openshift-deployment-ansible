@@ -8,7 +8,7 @@
       * hard nofile 65536
     marker: "# {mark} ANSIBLE MANAGED BLOCK - File descriptor increase for td-agent"
   become: true
-  when: inventory_hostname == groups.loadbalancers_controlplane
+  when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Reboot primary CP LBs to apply file descriptor change
   shell: "sleep 5 && reboot"
@@ -40,18 +40,19 @@
 
 - name: install td-agent
   shell: curl -L https://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | sh
+  when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: install gcc needed for http out plugin
   yum:
     name: gcc-c++
     state: latest
   become: true
-  when: inventory_hostname == groups.loadbalancers_controlplane
+  when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: install http-out plugin for td-agent
   command: td-agent-gem install fluent-plugin-out-http
   become: true
-  when: inventory_hostname == groups.loadbalancers_controlplane
+  when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Setup config files for td-agent
   template:
@@ -60,7 +61,7 @@
     owner: root
     group: root
     backup: yes
-  when: inventory_hostname == groups.loadbalancers_controlplane
+  when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Set td-agent daemon to run as root
   blockinfile:
@@ -69,7 +70,7 @@
     block: |
       TD_AGENT_USER=root
       TD_AGENT_GROUP=root
-  when: inventory_hostname == groups.loadbalancers_controlplane
+  when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Start and enable td-agent
   systemd:
@@ -77,7 +78,7 @@
     name: td-agent
     state: started
     enabled: yes
-  when: inventory_hostname == groups.loadbalancers_controlplane
+  when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Create project for in-cluster fluentd
   command: /usr/local/bin/oc new-project squid-showback
