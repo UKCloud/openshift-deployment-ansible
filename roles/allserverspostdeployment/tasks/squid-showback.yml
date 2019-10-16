@@ -149,3 +149,8 @@
 - name: Create squid deployment
   command: /usr/local/bin/oc create -f /home/cloud-user/squid-deployment.yml
   when: inventory_hostname == groups.masters[0] 
+
+- name: Scale deployment to number of infra nodes
+  vars:
+    infra_scale: "{{ groups['nodes_infra'] | length }}"
+  command: /usr/local/bin/oc scale dc squid-fluent-in --replicas={{ infra_scale }}
