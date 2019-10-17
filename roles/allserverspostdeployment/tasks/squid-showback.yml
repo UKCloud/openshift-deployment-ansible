@@ -154,3 +154,4 @@
   vars:
     infra_scale: "{{ groups['nodes_infra'] | length }}"
   command: /usr/local/bin/oc scale dc squid-fluent-in --replicas={{ infra_scale }}
+  when: inventory_hostname == groups.masters[0]
