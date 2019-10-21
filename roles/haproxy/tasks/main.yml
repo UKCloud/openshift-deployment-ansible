@@ -106,7 +106,12 @@
     line: 'options nf_conntrack expect_hashsize=32768 hashsize=32768'
     state: present
   when: inventory_hostname in groups.loadbalancers
-    
+
+- name: Restart firewalld to implement change
+  systemd:
+    state: restarted
+    name: firewalld
+  when: inventory_hostname in groups.loadbalancers
 
 
     
