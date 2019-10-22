@@ -81,3 +81,37 @@
     state: enabled
     zone: public
   when: inventory_hostname in groups.loadbalancers_controlplane
+
+- name: Increase the max tracked connections on loadbalancers
+  sysctl:
+    name: net.netfilter.nf_conntrack_max
+    value: 131072
+    state: present
+    reload: yes
+  when: inventory_hostname in groups.loadbalancers
+
+- name: Create conntrack hash table file
+  file:
+    path: /etc/modprobe.d/nf_conntrack.conf
+    owner: root
+    group: root
+    mode: '0644'
+    state: touch
+  when: inventory_hostname in groups.loadbalancers
+
+- name: Add conntrack hash table increase to created file
+  lineinfile:
+    path: /etc/modprobe.d/nf_conntrack.conf
+    insertbefore: BOF
+    line: 'options nf_conntrack expect_hashsize=32768 hashsize=32768'
+    state: present
+  when: inventory_hostname in groups.loadbalancers
+
+- name: Restart firewalld to implement change
+  systemd:
+    state: restarted
+    name: firewalld
+  when: inventory_hostname in groups.loadbalancers
+
+
+    
