@@ -174,10 +174,10 @@ openshift_http_proxy=http://{{ squid_vip }}:3128
 openshift_https_proxy=http://{{ squid_vip }}:3128
 openshift_no_proxy='.{{ localDomainSuffix }},frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,cor00005-2.cni.ukcloud.com,169.254.169.254'
 #openshift_generate_no_proxy_hosts=true
-#openshift_builddefaults_git_http_proxy=http://{{ haproxy_vip }}:3128
-#openshift_builddefaults_git_https_proxy=http://{{ haproxy_vip }}:3128
-#openshift_builddefaults_http_proxy=http://{{ haproxy_vip }}:3128
-#openshift_builddefaults_https_proxy=http://{{ haproxy_vip }}:3128
+#openshift_builddefaults_git_http_proxy=http://{{ squid_vip }}:3128
+#openshift_builddefaults_git_https_proxy=http://{{ squid_vip }}:3128
+#openshift_builddefaults_http_proxy=http://{{ squid_vip }}:3128
+#openshift_builddefaults_https_proxy=http://{{ squid_vip }}:3128
 {% endif %}
 
 ### Setup the default node labels for each node type
