@@ -170,9 +170,9 @@ oreg_auth_password={{ registryPassword }}
 
 {% if multinetwork %}
 # Proxy variables for use when net2 deployment is in place
-openshift_http_proxy=http://{{ haproxy_vip }}:3128
-openshift_https_proxy=http://{{ haproxy_vip }}:3128
-openshift_no_proxy='.{{ localDomainSuffix }},frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,169.254.169.254'
+openshift_http_proxy=http://{{ squid_vip }}:3128
+openshift_https_proxy=http://{{ squid_vip }}:3128
+openshift_no_proxy='.{{ localDomainSuffix }},frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,cor00005-2.cni.ukcloud.com,169.254.169.254'
 #openshift_generate_no_proxy_hosts=true
 #openshift_builddefaults_git_http_proxy=http://{{ haproxy_vip }}:3128
 #openshift_builddefaults_git_https_proxy=http://{{ haproxy_vip }}:3128
