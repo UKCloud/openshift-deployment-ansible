@@ -5,7 +5,7 @@ vrrp_script chk_haproxy {
 }
 
 vrrp_script chk_squid {
-    script "/usr/bin/killall -0 squid"
+    script "ps -deaf | grep -v grep | grep squid.conf"
     interval 2 # every 2 seconds
     weight 2 # add 2 points if OK
 }
