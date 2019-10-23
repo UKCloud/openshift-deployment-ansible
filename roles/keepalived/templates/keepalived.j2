@@ -29,6 +29,7 @@ vrrp_instance VI_1 {
     }
 }
 
+{% if squid_vip is defined and ansible_fqdn in groups.loadbalancers_controlplane %}
 vrrp_instance VI_2 {
     state {% if ansible_hostname in primary %}BACKUP
     {% else %}MASTER
@@ -47,6 +48,7 @@ vrrp_instance VI_2 {
         chk_squid
     }
 }
+{% endif %}
 
 {% if extra_gateway_vip is defined and ansible_fqdn in groups.loadbalancers_internet_dataplane %}
 vrrp_instance VI_3 {
