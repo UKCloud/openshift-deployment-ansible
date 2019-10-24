@@ -14,7 +14,7 @@ vrrp_instance VI_1 {
     state {% if ansible_hostname in primary %}MASTER
     {% else %}BACKUP
     {% endif %}interface eth0
-    virtual_router_id 51
+    virtual_router_id {% if ansible_fqdn in groups.loadbalancers_controlplane %}5{% elif ansible_fqdn in groups.loadbalancers_internet_dataplane %}6{% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}7{% endif %}1
     priority {% if ansible_hostname in primary  %}101{% else %}100{% endif %} # 101 on haproxy, 100 on haproxy2
     advert_int 1
     authentication {
@@ -34,7 +34,7 @@ vrrp_instance VI_2 {
     state {% if ansible_hostname in primary %}BACKUP
     {% else %}MASTER
     {% endif %}interface eth0
-    virtual_router_id 52
+    virtual_router_id {% if ansible_fqdn in groups.loadbalancers_controlplane %}5{% elif ansible_fqdn in groups.loadbalancers_internet_dataplane %}6{% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}7{% endif %}2
     priority {% if ansible_hostname in primary  %}100{% else %}101{% endif %} # 100 on haproxy, 101 on haproxy2
     advert_int 1
     authentication {
@@ -55,7 +55,7 @@ vrrp_instance VI_3 {
     state {% if ansible_hostname in primary %}BACKUP
     {% else %}MASTER
     {% endif %}interface eth0
-    virtual_router_id 53
+    virtual_router_id 83
     priority {% if ansible_hostname in primary  %}100{% else %}101{% endif %} # 100 on haproxy, 101 on haproxy2
     advert_int 1
     authentication {
