@@ -10,7 +10,7 @@ vrrp_script chk_squid {
     weight 2 # add 2 points if OK
 }
 
-vrrp_instance VI_1 {
+vrrp_instance HAPXY {
     state {% if ansible_hostname in primary %}MASTER
     {% else %}BACKUP
     {% endif %}interface eth0
@@ -30,11 +30,11 @@ vrrp_instance VI_1 {
 }
 
 {% if squid_vip is defined and ansible_fqdn in groups.loadbalancers_controlplane %}
-vrrp_instance VI_2 {
+vrrp_instance SQUID {
     state {% if ansible_hostname in primary %}BACKUP
     {% else %}MASTER
     {% endif %}interface eth0
-    virtual_router_id {% if ansible_fqdn in groups.loadbalancers_controlplane %}5{% elif ansible_fqdn in groups.loadbalancers_internet_dataplane %}6{% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}7{% endif %}2
+    virtual_router_id 52
     priority {% if ansible_hostname in primary  %}100{% else %}101{% endif %} # 100 on haproxy, 101 on haproxy2
     advert_int 1
     authentication {
@@ -51,7 +51,7 @@ vrrp_instance VI_2 {
 {% endif %}
 
 {% if extra_gateway_vip is defined and ansible_fqdn in groups.loadbalancers_internet_dataplane %}
-vrrp_instance VI_3 {
+vrrp_instance EXGWY {
     state {% if ansible_hostname in primary %}BACKUP
     {% else %}MASTER
     {% endif %}interface eth0
