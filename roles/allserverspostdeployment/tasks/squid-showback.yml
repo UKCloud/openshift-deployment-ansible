@@ -1,4 +1,4 @@
-- name: Increase fle descriptors
+- name: Increase file descriptors
   blockinfile:
     path: /etc/security/limits.conf
     block: |
