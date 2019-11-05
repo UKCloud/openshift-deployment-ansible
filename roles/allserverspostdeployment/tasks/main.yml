@@ -50,3 +50,5 @@
   when: multinetwork
 
 - include_tasks: docker-prune.yml
+
+- include_tasks: setup_backups.yml

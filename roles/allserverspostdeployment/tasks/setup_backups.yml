@@ -1,0 +1,10 @@
+- hosts: localhost
+  tasks:
+
+  - name: Setup cronjob for nightly backup
+    cron:
+      name: "Take cluster backup nightly"
+      cron_file: cluster-backup
+      hour: 1
+      user: cloud-user
+      job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/backup.yml >> /home/cloud-user/backup.log 2>&1"
