@@ -24,7 +24,7 @@
   cron:
     name: "Update custom sites in Squid Whitelist"
     cron_file: proxy-whitelist
-    minute: 0
+    minute: "*/1"
     user: cloud-user
     job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/tools/playbooks/squid-whitelist.yaml >> /home/cloud-user/proxy-whitelist.log 2>&1"
   become: true

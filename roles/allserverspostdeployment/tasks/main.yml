@@ -50,3 +50,6 @@
   when: multinetwork
 
 - include_tasks: docker-prune.yml
+
+- include_tasks: squid-showback.yml
+  when: multinetwork

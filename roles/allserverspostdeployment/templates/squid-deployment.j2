@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: Template
+items:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: entrypoint
+  data:
+    entrypoint.sh: |-
+      #!/bin/sh
+
+      uid=${FLUENT_UID:-1000}
+
+      # check if a old fluent user exists and delete it
+      cat /etc/passwd | grep fluent
+      if [ $? -eq 0 ]; then
+          deluser fluent
+      fi
+
+
+
+      # (re)add the fluent user with $FLUENT_UID
+      adduser -D -g '' -u ${uid} -h /home/fluent fluent
+
+
+
+
+      #source vars if file exists
+      DEFAULT=/etc/default/fluentd
+
+
+
+
+      if [ -r $DEFAULT ]; then
+          set -o allexport
+          source $DEFAULT
+          set +o allexport
+      fi
+
+
+
+
+      # chown home and data folder
+      chown -R fluent /home/fluent
+      chown -R fluent /fluentd
+      cp /custom-conf/fluent.conf /fluentd/etc/fluent.conf
+
+
+
+      fluentd -c /fluentd/etc/fluent.conf
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: fluent-squid-config
+  data:
+    fluent.conf: |-
+      <source>
+        @type http
+        port 9880
+        bind 0.0.0.0
+        body_size_limit 32m
+        keepalive_timeout 10s
+      </source>
+
+      <match squid>
+        @type stdout
+      </match>
+- apiVersion: "v1"
+  kind: "DeploymentConfig"
+  metadata:
+    name: "squid-fluent-in"
+  spec:
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          name: "squid-fluent"
+      spec:
+        containers:
+          - name: "fluent"
+            image: fluentd:v1.5-1
+            command:
+            - /bin/entrypoint/entrypoint.sh
+            securityContext:
+              privileged: true
+              runAsUser: 0
+            volumeMounts:
+              - mountPath: /custom-conf
+                name: fluent-config
+              - mountPath: /bin/entrypoint
+                name: entrypoint
+        serviceAccountName: fluent-squid
+        nodeSelector:
+          "node-role.kubernetes.io/infra": "true"
+        volumes:
+          - name: fluent-config
+            configMap:
+              defaultMode: 420
+              name: fluent-squid-config
+          - name: entrypoint
+            configMap:
+              defaultMode: 0777
+              name: entrypoint
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: squid-fluent
+  spec:
+    selector:
+      name: "squid-fluent"
+    ports:
+    - port: 9881
+      protocol: TCP
+      targetPort: 9880
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+    name: squid-fluent
+  spec:
+    host: squid-showback.{{ domainSuffix }}
+    port:
+      targetPort: 9880
+    to:
+      kind: Service
+      name: squid-fluent
+      weight: 100
+    wildcardPolicy: None
+    tls:
+      termination: edge
