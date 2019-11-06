@@ -1,6 +1,13 @@
 - hosts: localhost
   tasks:
-
+  - name: Create backup bucket for nightly backups
+    aws_s3:
+      aws_access_key: "{{ s3accesskey }}"
+      aws_secret_key: "{{ s3secretkey }}"
+      s3_url: "https://{{ s3regionendpoint }}"
+      bucket: nightly_backups
+      mode: create
+    
   - name: Setup cronjob for nightly backup
     cron:
       name: "Take cluster backup nightly"
