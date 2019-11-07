@@ -126,6 +126,8 @@ openshift_logging_master_url=https://console.{{ localDomainSuffix }}:8443
 openshift_logging_use_journal=true
 openshift_logging_use_ops=false
 openshift_logging_es_cluster_size={{ loggingClusterSize }}
+openshift_logging_es_pvc_dynamic=true
+openshift_logging_elasticsearch_storage_type=pvc
 openshift_logging_es_pvc_size=40Gi
 # Node selectors for aggregated logging
 openshift_logging_curator_nodeselector={"node-role.kubernetes.io/infra":"true"}
