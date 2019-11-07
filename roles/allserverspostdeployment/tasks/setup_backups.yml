@@ -1,17 +1,17 @@
-- hosts: localhost
-  tasks:
-  - name: Create backup bucket for nightly backups
-    aws_s3:
-      aws_access_key: "{{ s3accesskey }}"
-      aws_secret_key: "{{ s3secretkey }}"
-      s3_url: "https://{{ s3regionendpoint }}"
-      bucket: nightly_backups
-      mode: create
+- name: Create backup bucket for nightly backups
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: nightly_backups
+    mode: create
+  when: inventory_hostname == "localhost"
     
-  - name: Setup cronjob for nightly backup
-    cron:
-      name: "Take cluster backup nightly"
-      cron_file: cluster-backup
-      hour: 1
-      user: cloud-user
-      job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/backup.yml >> /home/cloud-user/backup.log 2>&1"
+- name: Setup cronjob for nightly backup
+  cron:
+    name: "Take cluster backup nightly"
+    cron_file: cluster-backup
+    hour: 1
+    user: cloud-user
+    job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/backup.yml >> /home/cloud-user/backup.log 2>&1"
+  when: inventory_hostname == "localhost"

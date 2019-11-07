@@ -31,6 +31,11 @@
     state: latest
   become: yes
 
+- name: Install boto3 with pip
+  pip:
+    name: boto3
+  become: true
+
 - name: Lock down epel repo to pip only
   lineinfile: 
     path: /etc/yum.repos.d/epel.repo
