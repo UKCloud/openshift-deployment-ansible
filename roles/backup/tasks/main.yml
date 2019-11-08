@@ -24,6 +24,8 @@
     s3_url: "https://{{ s3regionendpoint }}"
     bucket: nightly_backups
     mode: create
+  retries: 10
+  delay: 2
   when: inventory_hostname == "localhost"
 
 - name: Setup cronjob for nightly backup
