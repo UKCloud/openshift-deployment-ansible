@@ -2,9 +2,17 @@
 ---
 - hosts: nodes
   tasks:
-    - name: print time for debug logging purposes
-      debug:
-        var=ansible_date_time.date
-      
-    - name: Prune docker on all nodes
-      shell: "docker system prune -a -f"
+  - name: print time for debug logging purposes
+    debug:
+      var=ansible_date_time.date
+    delegate_to: 127.0.0.1
+    run_once: yes
+
+  - name: print date for debug logging purposes
+    debug:
+      var=ansible_date_time.time
+    delegate_to: 127.0.0.1
+    run_once: yes
+ 
+  - name: Prune docker on all nodes
+    shell: "docker system prune -a -f"
