@@ -13,7 +13,7 @@
     cron_file: proxy-whitelist
     minute: 0
     user: cloud-user
-    job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/tools/playbooks/squid-whitelist.yaml >> /home/cloud-user/proxy-whitelist.log 2>&1"
+    job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/tools/playbooks/squid-whitelist.yaml >> /home/cloud-user/cronjob-logs/proxy-whitelist.log 2>&1"
   become: true
   delegate_to: localhost
   run_once: yes

@@ -1,6 +1,10 @@
 ---
 - hosts: localhost, loadbalancers_controlplane
   tasks:
+  - name: print time for debug logging purposes
+    debug:
+      var=ansible_date_time.date
+
   - name: Retrieve whitelist from config-map
     shell: |
       /usr/bin/oc login https://ocp.{{ domainSuffix }}:8443 --token={{ lookup('file', '/home/cloud-user/whitelist-sa-token') }} > /dev/null

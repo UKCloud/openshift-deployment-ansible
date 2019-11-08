@@ -1,3 +1,7 @@
+- name: print time for debug logging purposes
+  debug:
+    var=ansible_date_time.date
+
 - name: Create backups directory
   file:
     path: /home/cloud-user/backups
@@ -20,7 +24,7 @@
     cron_file: cluster-backup
     hour: 1
     user: cloud-user
-    job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/backup.yml >> /home/cloud-user/backup.log 2>&1"
+    job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/backup.yml >> /home/cloud-user/cronjob-logs/backup.log 2>&1"
   become: true
   when: inventory_hostname == "localhost"
 
