@@ -1,16 +1,3 @@
-- name: Generate SSH keypair
-  command: ssh-keygen -t rsa -N "" -f /home/cloud-user/.ssh/id_rsa
-  no_log: True
-  delegate_to: localhost
-  run_once: yes
-
-- name: Copy generated SSH keypair to controlplane loadbalancers
-  authorized_key:
-    user: cloud-user
-    state: present
-    key: "{{ lookup('file', '/home/cloud-user/.ssh/id_rsa.pub') }}"
-  when: inventory_hostname in groups.loadbalancers_controlplane
-
 - name: Store whitelist serviceaccount token on Bastion
   lineinfile:
     dest: /home/cloud-user/whitelist-sa-token
