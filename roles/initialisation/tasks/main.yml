@@ -34,7 +34,7 @@
 - name: Install boto3 with pip
   pip:
     name: boto3
-  become: true
+  become: yes
 
 - name: Lock down epel repo to pip only
   lineinfile: 
