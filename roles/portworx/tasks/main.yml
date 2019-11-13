@@ -1,20 +1,24 @@
 - name: Retrieve pods on Portworx storage networks
   shell: /usr/local/bin/oc get pods -o wide --all-namespaces | awk 'BEGIN { OFS = " -n " } /10.254.253.|10.254.254./ {print $2, $1}'
   register: portworx_storage_network_pods
+  when: inventory_hostname in groups.masters
 
 - name: Delete pods on Portworx storage networks
   command: /usr/local/bin/oc delete pod {{ item }}
   with_items: "{{ portworx_storage_network_pods.stdout_lines }}"
   loop_control:
     pause: 15
+  when: inventory_hostname in groups.masters
 
 - name: Generate Portworx cluster UUID
   command: /usr/bin/uuidgen | tr '[:upper:]' '[:lower:]'
   register: portworx_cluster_uuid
+  when: inventory_hostname in groups.masters
 
 - name: Retrieve Kubernetes version
   shell: "/var/usrlocal/bin/kubectl version --short | /usr/bin/awk -Fv '/Server Version: / {print $3}'"
   register: kubernetes_version
+  when: inventory_hostname in groups.masters
 
 - name: Add Portworx service accounts to privileged SCC
   shell: |
@@ -24,40 +28,53 @@
     /usr/local/bin/oc adm policy add-scc-to-user anyuid system:serviceaccount:kube-system:px-lh-account
     /usr/local/bin/oc adm policy add-scc-to-user anyuid system:serviceaccount:default:default
     /usr/local/bin/oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:px-csi-account
+  when: inventory_hostname in groups.masters
 
 - name: Create docker registry credentials secret
   command: /usr/local/bin/oc create secret docker-registry pwx-regcred --docker-server='{{ registryUrl }}' --docker-username='{{ registryUser }}' --docker-password='{{ registryPassword }}' --docker-email='openshift@ukcloud.com' -n kube-system
+  when: inventory_hostname in groups.masters
 
 - name: Create alertmanager file from template
   template:
     src: templates/portworx-alertmanager.j2
     dest: /home/cloud-user/alertmanager.yaml
+  when: inventory_hostname in groups.masters
 
 - name: Create alertmanager secret
   command: /usr/local/bin/oc create secret generic alertmanager-portworx --from-file=/home/cloud-user/alertmanager.yaml -n kube-system
+  when: inventory_hostname in groups.masters
 
 - name: Remove alertmanager file
   file:
     path: /home/cloud-user/alertmanager.yaml
     state: absent
+  when: inventory_hostname in groups.masters
 
 - name: Create Portworx spec from template
   template:
     src: templates/portworx-2.1.3.j2
     dest: /home/cloud-user/portworx.yaml
+  when: inventory_hostname in groups.masters
 
 - name: Deploy Portworx
   command: /usr/local/bin/oc create -f /home/cloud-user/portworx.yaml
+  when: inventory_hostname in groups.masters
 
 - name: Create Portworx storage class spec from template
   template:
     src: templates/portworx-storage-classes.j2
     dest: /home/cloud-user/portworx-storage-classes.yaml
+  when: inventory_hostname in groups.masters
 
 - name: Create Portworx storage classes
   command: /usr/local/bin/oc create -f /home/cloud-user/portworx-storage-classes.yaml
+  when: inventory_hostname in groups.masters
 
 - name: Remove Portworx storage classes file
   file:
     path: /home/cloud-user/portworx-storage-classes.yaml
     state: absent
+  when: inventory_hostname in groups.masters
+
+- name: create cloudsnap creds
+  when: inventory_hostname in groups.portworx_nodes
