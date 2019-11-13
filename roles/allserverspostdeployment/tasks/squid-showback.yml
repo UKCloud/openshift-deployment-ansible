@@ -105,7 +105,7 @@
     path: /etc/squid/sites.whitelist.txt
     insertafter: EOF
     line: "{{ item }}"
-  when: inventory_hostname in groups.loadbalancers_controlplane
+  when: inventory_hostname in groups.loadbalancers_controlplane and not deploy_portworx_storage
   with_items:
     - ".docker.io"
     - ".docker.com"
@@ -127,7 +127,7 @@
     path: /etc/squid/sites.whitelist.txt
     state: absent
     regexp: '^{{ item }}'
-  when: inventory_hostname in groups.loadbalancers_controlplane
+  when: inventory_hostname in groups.loadbalancers_controlplane and not deploy_portworx_storage
   with_items:
     - ".docker.io"
     - ".docker.com"

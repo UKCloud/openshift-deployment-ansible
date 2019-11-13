@@ -4,4 +4,6 @@
 - import_playbook: all_servers.yml
 - import_playbook: certbot.yml
 - import_playbook: openshift.yml
+- import_playbook: portworx.yml
+  when: deploy_portworx_storage
 - import_playbook: upgrade_bastion.yml
