@@ -1,0 +1,3 @@
+- hosts: masters[0]
+  roles:
+    - portworx
