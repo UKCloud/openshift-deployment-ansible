@@ -21,7 +21,7 @@
     - openshift-infra
     - kube-system
     - openshift
-  when: installLogging == True
+  when: installLogging
 
 - name: Label privileged namespaces
   command: /usr/local/bin/oc label namespace {{ item }} state=privileged
@@ -51,15 +51,15 @@
     dest: /home/cloud-user/registry.cert
     owner: cloud-user
     mode: 0644 
-  when: getCertificates == True
+  when: getCertificates
 
 - name: Create registry cert secret
   command: /usr/local/bin/oc secrets new console-secret /home/cloud-user/registry.cert -n default
-  when: getCertificates == True
+  when: getCertificates
 
 - name: Mount secret to registry console container and trigger new deploy
   command: /usr/local/bin/oc set volume dc/registry-console --add --type=secret --secret-name=console-secret -m /etc/cockpit/ws-certs.d -n default
-  when: getCertificates == True
+  when: getCertificates
 
 - name: Create 'monitoring' serviceaccount for monitoring use
   command: /usr/local/bin/oc create serviceaccount monitoring -n openshift-infra
