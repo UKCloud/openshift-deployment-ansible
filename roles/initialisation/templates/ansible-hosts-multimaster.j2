@@ -98,6 +98,7 @@ openshift_cloudprovider_openstack_password={{ openstackOpenshiftPassword }}
 openshift_cloudprovider_openstack_tenant_id={{ osTenantId }}
 openshift_cloudprovider_openstack_tenant_name={{ osTenantName }}
 openshift_cloudprovider_openstack_region={{ osRegion }}
+openshift_cloudprovider_openstack_domain_name={{ osDomainID }}
 openshift_cloudprovider_openstack_blockstorage_ignore_volume_az="yes"
 
 # openstack default storage class configuration since this gets created for us regardless now!
@@ -128,6 +129,8 @@ openshift_logging_master_url=https://console.{{ localDomainSuffix }}:8443
 openshift_logging_use_journal=true
 openshift_logging_use_ops=false
 openshift_logging_es_cluster_size={{ loggingClusterSize }}
+openshift_logging_es_pvc_dynamic=true
+openshift_logging_elasticsearch_storage_type=pvc
 openshift_logging_es_pvc_size=40Gi
 # Node selectors for aggregated logging
 openshift_logging_curator_nodeselector={"node-role.kubernetes.io/infra":"true"}
@@ -135,8 +138,6 @@ openshift_logging_kibana_nodeselector={"node-role.kubernetes.io/infra":"true"}
 openshift_logging_es_nodeselector={"node-role.kubernetes.io/infra":"true"}
 # Set the default memory limit for elasticsearch so that the pod can be scheduled to an infra node
 openshift_logging_es_memory_limit="8Gi"
-# Specify newer curator5 image to mitigate https://bugzilla.redhat.com/show_bug.cgi?id=1648453
-openshift_logging_curator_image={{ registryUrl }}/openshift3/ose-logging-curator5:v3.11.59-2
 openshift_logging_curator_default_days=14
 
 # fix to make the ansible service broker deploy to the correct nodes rather than all or none
@@ -162,6 +163,11 @@ openshift_cluster_monitoring_operator_alertmanager_storage_capacity="2Gi"
 # Set the v3.11+ console hostname
 openshift_console_hostname=console.{{ domainSuffix }}
 
+{% if ocpBranding is defined and ocpBranding and ocpBrandingUrl is defined %}
+# Brand the ocp web console
+openshift_web_console_extension_stylesheet_urls=['{{ ocpBrandingUrl }}']
+{% endif %}
+
 # New registry authentication options
 oreg_auth_url={{ registryUrl }}
 oreg_auth_user={{ registryUser }}
@@ -169,18 +175,18 @@ oreg_auth_password={{ registryPassword }}
 
 {% if multinetwork %}
 # Proxy variables for use when net2 deployment is in place
-openshift_http_proxy=http://{{ haproxy_vip }}:3128
-openshift_https_proxy=http://{{ haproxy_vip }}:3128
+openshift_http_proxy=http://{{ squid_vip }}:3128
+openshift_https_proxy=http://{{ squid_vip }}:3128
 {% if deploy_portworx_storage is defined and deploy_portworx_storage %}
-openshift_no_proxy='.{{ localDomainSuffix }},frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,169.254.169.254,10.254.253.0/24,10.254.254.0/24'
+openshift_no_proxy='.{{ localDomainSuffix }},frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,cor00005-2.cni.ukcloud.com,169.254.169.254,10.254.253.0/24,10.254.254.0/24'
 {% else %}
-openshift_no_proxy='.{{ localDomainSuffix }},frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,169.254.169.254'
+openshift_no_proxy='.{{ localDomainSuffix }},frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,cor00005-2.cni.ukcloud.com,169.254.169.254'
 {% endif %}
 #openshift_generate_no_proxy_hosts=true
-#openshift_builddefaults_git_http_proxy=http://{{ haproxy_vip }}:3128
-#openshift_builddefaults_git_https_proxy=http://{{ haproxy_vip }}:3128
-#openshift_builddefaults_http_proxy=http://{{ haproxy_vip }}:3128
-#openshift_builddefaults_https_proxy=http://{{ haproxy_vip }}:3128
+#openshift_builddefaults_git_http_proxy=http://{{ squid_vip }}:3128
+#openshift_builddefaults_git_https_proxy=http://{{ squid_vip }}:3128
+#openshift_builddefaults_http_proxy=http://{{ squid_vip }}:3128
+#openshift_builddefaults_https_proxy=http://{{ squid_vip }}:3128
 {% endif %}
 
 ### Setup the default node labels for each node type

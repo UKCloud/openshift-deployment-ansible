@@ -4,11 +4,17 @@ vrrp_script chk_haproxy {
     weight 2 # add 2 points if OK
 }
 
-vrrp_instance VI_1 {
+vrrp_script chk_squid {
+    script "pgrep squid"
+    interval 2 # every 2 seconds
+    weight 2 # add 2 points if OK
+}
+
+vrrp_instance HAPXY {
     state {% if ansible_hostname in primary %}MASTER
     {% else %}BACKUP
     {% endif %}interface eth0
-    virtual_router_id 51
+    virtual_router_id {% if ansible_fqdn in groups.loadbalancers_controlplane %}5{% elif ansible_fqdn in groups.loadbalancers_internet_dataplane %}6{% elif ansible_fqdn in groups.loadbalancers_net2_dataplane %}7{% endif %}1
     priority {% if ansible_hostname in primary  %}101{% else %}100{% endif %} # 101 on haproxy, 100 on haproxy2
     advert_int 1
     authentication {
@@ -23,13 +29,34 @@ vrrp_instance VI_1 {
     }
 }
 
-{% if extra_gateway_vip is defined and ansible_fqdn in groups.loadbalancers_internet_dataplane %}
-vrrp_instance VI_2 {
+{% if squid_vip is defined and ansible_fqdn in groups.loadbalancers_controlplane %}
+vrrp_instance SQUID {
     state {% if ansible_hostname in primary %}BACKUP
     {% else %}MASTER
     {% endif %}interface eth0
     virtual_router_id 52
-    priority {% if ansible_hostname in primary  %}100{% else %}101{% endif %} # 101 on haproxy, 100 on haproxy2
+    priority {% if ansible_hostname in primary  %}100{% else %}101{% endif %} # 100 on haproxy, 101 on haproxy2
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass "{{ hostvars[groups.loadbalancers_controlplane[0]].keepalived_password.stdout }}"
+    }
+    virtual_ipaddress {
+        {{ squid_vip }} dev eth0
+    }
+    track_script {
+        chk_squid
+    }
+}
+{% endif %}
+
+{% if extra_gateway_vip is defined and ansible_fqdn in groups.loadbalancers_internet_dataplane %}
+vrrp_instance EXGWY {
+    state {% if ansible_hostname in primary %}BACKUP
+    {% else %}MASTER
+    {% endif %}interface eth0
+    virtual_router_id 83
+    priority {% if ansible_hostname in primary  %}100{% else %}101{% endif %} # 100 on haproxy, 101 on haproxy2
     advert_int 1
     authentication {
         auth_type PASS

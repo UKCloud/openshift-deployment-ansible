@@ -1,0 +1,14 @@
+<source>
+  @type tail
+  path /var/log/squid/access.log
+  tag squid
+  pos_file /var/log/td-agent/access.log.pos
+  format none
+</source>
+
+<match squid>
+  @type http
+  endpoint_url https://squid-showback.{{ domainSuffix }}/squid
+  serializer json
+  ssl_no_verify true
+</match>
