@@ -3,18 +3,6 @@
   register: portworx_storage_network_pods
   when: inventory_hostname in groups.masters
 
-- name: Retrieve pods on Portworx storage networks
-  shell: /usr/local/bin/oc get pods -o wide --all-namespaces | awk 'BEGIN { OFS = " -n " } /10.254.253.|10.254.254./ {print $2, $1}'
-  register: portworx_storage_network_pods
-  when: inventory_hostname in groups.masters
-
-- name: Delete pods on Portworx storage networks
-  command: /usr/local/bin/oc delete pod {{ item }}
-  with_items: "{{ portworx_storage_network_pods.stdout_lines }}"
-  loop_control:
-    pause: 15
-  when: inventory_hostname in groups.masters
-
 - name: Generate Portworx cluster UUID
   command: /usr/bin/uuidgen | tr '[:upper:]' '[:lower:]'
   register: portworx_cluster_uuid
@@ -92,6 +80,10 @@
   delay: 2
   delegate_to: 127.0.0.1
   run_once: yes
+
+- name: Pause to wait for portworx to be ready on the nodes
+  pause:
+    minutes: 5
  
 - name: Create cloudsnap creds
   command: /usr/local/bin/pxctl credentials create ECS --provider s3 --bucket portworx --s3-access-key {{ s3accesskey }} --s3-secret-key {{ s3secretkey }} --s3-region regionOne --s3-endpoint {{ s3regionendpoint }}
