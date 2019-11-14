@@ -76,5 +76,18 @@
     state: absent
   when: inventory_hostname in groups.masters
 
-- name: create cloudsnap creds
+- name: Create portworx bucket
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: portworx
+    mode: create
+  retries: 10
+  delay: 2
+  delegate_to: 127.0.0.1
+  run_once: yes
+ 
+- name: Create cloudsnap creds
+  command: pxctl credentials create ECS --provider s3 --bucket portworx --s3-access-key {{ s3accesskey }} --s3-secret-key {{ s3secretkey }} --s3-region regionOne --s3-endpoint {{ s3regionendpoint }}
   when: inventory_hostname in groups.portworx_nodes
