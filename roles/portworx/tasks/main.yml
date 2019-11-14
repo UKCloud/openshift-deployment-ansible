@@ -89,5 +89,5 @@
   run_once: yes
  
 - name: Create cloudsnap creds
-  command: pxctl credentials create ECS --provider s3 --bucket portworx --s3-access-key {{ s3accesskey }} --s3-secret-key {{ s3secretkey }} --s3-region regionOne --s3-endpoint {{ s3regionendpoint }}
+  command: /usr/local/bin/pxctl credentials create ECS --provider s3 --bucket portworx --s3-access-key {{ s3accesskey }} --s3-secret-key {{ s3secretkey }} --s3-region regionOne --s3-endpoint {{ s3regionendpoint }}
   when: inventory_hostname in groups.portworx_nodes

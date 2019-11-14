@@ -291,7 +291,7 @@ nodes_net2
 {%  endif %}
 {% endif %}
 
-# groups for portworx nodes
+# group for portworx nodes
 {% if deploy_portworx_storage %}
 [portworx_nodes]
 {%   for ip, hostname in worker_details_internet.items() %}
