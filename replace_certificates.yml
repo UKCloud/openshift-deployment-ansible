@@ -16,7 +16,7 @@
         - ROUTER_USE_PROXY_PROTOCOL=true
         - ROUTER_LOG_LEVEL=debug
 
-    - name: Patch router deployment
+    - name: Patch syslog pod into router deployment
       command: /usr/local/bin/oc patch dc/router -p '{"spec":{"template":{"spec":{"containers":[{"name":"router","env":[{"name":"ROUTER_SYSLOG_ADDRESS","value":"/var/lib/rsyslog/rsyslog.sock"}],"volumeMounts":[{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]},{"name":"syslog","command":["/sbin/rsyslogd","-n","-i","/tmp/rsyslog.pid","-f","/etc/rsyslog/rsyslog.conf"],"image":"registry.redhat.io/openshift3/ose-haproxy-router:v3.11","imagePullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"50m","memory":"256Mi"}},"volumeMounts":[{"mountPath":"/etc/rsyslog","name":"rsyslog-config"},{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]}],"volumes":[{"configMap":{"name":"rsyslog-config"},"name":"rsyslog-config"},{"emptyDir":{},"name":"rsyslog-socket"}]}}}}' -n default
 
     - name: Create registry console cert
@@ -44,4 +44,3 @@
 
     - name: Patch docker-registry
       command: /usr/local/bin/oc patch route docker-registry -p '{"spec":{"tls":{"certificate":"'"{{ certificate | join("\n") }}"'","key":"'"{{ key | join("\n") }}"'"}}}' -n default
-
