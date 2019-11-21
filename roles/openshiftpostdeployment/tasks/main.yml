@@ -45,6 +45,14 @@
   command: /usr/local/bin/oc create -f ~/netpol.yml -n {{ item }}
   with_items: "{{ netpol_projects.stdout_lines }}"
 
+- name: Create registry.cert file
+  shell: cat fullchain.pem privkey.pem > registry.cert
+  args:
+    chdir: "/home/cloud-user/*.{{ domainSuffix }}"
+  delegate_to: localhost
+  run_once: yes
+  when: getCertificates
+
 - name: Move registry.cert across to masters[0]
   copy:
     src: /home/cloud-user/*.{{ domainSuffix }}/registry.cert
