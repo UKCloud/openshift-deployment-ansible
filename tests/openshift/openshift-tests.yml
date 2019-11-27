@@ -37,5 +37,16 @@
   - name: Test pod
     shell: pod=$(oc get pods | grep -v python-.*-build | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /usr/bin/python --version
 
+  - name: Expose app
+    shell: oc expose svc/os-sample-python
+    register: expose_app
+    when: "'os-sample-python exposed' in expose_app.stdout"
+
+  - name: Check app is exposed and returns status code 200
+    uri:
+      url: http://os-sample-python-test-container."{{server}}"
+      status_code: 200
+      validate_certs: no
+
   - name: Delete project
     command: oc delete project test-container
