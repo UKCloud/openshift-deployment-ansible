@@ -1,0 +1,46 @@
+---
+- import_playbook: /usr/share/ansible/openshift-ansible/playbooks/openshift-master/redeploy-certificates.yml
+
+- import_playbook: /usr/share/ansible/openshift-ansible/playbooks/openshift-hosted/redeploy-router-certificates.yml
+
+- hosts: masters[0]
+
+  vars:
+    certificate: "{{ lookup('file', '/home/cloud-user/' + domainSuffix + '/fullchain.pem').split('\n') }}"
+    key: "{{ lookup('file', '/home/cloud-user/' + domainSuffix + '/privkey.pem').split('\n') }}"
+
+  tasks:
+    - name: Setup default router environment
+      command: /usr/local/bin/oc set env dc/router {{ item }} -n default
+      with_items:
+        - ROUTER_USE_PROXY_PROTOCOL=true
+        - ROUTER_LOG_LEVEL=debug
+
+    - name: Patch syslog pod into router deployment
+      command: /usr/local/bin/oc patch dc/router -p '{"spec":{"template":{"spec":{"containers":[{"name":"router","env":[{"name":"ROUTER_SYSLOG_ADDRESS","value":"/var/lib/rsyslog/rsyslog.sock"}],"volumeMounts":[{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]},{"name":"syslog","command":["/sbin/rsyslogd","-n","-i","/tmp/rsyslog.pid","-f","/etc/rsyslog/rsyslog.conf"],"image":"registry.redhat.io/openshift3/ose-haproxy-router:v3.11","imagePullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"50m","memory":"256Mi"}},"volumeMounts":[{"mountPath":"/etc/rsyslog","name":"rsyslog-config"},{"mountPath":"/var/lib/rsyslog","name":"rsyslog-socket"}]}],"volumes":[{"configMap":{"name":"rsyslog-config"},"name":"rsyslog-config"},{"emptyDir":{},"name":"rsyslog-socket"}]}}}}' -n default
+
+    - name: Create registry console cert
+      shell: cat fullchain.pem privkey.pem > registry.cert
+      args:
+        chdir: "/home/cloud-user/{{ domainSuffix }}"
+      delegate_to: 127.0.0.1
+      run_once: yes
+
+    - name: Move registry.cert across to masters[0]
+      copy:
+        src: /home/cloud-user/{{ domainSuffix }}/registry.cert
+        dest: /home/cloud-user/registry.cert
+        owner: cloud-user
+        mode: 0644
+
+    - name: Delete registry cert secret
+      command: /usr/local/bin/oc delete secret console-secret -n default
+
+    - name: Create registry cert secret
+      command: /usr/local/bin/oc secrets new console-secret /home/cloud-user/registry.cert -n default
+
+    - name: Rollout deployment
+      command: /usr/local/bin/oc rollout latest dc/registry-console -n default
+
+    - name: Patch docker-registry
+      command: /usr/local/bin/oc patch route docker-registry -p '{"spec":{"tls":{"certificate":"'"{{ certificate | join("\n") }}"'","key":"'"{{ key | join("\n") }}"'"}}}' -n default

@@ -1,8 +1,9 @@
 - import_playbook: upgrade_and_reboot_servers.yml
 - import_playbook: loadbalancers.yml
 - import_playbook: dns.yml
+- import_playbook: /home/cloud-user/openshift-tooling/acme.sh/deployment.yml
+  when: getCertificates
 - import_playbook: all_servers.yml
-- import_playbook: certbot.yml
 - import_playbook: openshift.yml
 - import_playbook: backup.yml
 - import_playbook: upgrade_bastion.yml
