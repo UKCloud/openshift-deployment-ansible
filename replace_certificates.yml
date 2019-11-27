@@ -6,8 +6,8 @@
 - hosts: masters[0]
 
   vars:
-    certificate: "{{ lookup('file', '/home/cloud-user/*.' + domainSuffix + '/fullchain.pem').split('\n') }}"
-    key: "{{ lookup('file', '/home/cloud-user/*.' + domainSuffix + '/privkey.pem').split('\n') }}"
+    certificate: "{{ lookup('file', '/home/cloud-user/' + domainSuffix + '/fullchain.pem').split('\n') }}"
+    key: "{{ lookup('file', '/home/cloud-user/' + domainSuffix + '/privkey.pem').split('\n') }}"
 
   tasks:
     - name: Setup default router environment
