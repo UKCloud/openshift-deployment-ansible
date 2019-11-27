@@ -1,0 +1,11 @@
+- hosts: masters, localhost
+  vars:
+    datetime: "{{ ansible_date_time.date}}-{{ ansible_date_time.time }}"
+  roles:
+    - backup
+
+- hosts: localhost
+  vars:
+    datetime: "{{ ansible_date_time.date}}-{{ ansible_date_time.time }}"
+  roles:
+    - ecs
