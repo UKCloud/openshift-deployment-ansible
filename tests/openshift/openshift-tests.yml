@@ -44,7 +44,7 @@
 
   - name: Check app is exposed and returns status code 200
     uri:
-      url: http://os-sample-python-test-container."{{server}}"
+      url: http://os-sample-python-test-container."{{domainSuffix}}"
       status_code: 200
       validate_certs: no
 
