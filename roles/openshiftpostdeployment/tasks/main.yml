@@ -48,14 +48,14 @@
 - name: Create registry.cert file
   shell: cat fullchain.pem privkey.pem > registry.cert
   args:
-    chdir: "/home/cloud-user/*.{{ domainSuffix }}"
+    chdir: "/home/cloud-user/{{ domainSuffix }}"
   delegate_to: 127.0.0.1
   run_once: yes
   when: getCertificates
 
 - name: Move registry.cert across to masters[0]
   copy:
-    src: /home/cloud-user/*.{{ domainSuffix }}/registry.cert
+    src: /home/cloud-user/{{ domainSuffix }}/registry.cert
     dest: /home/cloud-user/registry.cert
     owner: cloud-user
     mode: 0644 
