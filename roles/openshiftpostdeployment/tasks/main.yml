@@ -49,7 +49,7 @@
   shell: cat fullchain.pem privkey.pem > registry.cert
   args:
     chdir: "/home/cloud-user/*.{{ domainSuffix }}"
-  delegate_to: localhost
+  delegate_to: 127.0.0.1
   run_once: yes
   when: getCertificates
 
