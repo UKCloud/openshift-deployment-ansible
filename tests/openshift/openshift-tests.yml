@@ -19,34 +19,39 @@
     command: oc login "{{server}}" -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
 
   - name: Create project
-    command: oc new-project test-container
+    command: "oc new-project test-container"
     register: result
 
   - name: Create pod
-    shell: oc new-app https://github.com/OpenShiftDemos/os-sample-python.git
+    command: "oc new-app https://github.com/OpenShiftDemos/os-sample-python.git"
 
   # oc rollout status waits for the deployment to get going, but may
   # return before the app is really ready. Poll for specific output.
   - name: "Wait for app to warm up"
-    shell: "oc rollout status dc os-sample-python"
+    command: "oc rollout status dc os-sample-python"
     register: app_readiness
     until: "'successfully rolled out' in app_readiness.stdout"
-    retries: 30
+    retries: 35
     delay: 2
 
   - name: Test pod
     shell: pod=$(oc get pods | grep -v python-.*-build | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /usr/bin/python --version
 
   - name: Expose app
-    shell: oc expose svc/os-sample-python
+    command: "oc expose svc/os-sample-python"
     register: expose_app
     when: "'os-sample-python exposed' in expose_app.stdout"
+    retries: 5
+    delay: 2
 
   - name: Check app is exposed and returns status code 200
     uri:
-      url: http://os-sample-python-test-container."{{domainSuffix}}"
-      status_code: 200
+      url: "http://os-sample-python-test-container.{{domainSuffix}}"
       validate_certs: no
+    register: resp
+    until: resp.status == 200
+    retries: 10
+    delay: 5
 
   - name: Delete project
-    command: oc delete project test-container
+    command: "oc delete project test-container"
