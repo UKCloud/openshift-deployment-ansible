@@ -40,7 +40,7 @@
   - name: Expose app
     command: "oc expose svc/os-sample-python"
     register: expose_app
-    when: "'os-sample-python exposed' in expose_app.stdout"
+    until: "'os-sample-python exposed' in expose_app.stdout"
     retries: 5
     delay: 2
 
