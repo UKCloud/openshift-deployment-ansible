@@ -4,19 +4,19 @@
   
   - name: Test cluster health reports OK
     uri:
-      url: "{{server}}/healthz/ping"
+      url: "https://ocp.{{ domainSuffix }}:8443/healthz/ping"
       status_code: 200
       body: ok
       validate_certs: no
   
   - name: Request URL to confirm homepage works
     uri:
-      url: "{{server}}"
+      url: "https://ocp.{{ domainSuffix }}:8443"
       status_code: 200
       validate_certs: no
 
   - name: Login to openshift
-    command: oc login "{{server}}" -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
+    command: oc login https://ocp.{{ domainSuffix }}:8443 -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
 
   - name: Create project
     command: "oc new-project test-container"
