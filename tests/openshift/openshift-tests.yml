@@ -1,5 +1,5 @@
 --- 
-- hosts: localhost
+- hosts: masters[0]
   tasks:
   
   - name: Test cluster health reports OK
@@ -16,36 +16,36 @@
       validate_certs: no
 
   - name: Login to openshift
-    command: oc login https://ocp.{{ domainSuffix }}:8443 -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
+    command: /usr/local/bin/oc login https://ocp.{{ domainSuffix }}:8443 -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
 
   - name: Create project
-    command: "oc new-project test-container"
+    command: "/usr/local/bin/oc new-project test-container"
     register: result
 
   - name: Create pod
-    command: "oc new-app https://github.com/OpenShiftDemos/os-sample-python.git"
+    command: "/usr/local/bin/oc new-app https://github.com/OpenShiftDemos/os-sample-python.git"
 
   # oc rollout status waits for the deployment to get going, but may
   # return before the app is really ready. Poll for specific output.
   - name: "Wait for app to warm up"
-    command: "oc rollout status dc os-sample-python"
+    command: "/usr/local/bin/oc rollout status dc os-sample-python"
     register: app_readiness
     until: "'successfully rolled out' in app_readiness.stdout"
     retries: 35
     delay: 2
 
   - name: Register pod name
-    shell: oc get pods | grep -v python-.*-build | grep -v NAME | awk '{ print $1 }'
+    shell: /usr/local/bin/oc get pods | grep -v python-.*-build | grep -v NAME | awk '{ print $1 }'
     register: podName
  
   - name: test oc rsh
-    command: oc rsh {{ podName.stdout }} /usr/bin/python --version
+    command: /usr/local/bin/oc rsh {{ podName.stdout }} /usr/bin/python --version
 
   - name: test oc logs
-    command: oc logs {{ podName.stdout }}
+    command: /usr/local/bin/oc logs {{ podName.stdout }}
 
   - name: Expose app
-    command: "oc expose svc/os-sample-python"
+    command: "/usr/local/bin/oc expose svc/os-sample-python"
 
   - name: Check app is exposed and returns status code 200
     uri:
@@ -57,4 +57,4 @@
     delay: 5
 
   - name: Delete project
-    command: "oc delete project test-container"
+    command: "/usr/local/bin/oc delete project test-container"
