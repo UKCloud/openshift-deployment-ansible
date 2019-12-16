@@ -11,7 +11,7 @@
     command: /usr/local/bin/oc adm top pods
 
   - name: register node
-    command: /usr/local/bin/oc get node | grep -v NAME | awk 'NR==1{print $1}'
+    shell: /usr/local/bin/oc get node | grep -v NAME | awk 'NR==1{print $1}'
     register: nodeName
 
   - name: test manage-node
