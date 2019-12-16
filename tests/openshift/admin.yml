@@ -2,7 +2,7 @@
   tasks:
 
   - name: Login to openshift
-    command: oc login https://ocp.{{domainSuffix}}:8443 -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
+    command: oc login https://ocp.{{domainSuffix}}:8443 -u "{{ADMIN_USERNAME}}" -p "{{ADMIN_PASSWORD}}" --insecure-skip-tls-verify
 
   - name: test top nodes
     command: oc adm top nodes
