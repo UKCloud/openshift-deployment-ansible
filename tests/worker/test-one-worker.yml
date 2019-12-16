@@ -27,7 +27,8 @@
   register: number_of_pods
   until: number_of_pods.stdout == "1"
   retries: 15
-  delay: 2
+  delay: 3
+ 
 
 - name: "Get the pod name"
   shell: "oc get pod -o name | grep -v -- '-build$' | sed -e s,pod/,,"
