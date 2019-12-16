@@ -35,7 +35,7 @@
     delay: 2
 
   - name: Register pod name
-    shell: oc get pods | grep -v python-.*-build | grep -v NAME | awk '{ print $1 }')
+    shell: oc get pods | grep -v python-.*-build | grep -v NAME | awk '{ print $1 }'
     register: podName
  
   - name: test oc rsh
