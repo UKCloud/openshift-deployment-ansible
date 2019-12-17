@@ -78,6 +78,14 @@
 - name: Patch nodeSelector into metrics-server deployment
   command: /usr/local/bin/oc patch deployment.apps/metrics-server -p '{"spec":{"template":{"spec":{"nodeSelector":{"infra":"'"true"'"}}}}}' -n openshift-metrics-server
 
+- name: Patch routes for updated hostnames
+  command: /usr/local/bin/oc patch route {{ item.service }} -p '{"spec":{"host":"{{ item.hostname }}.{{ domainSuffix }}"}}' -n {{ item.namespace }}
+  with_items:
+    - { service: "alertmanager-main", namespace: "openshift-monitoring", hostname: "alertmanager" }
+    - { service: "grafana", namespace: "openshift-monitoring", hostname: "grafana" }
+    - { service: "prometheus-k8s", namespace: "openshift-monitoring", hostname: "prometheus" }
+  when: getCertificates
+
 - include_tasks: routers.yml
 
 - include_tasks: squid-whitelist.yml
