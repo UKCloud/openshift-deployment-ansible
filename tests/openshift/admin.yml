@@ -15,4 +15,4 @@
     register: nodeName
 
   - name: test manage-node
-    command: /usr/local/bin/oc adm manage-node {{ nodeName }} --schedulable 
+    command: /usr/local/bin/oc adm manage-node {{ nodeName.stdout}} --schedulable 
