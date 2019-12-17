@@ -20,8 +20,8 @@
         replace: "{{ item.key }}: {{ item.new_path }}"
       become: yes
       with_items:
-        - { key: "certFile", old_path: "{{ namedCertificatesPath }}/fullchain1.pem", new_path: "{{ namedCertificatesPath }}/{{ certFile | basename }}"}
-        - { key: "keyFile", old_path: "{{ namedCertificatesPath }}/privkey1.pem", new_path: "{{ namedCertificatesPath }}/{{ keyFile | basename }}"}
+        - { key: "certFile", old_path: "{{ namedCertificatesPath }}/fullchain1.pem", new_path: "{{ namedCertificatesPath }}/{{ certFile | basename }}" }
+        - { key: "keyFile", old_path: "{{ namedCertificatesPath }}/privkey1.pem", new_path: "{{ namedCertificatesPath }}/{{ keyFile | basename }}" }
 
     - name: Copy named certificates
       copy:
