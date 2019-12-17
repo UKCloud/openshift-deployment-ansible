@@ -7,7 +7,7 @@
 
   - name: Test prometheus route returns 200
     uri:
-      url: "https://grafana-openshift-monitoring.{{ domainSuffix }}"
+      url: "https://grafana.{{ domainSuffix }}"
       status_code: 200
       validate_certs: no
       headers:
@@ -15,7 +15,7 @@
 
   - name: Test prometheus route returns 200
     uri:
-      url: "https://prometheus-k8s-openshift-monitoring.{{ domainSuffix }}"
+      url: "https://prometheus.{{ domainSuffix }}"
       status_code: 200
       validate_certs: no
       headers:
@@ -23,7 +23,7 @@
 
   - name: Test alertmanager route returns 200
     uri:
-      url: "https://alertmanager-main-openshift-monitoring.{{ domainSuffix }}"
+      url: "https://alertmanager-main.{{ domainSuffix }}"
       status_code: 200
       validate_certs: no
       headers:
