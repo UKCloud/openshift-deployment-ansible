@@ -5,7 +5,6 @@
 #
 # To run this playbook:
 # ansible-playbook -i localhost, -c local tests/worker/worker-tests.yml \
-#          --extra-vars server=$OPENSHIFT_BASE_URL \
 #          --extra-vars OPENSHIFT_USERNAME=$OPENSHIFT_USERNAME \
 #          --extra-vars OPENSHIFT_PASSWORD=$OPENSHIFT_PASSWORD
 #
@@ -19,7 +18,7 @@
   tasks:
 
   - name: Log in to OC
-    shell: oc login {{ server }} --username={{ OPENSHIFT_USERNAME }} --password={{ OPENSHIFT_PASSWORD }} --insecure-skip-tls-verify
+    shell: oc login https://ocp.{{ domainSuffix }}:8443 --username={{ OPENSHIFT_USERNAME }} --password={{ OPENSHIFT_PASSWORD }} --insecure-skip-tls-verify
 
   - name: Ensure we're logged in to OC, and record the username
     shell: oc whoami 
@@ -67,7 +66,7 @@
         - "Initial Pod name = {{ app_is_ready_pod_name.stdout }}"
 
   - name: "Find all configured workers"
-    shell: grep worker- /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts | sort | awk '{print $1}'
+    shell: grep worker- /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts | grep -v infra | sort | awk '{print $1}'
     register: workers_from_inventory
 
   # -----------------------------------------------------------------

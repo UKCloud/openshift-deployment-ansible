@@ -4,19 +4,19 @@
   
   - name: Test cluster health reports OK
     uri:
-      url: "{{server}}/healthz/ping"
+      url: "https://ocp.{{ domainSuffix }}:8443/healthz/ping"
       status_code: 200
       body: ok
       validate_certs: no
   
   - name: Request URL to confirm homepage works
     uri:
-      url: "{{server}}"
+      url: "https://ocp.{{ domainSuffix }}:8443"
       status_code: 200
       validate_certs: no
 
   - name: Login to openshift
-    command: oc login "{{server}}" -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
+    command: oc login https://ocp.{{ domainSuffix }}:8443 -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
 
   - name: Create project
     command: "oc new-project test-container"
@@ -34,8 +34,15 @@
     retries: 35
     delay: 2
 
-  - name: Test pod
-    shell: pod=$(oc get pods | grep -v python-.*-build | grep -v NAME | awk '{ print $1 }'); oc rsh $pod /usr/bin/python --version
+  - name: Register pod name
+    shell: oc get pods | grep -v python-.*-build | grep -v NAME | awk '{ print $1 }'
+    register: podName
+ 
+  - name: test oc rsh
+    command: oc rsh {{ podName.stdout }} /usr/bin/python --version
+
+  - name: test oc logs
+    command: oc logs {{ podName.stdout }}
 
   - name: Expose app
     command: "oc expose svc/os-sample-python"
