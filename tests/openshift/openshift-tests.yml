@@ -7,6 +7,7 @@
       name: "Update custom sites in Squid Whitelist"
       cron_file: proxy-whitelist
       state: absent
+    when: multinetwork
   
   - name: Test cluster health reports OK
     uri:
