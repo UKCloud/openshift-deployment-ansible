@@ -79,3 +79,5 @@
     dest: /home/cloud-user/openshift-tooling
     version: master
     key_file: "/home/cloud-user/.ssh/openshift-tooling_deploy_key"
+    accept_hostkey: yes
+
