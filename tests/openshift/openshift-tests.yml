@@ -2,6 +2,14 @@
 - hosts: localhost
   tasks:
   
+  - name: disable squid whitelist cronjob to stop bastion being logged in as cronjob user
+    cron:
+      name: "Update custom sites in Squid Whitelist"
+      cron_file: proxy-whitelist
+      state: absent
+    become: true
+    when: multinetwork
+  
   - name: Test cluster health reports OK
     uri:
       url: "https://ocp.{{ domainSuffix }}:8443/healthz/ping"
