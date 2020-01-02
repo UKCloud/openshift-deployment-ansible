@@ -40,7 +40,7 @@
       - pod_name.stdout != ""
 
 - name: "Get the new worker"
-  shell: "oc get -o wide {{ pod_name.stdout }} | grep worker | awk '{print $7}'"
+  shell: "oc get pod -o wide {{ pod_name.stdout }} | grep worker | awk '{print $7}'"
   register: assigned_worker
 
 - name: "Show the vars"

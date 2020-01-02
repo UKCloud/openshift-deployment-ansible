@@ -41,6 +41,7 @@
   - name: Create error configmap if necessary
     shell: /usr/bin/oc patch cm proxy-whitelist -p '{"data":{"whitelist-error":"{{ reconfigure_status.stderr_lines[0]}}  {{ reconfigure_status.stderr_lines[1]}}"}}' -n whitelist
     when: reconfigure_status.rc == 1
+    ignore_errors: true
     delegate_to: 127.0.0.1
 
   handlers:

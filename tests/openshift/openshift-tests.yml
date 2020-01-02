@@ -1,6 +1,26 @@
---- 
-- hosts: masters[0]
+- hosts: localhost, loadbalancers_controlplane
   tasks:
+  - name: Setup whitelist file
+    template:  
+      src: templates/whitelist.j2
+      dest: /etc/squid/sites.whitelist.txt
+      force: yes
+      backup: yes
+    when: inventory_hostname in groups.loadbalancers_controlplane
+
+  - name: restart the squid service
+    systemd:
+      name: squid
+      state: restarted
+    when: inventory_hostname in groups.loadbalancers_controlplane
+  
+  - name: disable squid whitelist cronjob to stop bastion being logged in as cronjob user
+    cron:
+      name: "Update custom sites in Squid Whitelist"
+      cron_file: proxy-whitelist
+      state: absent
+    become: true
+    when: multinetwork and inventory_hostname == 'localhost'
   
   - name: Test cluster health reports OK
     uri:
@@ -8,22 +28,27 @@
       status_code: 200
       body: ok
       validate_certs: no
+    when: inventory_hostname == 'localhost'
   
   - name: Request URL to confirm homepage works
     uri:
       url: "https://ocp.{{ domainSuffix }}:8443"
       status_code: 200
       validate_certs: no
+    when: inventory_hostname == 'localhost'
 
   - name: Login to openshift
-    command: /usr/local/bin/oc login https://ocp.{{ domainSuffix }}:8443 -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
+    command: oc login https://ocp.{{ domainSuffix }}:8443 -u "{{OPENSHIFT_USERNAME}}" -p "{{OPENSHIFT_PASSWORD}}" --insecure-skip-tls-verify
+    when: inventory_hostname == 'localhost'
 
   - name: Create project
     command: "/usr/local/bin/oc new-project test-container"
     register: result
+    when: inventory_hostname == 'localhost'
 
   - name: Create pod
-    command: "/usr/local/bin/oc new-app https://github.com/OpenShiftDemos/os-sample-python.git"
+    command: "oc new-app https://github.com/OpenShiftDemos/os-sample-python.git"
+    when: inventory_hostname == 'localhost'
 
   # oc rollout status waits for the deployment to get going, but may
   # return before the app is really ready. Poll for specific output.
@@ -33,19 +58,24 @@
     until: "'successfully rolled out' in app_readiness.stdout"
     retries: 35
     delay: 2
+    when: inventory_hostname == 'localhost'
 
   - name: Register pod name
-    shell: /usr/local/bin/oc get pods | grep -v python-.*-build | grep -v NAME | awk '{ print $1 }'
+    shell: oc get pods | grep -v python-.*-build | grep -v NAME | awk '{ print $1 }'
     register: podName
+    when: inventory_hostname == 'localhost'
  
   - name: test oc rsh
-    command: /usr/local/bin/oc rsh {{ podName.stdout }} /usr/bin/python --version
+    command: oc rsh {{ podName.stdout }} /usr/bin/python --version
+    when: inventory_hostname == 'localhost'
 
   - name: test oc logs
-    command: /usr/local/bin/oc logs {{ podName.stdout }}
+    command: oc logs {{ podName.stdout }}
+    when: inventory_hostname == 'localhost'
 
   - name: Expose app
-    command: "/usr/local/bin/oc expose svc/os-sample-python"
+    command: "oc expose svc/os-sample-python"
+    when: inventory_hostname == 'localhost'
 
   - name: Check app is exposed and returns status code 200
     uri:
@@ -55,6 +85,8 @@
     until: resp.status == 200
     retries: 10
     delay: 5
+    when: inventory_hostname == 'localhost'
 
   - name: Delete project
-    command: "/usr/local/bin/oc delete project test-container"
+    command: "oc delete project test-container"
+    when: inventory_hostname == 'localhost'
