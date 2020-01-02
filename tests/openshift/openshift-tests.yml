@@ -42,18 +42,18 @@
     when: inventory_hostname == 'localhost'
 
   - name: Create project
-    command: "/usr/local/bin/oc new-project test-container"
+    command: oc new-project test-container
     register: result
     when: inventory_hostname == 'localhost'
 
   - name: Create pod
-    command: "oc new-app https://github.com/OpenShiftDemos/os-sample-python.git"
+    command: oc new-app https://github.com/OpenShiftDemos/os-sample-python.git
     when: inventory_hostname == 'localhost'
 
   # oc rollout status waits for the deployment to get going, but may
   # return before the app is really ready. Poll for specific output.
   - name: "Wait for app to warm up"
-    command: "/usr/local/bin/oc rollout status dc os-sample-python"
+    command: oc rollout status dc os-sample-python
     register: app_readiness
     until: "'successfully rolled out' in app_readiness.stdout"
     retries: 35
@@ -74,7 +74,7 @@
     when: inventory_hostname == 'localhost'
 
   - name: Expose app
-    command: "oc expose svc/os-sample-python"
+    command: oc expose svc/os-sample-python
     when: inventory_hostname == 'localhost'
 
   - name: Check app is exposed and returns status code 200
@@ -88,5 +88,5 @@
     when: inventory_hostname == 'localhost'
 
   - name: Delete project
-    command: "oc delete project test-container"
+    command: oc delete project test-container
     when: inventory_hostname == 'localhost'
