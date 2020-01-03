@@ -5,7 +5,7 @@
     command: /usr/local/bin/oc serviceaccounts get-token monitoring -n openshift-infra
     register: token
 
-  - name: Test prometheus route returns 200
+  - name: Test Grafana route returns 200
     uri:
       url: "https://grafana.{{ domainSuffix }}"
       status_code: 200
