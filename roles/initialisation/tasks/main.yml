@@ -67,3 +67,17 @@
     force: yes
     backup: yes
 
+- name: Create SSH key from secret
+  copy:
+    src: "../files/openshift-tooling_deploy_key"
+    dest: "/home/cloud-user/.ssh/openshift-tooling_deploy_key"
+    mode: '0600'
+
+- name: Pull UKCloud openshift-tooling
+  git:
+    repo: 'git@github.com:UKCloud/openshift-tooling.git'
+    dest: /home/cloud-user/openshift-tooling
+    version: master
+    key_file: "/home/cloud-user/.ssh/openshift-tooling_deploy_key"
+    accept_hostkey: yes
+

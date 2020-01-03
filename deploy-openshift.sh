@@ -38,7 +38,7 @@ rm tmp_htpasswd
 
 # Build the openshift-ansible-hosts file for use in the next play,
 # and install bind-utils
-ansible-playbook -i localhost, -c local bastion.yml
+ansible-playbook --vault-id /home/cloud-user/ansible-vault-password -i localhost, -c local bastion.yml
 
 ansible-playbook --private-key ~/id_rsa_jenkins -i openshift-ansible-hosts site.yml
 
