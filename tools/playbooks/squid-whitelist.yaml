@@ -45,19 +45,6 @@
 
   - meta: flush_handlers
 
-  - name: Create error configmap if necessary
-    shell: /usr/bin/oc patch cm proxy-whitelist -p '{"data":{"whitelist-error":"{{ reconfigure_status.stderr_lines[0]}}  {{ reconfigure_status.stderr_lines[1]}}"}}' -n whitelist
-    when: reconfigure_status.rc == 1
-    ignore_errors: true
-    delegate_to: 127.0.0.1
-
-  - name: revert to backed up whitelist file if reconfigure failed
-    copy:
-      src: /etc/squid/sites.whitelist.txt.bk
-      dest: /etc/squid/sites.whitelist.txt
-      remote_src: yes
-    when: inventory_hostname in groups.loadbalancers_controlplane and reconfigure_status.rc == 1
-
   - meta: flush_handlers
 
   handlers:
@@ -67,3 +54,23 @@
       ignore_errors: true
       when: inventory_hostname in groups.loadbalancers_controlplane
       register: reconfigure_status
+      notify:
+        - Create error configmap if necessary
+        - Revert to backed up whitelist file if reconfigure failed
+
+    - name: Create error configmap if necessary
+      shell: /usr/bin/oc patch cm proxy-whitelist -p '{"data":{"whitelist-error":"{{ reconfigure_status.stderr_lines[0]}}  {{ reconfigure_status.stderr_lines[1]}}"}}' -n whitelist
+      when: inventory_hostname in groups.loadbalancers_controlplane and reconfigure_status.rc == 1
+      ignore_errors: true
+      delegate_to: 127.0.0.1
+
+    - name: Revert to backed up whitelist file if reconfigure failed
+      copy:
+        src: /etc/squid/sites.whitelist.txt.bk
+        dest: /etc/squid/sites.whitelist.txt
+        remote_src: yes
+      ignore_errors: true
+      when: inventory_hostname in groups.loadbalancers_controlplane and reconfigure_status.rc == 1
+      notify:
+        - reconfigure squid
+
