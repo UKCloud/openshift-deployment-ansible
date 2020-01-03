@@ -25,7 +25,8 @@ global
     daemon
 
     # turn on stats unix socket
-    stats socket /var/lib/haproxy/stats
+    stats socket /var/lib/haproxy/stats mode 666 level user
+    stats timeout 2m
 
 #---------------------------------------------------------------------
 # common defaults that all the 'listen' and 'backend' sections will
