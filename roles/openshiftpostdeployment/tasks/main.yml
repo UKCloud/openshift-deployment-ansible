@@ -21,7 +21,7 @@
     - openshift-infra
     - kube-system
     - openshift
-  when: installLogging == True
+  when: installLogging
 
 - name: Label privileged namespaces
   command: /usr/local/bin/oc label namespace {{ item }} state=privileged
@@ -46,24 +46,28 @@
   with_items: "{{ netpol_projects.stdout_lines }}"
 
 - name: Create registry.cert file
-  local_action: shell cd /home/cloud-user/ocp.{{ domainSuffix }} ; cat fullchain1.pem privkey1.pem > registry.cert
-  when: getCertificates == True
+  shell: cat fullchain.pem privkey.pem > registry.cert
+  args:
+    chdir: "/home/cloud-user/{{ domainSuffix }}"
+  delegate_to: 127.0.0.1
+  run_once: yes
+  when: getCertificates
 
 - name: Move registry.cert across to masters[0]
   copy:
-    src: /home/cloud-user/ocp.{{ domainSuffix }}/registry.cert
+    src: /home/cloud-user/{{ domainSuffix }}/registry.cert
     dest: /home/cloud-user/registry.cert
     owner: cloud-user
     mode: 0644 
-  when: getCertificates == True 
+  when: getCertificates
 
 - name: Create registry cert secret
   command: /usr/local/bin/oc secrets new console-secret /home/cloud-user/registry.cert -n default
-  when: getCertificates == True
+  when: getCertificates
 
 - name: Mount secret to registry console container and trigger new deploy
   command: /usr/local/bin/oc set volume dc/registry-console --add --type=secret --secret-name=console-secret -m /etc/cockpit/ws-certs.d -n default
-  when: getCertificates == True
+  when: getCertificates
 
 - name: Create 'monitoring' serviceaccount for monitoring use
   command: /usr/local/bin/oc create serviceaccount monitoring -n openshift-infra
@@ -74,31 +78,13 @@
 - name: Patch nodeSelector into metrics-server deployment
   command: /usr/local/bin/oc patch deployment.apps/metrics-server -p '{"spec":{"template":{"spec":{"nodeSelector":{"infra":"'"true"'"}}}}}' -n openshift-metrics-server
 
-- name: read fullchain cert into var
-  shell: /usr/bin/awk '{printf "%s\n", $0}'  /etc/origin/master/named_certificates/fullchain1.pem
-  register: fullchain
-  when: getCertificates == True
-
-- name: read private key into var
-  shell: /usr/bin/awk '{printf "%s\n", $0}'  /etc/origin/master/named_certificates/privkey1.pem
-  register: privkey
-  when: getCertificates == True
-
-- name: Patch routes for updated hostnames and certs
-  vars:
-    contents: "{{ lookup('file', '/home/cloud-user/ocp.{{ domainSuffix }}/fullchain1.pem') }}"
-  command: /usr/local/bin/oc patch route {{ item.service }} -p '{"spec":{"host":"{{ item.hostname }}.{{ domainSuffix }}","tls":{"certificate":"'"{{ fullchain.stdout_lines | join("\n") }}"'","key":"'"{{ privkey.stdout_lines | join("\n") }}"'"}}}' -n {{ item.namespace }}
-  loop:
-    - service: "alertmanager-main"
-      namespace: "openshift-monitoring"
-      hostname: "alertmanager"
-    - service: "grafana"
-      namespace: "openshift-monitoring"
-      hostname: "grafana"
-    - service: "prometheus-k8s"
-      namespace: "openshift-monitoring"
-      hostname: "prometheus"
-  when: getCertificates == True
+- name: Patch routes for updated hostnames
+  command: /usr/local/bin/oc patch route {{ item.service }} -p '{"spec":{"host":"{{ item.hostname }}.{{ domainSuffix }}"}}' -n {{ item.namespace }}
+  with_items:
+    - { service: "alertmanager-main", namespace: "openshift-monitoring", hostname: "alertmanager" }
+    - { service: "grafana", namespace: "openshift-monitoring", hostname: "grafana" }
+    - { service: "prometheus-k8s", namespace: "openshift-monitoring", hostname: "prometheus" }
+  when: getCertificates
 
 - include_tasks: routers.yml
 

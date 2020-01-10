@@ -1,0 +1,18 @@
+- hosts: masters[0]
+  tasks:
+
+  - name: Login to openshift
+    command: /usr/local/bin/oc login https://ocp.{{domainSuffix}}:8443 -u "{{ADMIN_USERNAME}}" -p "{{ADMIN_PASSWORD}}" --insecure-skip-tls-verify
+
+  - name: test top nodes
+    command: /usr/local/bin/oc adm top nodes
+
+  - name: test top pods
+    command: /usr/local/bin/oc adm top pods
+
+  - name: register node
+    shell: /usr/local/bin/oc get node | grep -v NAME | awk 'NR==1{print $1}'
+    register: nodeName
+
+  - name: test manage-node
+    command: /usr/local/bin/oc adm manage-node {{ nodeName.stdout }} --schedulable 

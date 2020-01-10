@@ -1,0 +1,77 @@
+- name: Change to kube-system project
+  shell: /usr/local/bin/oc project kube-system
+  when: inventory_hostname == groups.masters[0]
+
+- name: Register etcd pod name
+  shell: /usr/local/bin/oc get pods -n kube-system | grep -o -m 1 '\S*etcd\S*'
+  register: etcd_pod
+  when: inventory_hostname == groups.masters[0]
+
+- name: Register etcd endpoint
+  shell: grep https /etc/origin/node/pods/etcd.yaml | cut -d '/' -f3
+  become: true
+  register: etcd_ep
+  when: inventory_hostname == groups.masters[0]
+
+- name: Backup etcd db
+  shell: /usr/local/bin/oc exec {{ etcd_pod.stdout }} -c etcd -- /bin/bash -c "ETCDCTL_API=3 etcdctl --cert=/etc/etcd/peer.crt --key=/etc/etcd/peer.key --cacert=/etc/etcd/ca.crt --endpoints={{ etcd_ep.stdout }} snapshot save /var/lib/etcd/snapshot.db"
+  when: inventory_hostname == groups.masters[0]
+
+- name: move etcd db backup from container to host
+  command: /usr/local/bin/oc rsync {{ etcd_pod.stdout }}:/var/lib/etcd/snapshot.db /home/cloud-user
+  when: inventory_hostname == groups.masters[0]
+
+- name: Move backup file to cloud-users directory and archive
+  archive:
+    path: /home/cloud-user/snapshot.db
+    dest: /home/cloud-user/etcd-data.bak.gz
+    format: gz
+  become: true
+  when: inventory_hostname == groups.masters[0]
+
+- name: Change permissions of backup
+  file:
+    path: /home/cloud-user/etcd-data.bak.gz
+    owner: cloud-user
+    group: cloud-user
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Fetch tar.gz file back to bastion
+  fetch:
+    src: /home/cloud-user/etcd-data.bak.gz
+    dest: /home/cloud-user/backups/etcd-data.bak-{{ datetime }}.gz
+    flat: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Remove snapshot file and gzip file
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /home/cloud-user/snapshot.db
+    - /home/cloud-user/etcd-data.bak.gz
+  become: true
+  when: inventory_hostname == groups.masters[0]
+
+- name: Backup etcd config on all masters
+  archive:
+    path: /etc/etcd
+    dest: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar.gz
+    format: gz
+    owner: cloud-user
+    group: cloud-user
+  when: inventory_hostname in groups.masters
+
+- name: Fetch tar.gz files back to bastion
+  fetch:
+    src: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar.gz
+    dest: /home/cloud-user/backups/etcd-config-{{ ansible_hostname }}-{{ datetime }}.tar.gz
+    flat: yes
+  when: inventory_hostname in groups.masters
+
+- name: Remove tar.gz files from masters
+  file:
+    path: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar.gz
+    state: absent
+  when: inventory_hostname in groups.masters

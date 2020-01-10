@@ -5,7 +5,7 @@ vrrp_script chk_haproxy {
 }
 
 vrrp_script chk_squid {
-    script "pgrep squid"
+    script "/usr/bin/pgrep squid"
     interval 2 # every 2 seconds
     weight 2 # add 2 points if OK
 }
@@ -27,6 +27,7 @@ vrrp_instance HAPXY {
     track_script {
         chk_haproxy
     }
+    notify /usr/local/bin/keepalived_notify.sh
 }
 
 {% if squid_vip is defined and ansible_fqdn in groups.loadbalancers_controlplane %}
@@ -47,6 +48,7 @@ vrrp_instance SQUID {
     track_script {
         chk_squid
     }
+    notify /usr/local/bin/keepalived_notify.sh
 }
 {% endif %}
 
@@ -68,5 +70,6 @@ vrrp_instance EXGWY {
     track_script {
         chk_haproxy
     }
+    notify /usr/local/bin/keepalived_notify.sh
 }
 {% endif %}

@@ -1,4 +1,0 @@
-# This runs the poll role against the API endpoint to generate traffic for haproxy test.
-- hosts: localhost
-  roles:
-  - poll

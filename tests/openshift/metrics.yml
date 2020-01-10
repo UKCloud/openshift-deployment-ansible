@@ -1,0 +1,30 @@
+- hosts: masters[0]
+  tasks:
+
+  - name: Register token
+    command: /usr/local/bin/oc serviceaccounts get-token monitoring -n openshift-infra
+    register: token
+
+  - name: Test Grafana route returns 200
+    uri:
+      url: "https://grafana.{{ domainSuffix }}"
+      status_code: 200
+      validate_certs: no
+      headers:
+        Authorization: "Bearer {{ token.stdout }}"
+
+  - name: Test prometheus route returns 200
+    uri:
+      url: "https://prometheus.{{ domainSuffix }}"
+      status_code: 200
+      validate_certs: no
+      headers:
+        Authorization: "Bearer {{ token.stdout }}"
+
+  - name: Test alertmanager route returns 200
+    uri:
+      url: "https://alertmanager-main.{{ domainSuffix }}"
+      status_code: 200
+      validate_certs: no
+      headers:
+        Authorization: "Bearer {{ token.stdout }}"

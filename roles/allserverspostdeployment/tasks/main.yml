@@ -46,6 +46,8 @@
     state: restarted
   when: inventory_hostname in groups.nodes and inventory_hostname not in groups.masters
 
+- include_tasks: cronjob-prep.yml
+ 
 - include_tasks: squid-whitelist.yml
   when: multinetwork
 

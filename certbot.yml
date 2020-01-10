@@ -1,4 +1,0 @@
-- hosts: loadbalancers, localhost
-  roles:
-    - name: certbot
-      when: getCertificates == True
