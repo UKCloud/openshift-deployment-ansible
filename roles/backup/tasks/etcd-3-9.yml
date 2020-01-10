@@ -1,0 +1,71 @@
+- name: Backup etcd data dir
+  shell: docker exec etcd_container etcdctl backup --data-dir /var/lib/etcd --backup-dir /var/lib/etcd.bak
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Backup etcd db
+  shell: docker exec etcd_container cp /var/lib/etcd/member/snap/db /var/lib/etcd.bak/member/snap/db
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Copy backup files from container to host
+  shell: docker cp etcd_container:/var/lib/etcd.bak /home/cloud-user/etcd.bak
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Clean up backup file in container
+  shell: docker exec etcd_container rm -rf /var/lib/etcd.bak
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Change permissions of backup
+  file:
+    path: /home/cloud-user/etcd.bak
+    owner: cloud-user
+    group: cloud-user
+  become: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Archive etcd backup
+  archive:
+    path: /home/cloud-user/etcd.bak
+    dest: /home/cloud-user/etcd-data.bak.tar.gz
+    format: gz
+  when: inventory_hostname == groups.masters[0]
+
+- name: Fetch tar.gz file back to bastion
+  fetch:
+    src: /home/cloud-user/etcd-data.bak.tar.gz
+    dest: /home/cloud-user/backups/etcd-data.bak-{{ datetime }}.tar.gz
+    flat: yes
+  when: inventory_hostname == groups.masters[0]
+
+- name: Clean up file from master
+  command: rm -rf /home/cloud-user/{{ item }}
+  with_items:
+    - etcd.bak
+    - etcd-data.bak.tar.gz
+  become: true
+  when: inventory_hostname == groups.masters[0]
+
+- name: Backup etcd config on all masters
+  archive:
+    path: /etc/etcd
+    dest: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar.gz
+    format: gz
+    owner: cloud-user
+    group: cloud-user
+  when: inventory_hostname in groups.masters
+
+- name: Fetch tar.gz files back to bastion
+  fetch:
+    src: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar.gz
+    dest: /home/cloud-user/backups/etcd-config-{{ ansible_hostname }}-{{ datetime }}.tar.gz
+    flat: yes
+  when: inventory_hostname in groups.masters
+
+- name: Remove tar.gz files from masters
+  file:
+    path: /home/cloud-user/etcd-config-{{ ansible_hostname }}.tar.gz
+    state: absent
+  when: inventory_hostname in groups.masters

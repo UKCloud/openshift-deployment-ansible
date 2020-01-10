@@ -1,6 +1,18 @@
 ---
 - hosts: localhost, loadbalancers_controlplane
   tasks:
+  - name: print time for debug logging purposes
+    debug:
+      var=ansible_date_time.date
+    delegate_to: 127.0.0.1
+    run_once: yes
+
+  - name: print date for debug logging purposes
+    debug:
+      var=ansible_date_time.time
+    delegate_to: 127.0.0.1
+    run_once: yes
+
   - name: Retrieve whitelist from config-map
     shell: |
       /usr/bin/oc login https://ocp.{{ domainSuffix }}:8443 --token={{ lookup('file', '/home/cloud-user/whitelist-sa-token') }} > /dev/null
@@ -29,6 +41,7 @@
   - name: Create error configmap if necessary
     shell: /usr/bin/oc patch cm proxy-whitelist -p '{"data":{"whitelist-error":"{{ reconfigure_status.stderr_lines[0]}}  {{ reconfigure_status.stderr_lines[1]}}"}}' -n whitelist
     when: reconfigure_status.rc == 1
+    ignore_errors: true
     delegate_to: 127.0.0.1
 
   handlers:

@@ -1,0 +1,58 @@
+- name: print time for debug logging purposes
+  debug:
+    var=ansible_date_time.date
+  delegate_to: 127.0.0.1
+  run_once: yes
+
+- name: print date for debug logging purposes
+  debug:
+    var=ansible_date_time.time
+  delegate_to: 127.0.0.1
+  run_once: yes
+
+- name: Create backups directory
+  file:
+    path: /home/cloud-user/backups
+    state: directory
+    mode: 0755
+  when: inventory_hostname == 'localhost'
+
+- name: Create backup bucket for nightly backups
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: nightly_backups
+    mode: create
+  retries: 10
+  delay: 2
+  when: inventory_hostname == "localhost"
+
+- name: Setup cronjob for nightly backup
+  cron:
+    name: "Take cluster backup nightly"
+    cron_file: cluster-backup
+    hour: 1
+    minute: 0
+    user: cloud-user
+    job: "/usr/bin/ansible-playbook -i /usr/share/ansible/openshift-deployment-ansible/openshift-ansible-hosts /usr/share/ansible/openshift-deployment-ansible/backup.yml >> /home/cloud-user/cronjob-logs/backup.log 2>&1"
+  become: true
+  when: inventory_hostname == "localhost"
+
+- include_tasks: etcd-3-11.yml
+  when: openshiftVersion == "3.11"
+
+- include_tasks: etcd-3-10.yml
+  when: openshiftVersion == "3.10"
+
+- include_tasks: etcd-3-9.yml
+  when: openshiftVersion == 3.9
+
+- include_tasks: masters-3-11.yml
+  when: openshiftVersion == "3.11"
+
+- include_tasks: masters-3-10.yml
+  when: openshiftVersion == "3.10"
+
+- include_tasks: masters-3-9.yml
+  when: openshiftVersion == 3.9

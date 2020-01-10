@@ -1,0 +1,57 @@
+- name: Register backed up files older than 7 days
+  find:
+    paths: /home/cloud-user/backups
+    age: 8d
+    recurse: yes
+  register: to_delete_json
+
+- set_fact:
+    to_delete: "{{ to_delete_json | json_query('files[*].path') }}"
+
+- name: Delete files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items: "{{ to_delete }}"
+
+- name: Delete older files from ECS
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: nightly_backups
+    object: "{{ item }}"
+    mode: delobj
+    rgw: true
+  with_items: "{{ to_delete }}"
+  ignore_errors: true
+
+- name: Send backed up files to bucket in ECS
+  aws_s3:
+    aws_access_key: "{{ s3accesskey }}"
+    aws_secret_key: "{{ s3secretkey }}"
+    s3_url: "https://{{ s3regionendpoint }}"
+    bucket: nightly_backups
+    object: "{{ item }}"
+    src: "{{ item }}"
+    mode: put
+    rgw: true
+  with_fileglob:
+    - "/home/cloud-user/backups/*"
+  register: ecs_output
+  ignore_errors: true
+
+- name:
+  find:
+    paths: /home/cloud-user/backups
+    patterns: '*'
+  register: backup_files
+
+- set_fact:
+    max_index: "{{ backup_files.examined - 1 |int }}"
+
+- name: Fail if all files did not get transferred to ECS
+  fail:
+    msg: "It appears one or more files did not get transferred to ECS. Consider re-running in a more verbose mode to troubleshoot."
+  with_sequence: start=0 end={{ max_index }}
+  when: ecs_output.results[{{ item|int }}].failed != false

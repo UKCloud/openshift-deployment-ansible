@@ -1,0 +1,103 @@
+---
+- hosts: masters
+  serial: 1
+
+  vars:
+    masterConfigPath: "/etc/origin/master"
+    
+  tasks:
+    - name: Set certificate paths
+      set_fact:
+        namedCertificatesPath: "{{ masterConfigPath }}/named_certificates"
+        certFile: "{{ openshift_master_named_certificates[0].certfile }}"
+        keyFile: "{{ openshift_master_named_certificates[0].keyfile }}"
+        caFile: "{{ openshift_master_named_certificates[0].cafile }}"
+
+    - name: Change master-config.yaml certificate filenames
+      replace:
+        path: "{{ masterConfigPath }}/master-config.yaml"
+        regexp: "{{ item.key }}: {{ item.old_path }}$"
+        replace: "{{ item.key }}: {{ item.new_path }}"
+      become: yes
+      with_items:
+        - { key: "certFile", old_path: "{{ namedCertificatesPath }}/fullchain1.pem", new_path: "{{ namedCertificatesPath }}/{{ certFile | basename }}" }
+        - { key: "keyFile", old_path: "{{ namedCertificatesPath }}/privkey1.pem", new_path: "{{ namedCertificatesPath }}/{{ keyFile | basename }}" }
+
+    - name: Copy named certificates
+      copy:
+        src: "{{ item }}"
+        dest: "{{ namedCertificatesPath }}/{{ item | basename }}"
+        mode: '0600'
+      with_items:
+        - "{{ certFile }}"
+        - "{{ keyFile }}"
+        - "{{ caFile }}"
+      notify: restart master
+
+  handlers:
+    - name: restart master
+      command: /usr/local/bin/master-restart "{{ item }}"
+      with_items:
+      - api
+      - controllers
+      retries: 5
+      delay: 5
+      register: result
+      until: result.rc == 0
+      notify: verify API server
+      
+    - name: verify API server
+      command: >
+        curl --silent --tlsv1.2 --max-time 2
+        --cacert /etc/origin/master/ca-bundle.crt
+        https://{{ openshift_master_cluster_public_hostname }}:8443/healthz/ready
+      args:
+        warn: no
+      register: api_output
+      until: api_output.stdout == 'ok'
+      retries: 120
+      delay: 1
+      changed_when: false
+
+- hosts: masters[0]
+
+  vars:
+    certificate: "{{ lookup('file', '{{ certFile }}').split('\n') }}"
+    key: "{{ lookup('file', '{{ keyFile }}').split('\n') }}"
+
+  tasks:
+    - name: Create new router certificate
+      shell: cat {{ certFile | basename }} /etc/origin/master/ca.crt {{ keyFile | basename }} > router.pem
+      args:
+        chdir: "{{ namedCertificatesPath }}"
+
+    - name: Create registry console cert
+      shell: cat {{ certFile | basename }} {{ keyFile | basename }} > registry.cert
+      args:
+        chdir: "{{ namedCertificatesPath }}"
+
+    - name: Pause before executing oc commands
+      pause:
+        seconds: 30
+
+    - name: Replace router certificate secret
+      shell: /usr/local/bin/oc create secret tls router-certs --cert=router.pem --key={{ keyFile | basename }} -n default -o json --dry-run | /usr/local/bin/oc replace -f -
+      args:
+        chdir: "{{ namedCertificatesPath }}"
+      notify: Rollout router deployment
+
+    - name: Replace registry cert secret
+      shell: /usr/local/bin/oc create secret generic console-secret --from-file=registry.cert -n default -o json --dry-run | /usr/local/bin/oc replace -f -
+      args:
+        chdir: "{{ namedCertificatesPath }}"
+      notify: Rollout registry-console deployment
+
+    - name: Patch docker-registry
+      command: /usr/local/bin/oc patch route docker-registry -p '{"spec":{"tls":{"certificate":"'"{{ certificate | join("\n") }}"'","key":"'"{{ key | join("\n") }}"'"}}}' -n default
+
+  handlers:
+    - name: Rollout router deployment
+      command: /usr/local/bin/oc rollout latest dc/router -n default
+
+    - name: Rollout registry-console deployment
+      command: /usr/local/bin/oc rollout latest dc/registry-console -n default

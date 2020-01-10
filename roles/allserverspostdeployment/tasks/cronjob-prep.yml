@@ -1,0 +1,19 @@
+- name: Create cronjob-logs directory in /home/cloud-user
+  file:
+    path: /home/cloud-user/cronjob-logs
+    state: directory
+    mode: 0755
+  delegate_to: 127.0.0.1
+  run_once: yes
+
+- name: Generate SSH keypair to allow cronjobs to run ansible tasks
+  command: ssh-keygen -t rsa -N "" -f /home/cloud-user/.ssh/id_rsa
+  no_log: True
+  delegate_to: 127.0.0.1
+  run_once: yes
+
+- name: Copy generated SSH keypair to the cluster
+  authorized_key:
+    user: cloud-user
+    state: present
+    key: "{{ lookup('file', '/home/cloud-user/.ssh/id_rsa.pub') }}"
