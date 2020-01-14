@@ -59,9 +59,12 @@
 - name: Test the app is responding over HTTP
   uri:
     url: http://{{ oc_route_url.stdout }}
-    status_code: 200
     body: "Hello World!"
     validate_certs: no
+  register: _result
+  until: _result.status == 200
+  retries: 10
+  delay: 5
 
 - name: "Catch your breath..."
   pause: seconds=3
