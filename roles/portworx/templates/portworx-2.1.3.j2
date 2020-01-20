@@ -185,9 +185,9 @@ spec:
               value: unix:///var/lib/kubelet/plugins/com.openstorage.pxd/csi.sock
 {% if multinetwork %}
             - name: "PX_HTTP_PROXY"
-              value: "http://{{ haproxy_vip }}:3128"
+              value: "http://{{ squid_vip }}:3128"
             - name: "PX_HTTPS_PROXY"
-              value: "http://{{ haproxy_vip }}:3128"
+              value: "http://{{ squid_vip }}:3128"
 {% endif %}
 {% raw %}
           livenessProbe:
@@ -1035,8 +1035,6 @@ spec:
   endpoints:
     - port: px-api
       targetPort: 9001
-    - port: px-kvdb
-      targetPort: 9019
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: Alertmanager
@@ -1157,7 +1155,7 @@ spec:
       annotations:
         description: Portworx cluster Quorum Unhealthy for more than 5 minutes.
         summary: Portworx Quorum Unhealthy.
-      expr: max(px_cluster_status_cluster_quorum) > 1
+      expr: min(px_cluster_status_cluster_quorum) == 0 or absent(px_cluster_status_cluster_quorum)
       for: 5m
       labels:
         issue: Portworx Quorum Unhealthy.

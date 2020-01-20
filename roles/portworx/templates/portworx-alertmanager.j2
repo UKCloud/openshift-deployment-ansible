@@ -1,19 +1,26 @@
 global:
-  # The smarthost and SMTP sender used for mail notifications.
-  smtp_smarthost: "<smtpserver:port>"
-  smtp_from: "<sender-email-address>"
-  smtp_auth_username: "<sender-email-address>"
-  smtp_auth_password: "<sender-email-password>"
+
 route:
-  group_by: [Alertname]
-  # Send all notifications to me.
-  receiver: email-me
+  receiver: 'slack-UKCloud-OpenShift'
+  group_by: ['alertname']
+  routes:
+  - match_re:
+      alertname: ^PortworxVolume[a-zA-Z]*$
+    receiver: 'blackhole'
+
 receivers:
-  - name: email-me
-    email_configs:
-      - to: "<receiver-email-address>"
-        from: "<sender-email-address>"
-        smarthost: "<smtpserver:port>"
-        auth_username: "<sender-email-address>"
-        auth_identity: "<sender-email-address>"
-        auth_password: "<sender-email-password>"
+- name: 'slack-UKCloud-OpenShift'
+  slack_configs:
+  - api_url: '{{ slackWebhookUrlAcmeSh }}'
+{% if multinetwork %}
+    http_config:
+      proxy_url: http://{{ squid_vip }}:3128
+{% endif %}
+    channel: '#openshift-monitoring'
+    send_resolved: true
+    icon_emoji: ':try_not_to_cry:'
+    title_link: 'https://alertmanager-portworx-kube-system.{{ domainSuffix }}/#/alerts'
+    text: |-
+      *Cluster:* <https://ocp.{{ domainSuffix }}:8443|{{ domainSuffix }}>
+- name: 'blackhole'
+
