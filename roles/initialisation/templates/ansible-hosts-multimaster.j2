@@ -87,6 +87,9 @@ osm_default_node_selector='tenant=true'
 # enable ntp on masters to ensure proper failover
 openshift_clock_enabled=true
 
+# disable certificate expiry check so upgrades don't fail - CNAP-971
+openshift_certificate_expiry_fail_on_warn=false
+
 # openstack cinder integration for persistant volume claims
 openshift_cloudprovider_kind=openstack
 openshift_cloudprovider_openstack_auth_url={{ osAuthUrl }}
@@ -174,7 +177,11 @@ oreg_auth_password={{ registryPassword }}
 # Proxy variables for use when net2 deployment is in place
 openshift_http_proxy=http://{{ squid_vip }}:3128
 openshift_https_proxy=http://{{ squid_vip }}:3128
-openshift_no_proxy='.{{ localDomainSuffix }},frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,cor00005-2.cni.ukcloud.com,169.254.169.254'
+{% if deploy_portworx_storage is defined and deploy_portworx_storage %}
+openshift_no_proxy='ocp.{{ domainSuffix }},.{{ localDomainSuffix }},frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,cor00005-2.cni.ukcloud.com,169.254.169.254,10.254.253.0/24,10.254.254.0/24'
+{% else %}
+openshift_no_proxy='ocp.{{ domainSuffix }},.{{ localDomainSuffix }},frn00006.cni.ukcloud.com,cor00005.cni.ukcloud.com,cor00005-2.cni.ukcloud.com,169.254.169.254'
+{% endif %}
 #openshift_generate_no_proxy_hosts=true
 #openshift_builddefaults_git_http_proxy=http://{{ squid_vip }}:3128
 #openshift_builddefaults_git_https_proxy=http://{{ squid_vip }}:3128
@@ -183,7 +190,12 @@ openshift_no_proxy='.{{ localDomainSuffix }},frn00006.cni.ukcloud.com,cor00005.c
 {% endif %}
 
 ### Setup the default node labels for each node type
+{% if deploy_portworx_storage is defined and deploy_portworx_storage %}
+openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{% if worker_details_internet != None %}{% for ip, hostname in worker_details_internet.items() %}{'name': 'node-config-compute-{{ hostname }}', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]},{ 'key': 'nodeIP','value': '{{ ip }}'}]},{% endfor %}{% endif %}{% if multinetwork %}{% for ip, hostname in worker_details_net2.items() %}{'name': 'node-config-compute-net2-{{ hostname }}', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]},{ 'key': 'nodeIP','value': '{{ ip }}'}]},{% endfor %}{% endif %}{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]}] 
+{% else %}
 openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','infra=true','router=true'{% if extra_gateway_vip is defined %},'router-private=true'{% endif %}], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','internet=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]},{'name': 'node-config-compute-net2', 'labels': ['node-role.kubernetes.io/compute=true','router=secondary','net2=true','tenant=true'], 'edits': [{ 'key': 'kubeletArguments.kube-reserved','value': ["cpu=200m,memory=512Mi"]}]}]
+{% endif %}
+
 
 # Create an OSEv3 group that contains the masters and nodes groups
 # host group for masters
@@ -247,10 +259,18 @@ nodes_net2
 {% for ip, hostname in master_details.items() %}
 {{ hostname }} openshift_node_group_name='node-config-master'
 {% endfor %}
-{% if worker_details_internet != None %}
-{% for ip, hostname in worker_details_internet.items() %}
+{% if deploy_portworx_storage is defined and deploy_portworx_storage %}
+{%  if worker_details_internet != None %}
+{%   for ip, hostname in worker_details_internet.items() %}
+{{ hostname }} openshift_node_group_name='node-config-compute-{{ hostname }}'
+{%   endfor %}
+{%  endif %}
+{% else %}
+{%  if worker_details_internet != None %}
+{%   for ip, hostname in worker_details_internet.items() %}
 {{ hostname }} openshift_node_group_name='node-config-compute'
-{% endfor %}
+{%   endfor %}
+{%  endif %}
 {% endif %}
 
 [nodes_infra]
@@ -260,9 +280,28 @@ nodes_net2
 
 [nodes_net2]
 {% if multinetwork %}
-{% for ip, hostname in worker_details_net2.items() %}
+{%  if deploy_portworx_storage is defined and deploy_portworx_storage %}
+{%   for ip, hostname in worker_details_net2.items() %}
+{{ hostname }} openshift_node_group_name='node-config-compute-net2-{{ hostname }}'
+{%   endfor %}
+{%  else %}
+{%   for ip, hostname in worker_details_net2.items() %}
 {{ hostname }} openshift_node_group_name='node-config-compute-net2'
-{% endfor %}
+{%   endfor %}
+{%  endif %}
+{% endif %}
+
+# group for portworx nodes
+{% if deploy_portworx_storage %}
+[portworx_nodes]
+{%   for ip, hostname in worker_details_internet.items() %}
+{{ hostname }}
+{%   endfor %}
+{%   if multinetwork %}
+{%     for ip, hostname in worker_details_net2.items() %}
+{{ hostname }}
+{%     endfor %}
+{%   endif %}
 {% endif %}
 
 # groups to capture all of the hosts with connectivity to each network connection

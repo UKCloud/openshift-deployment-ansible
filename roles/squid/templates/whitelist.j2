@@ -3,6 +3,21 @@ registry.access.redhat.com
 registry.redhat.io
 {{ s3regionendpoint }}
 idp.ukcloud.com
+
+{% if deploy_portworx_storage is defined and deploy_portworx_storage %}
+#Portworx requirements:
+.quay.io
+registry.centos.org
+registry.fedoraproject.org
+.docker.io
+.gcr.io
+.cloudfront.net
+.docker.com
+storage.googleapis.com
+.portworx.com
+hooks.slack.com
+{% endif %}
+
 # Squid does not support having subdomains of existing domains added
 # if you add any the proxy will not reconfigure correctly and any
 # further domains added will not be whitelisted until the offending
