@@ -77,7 +77,7 @@
   git:
     repo: 'git@github.com:UKCloud/openshift-tooling.git'
     dest: /home/cloud-user/openshift-tooling
-    version: master
+    version: staging_certs
     key_file: "/home/cloud-user/.ssh/openshift-tooling_deploy_key"
     accept_hostkey: yes
 
