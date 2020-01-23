@@ -73,10 +73,10 @@
     regexp: '^{{ item.regex }}.*$'
     replace: '{{ item.replace }}'
   with_items:
-   - regex: "User"
-     replace: "User=root"
-   - regex: "Group"
-     replace: "Group=root"
+  - regex: "User"
+    replace: "User=root"
+  - regex: "Group"
+    replace: "Group=root"
 
     when: inventory_hostname in groups.loadbalancers_controlplane
 
