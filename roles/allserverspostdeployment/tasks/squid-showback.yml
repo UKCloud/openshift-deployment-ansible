@@ -79,6 +79,9 @@
     replace: "Group=root"
   when: inventory_hostname in groups.loadbalancers_controlplane
 
+- pause:
+    seconds: 30 
+  
 - name: Start and enable td-agent
   systemd:
     daemon_reload: yes
