@@ -77,8 +77,7 @@
     replace: "User=root"
   - regex: "Group"
     replace: "Group=root"
-
-    when: inventory_hostname in groups.loadbalancers_controlplane
+  when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Start and enable td-agent
   systemd:
