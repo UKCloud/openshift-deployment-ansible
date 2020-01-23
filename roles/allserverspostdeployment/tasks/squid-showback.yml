@@ -68,13 +68,17 @@
   when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Set td-agent daemon to run as root
-  blockinfile:
-    path: /etc/init.d/td-agent
-    insertafter: ^TD_AGENT_OPTIONS
-    block: |
-      TD_AGENT_USER=root
-      TD_AGENT_GROUP=root
-  when: inventory_hostname in groups.loadbalancers_controlplane
+  replace:
+    path: /usr/lib/systemd/system/td-agent.service
+    regexp: '^{{ item.regex }}.*$'
+    replace: '{{ item.replace }}'
+  with_items:
+   - regex: "User"
+     replace: "User=root"
+   - regex: "Group"
+     replace: "Group=root"
+
+    when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Start and enable td-agent
   systemd:
