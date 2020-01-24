@@ -98,6 +98,9 @@
   register: td_agent_state
   when: inventory_hostname in groups.loadbalancers_controlplane
 
+- debug:
+    var: td_agent_state
+
 - name: Fail if td-agent is not in 'running' state on either loadbalancer
   fail:
     msg: td-agent has failed to start. Please investigate the logs using journalctl -u td-agent.
