@@ -79,16 +79,29 @@
     replace: "Group=root"
   when: inventory_hostname in groups.loadbalancers_controlplane
 
-- pause:
-    seconds: 30 
-  
 - name: Start and enable td-agent
   systemd:
     daemon_reload: yes
     name: td-agent
     state: restarted
     enabled: yes
+  ignore_errors: true
+  become: true
   when: inventory_hostname in groups.loadbalancers_controlplane
+
+- pause:
+    seconds: 10
+
+- name: Register status of td-agent service
+  systemd:
+    name: td-agent
+  register: td_agent_state
+  when: inventory_hostname in groups.loadbalancers_controlplane
+
+- name: Fail if td-agent is not in 'running' state on either loadbalancer
+  fail:
+    msg: td-agent has failed to start. Please investigate the logs using journalctl -u td-agent.
+  when: "running" not in td_agent_state.status.SubState and inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Create project for in-cluster fluentd
   command: /usr/local/bin/oc new-project squid-showback
