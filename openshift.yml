@@ -6,5 +6,7 @@
     - openshiftpostdeployment
 
 - hosts: all
+  vars:
+    td_agent_state.status.SubState: "not_present"
   roles:
     - allserverspostdeployment

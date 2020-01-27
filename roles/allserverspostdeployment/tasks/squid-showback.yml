@@ -1,6 +1,3 @@
-- vars:
-    td_agent_state.status.SubState: "not_present"
-
 - name: Increase file descriptors
   blockinfile:
     path: /etc/security/limits.conf
