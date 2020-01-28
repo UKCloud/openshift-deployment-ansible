@@ -39,7 +39,7 @@
   when: inventory_hostname == groups.loadbalancers_controlplane[1]
 
 - name: install td-agent
-  shell: curl -L https://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | sh
+  shell: curl -L https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh | sh
   when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: wait for install script to run
@@ -68,12 +68,15 @@
   when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Set td-agent daemon to run as root
-  blockinfile:
-    path: /etc/init.d/td-agent
-    insertafter: ^TD_AGENT_OPTIONS
-    block: |
-      TD_AGENT_USER=root
-      TD_AGENT_GROUP=root
+  replace:
+    path: /usr/lib/systemd/system/td-agent.service
+    regexp: '^{{ item.regex }}.*$'
+    replace: '{{ item.replace }}'
+  with_items:
+  - regex: "User"
+    replace: "User=root"
+  - regex: "Group"
+    replace: "Group=root"
   when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: Start and enable td-agent
@@ -82,7 +85,25 @@
     name: td-agent
     state: restarted
     enabled: yes
+  ignore_errors: true
+  become: true
   when: inventory_hostname in groups.loadbalancers_controlplane
+
+- pause:
+    seconds: 10
+
+- name: Register status of td-agent service
+  systemd:
+    name: td-agent
+  register: td_agent_state
+  when: inventory_hostname in groups.loadbalancers_controlplane
+
+- name: Fail if td-agent is not in 'running' state on either loadbalancer
+  fail:
+    msg: td-agent has failed to start. Please investigate the logs using journalctl -u td-agent.
+  when: 
+    - inventory_hostname in groups.loadbalancers_controlplane
+    - '"running" not in td_agent_state.status.SubState'
 
 - name: Create project for in-cluster fluentd
   command: /usr/local/bin/oc new-project squid-showback
