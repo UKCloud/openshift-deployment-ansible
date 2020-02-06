@@ -13,6 +13,13 @@
     delegate_to: 127.0.0.1
     run_once: yes
 
+  - name: backup whitelist file
+    copy:
+      src: /etc/squid/sites.whitelist.txt
+      dest: /etc/squid/sites.whitelist.txt.bk
+      remote_src: yes
+    when: inventory_hostname in groups.loadbalancers_controlplane and multinetwork
+
   - name: Retrieve whitelist from config-map
     shell: |
       /usr/bin/oc login https://ocp.{{ domainSuffix }}:8443 --token={{ lookup('file', '/home/cloud-user/whitelist-sa-token') }} > /dev/null
@@ -40,9 +47,21 @@
 
   - name: Create error configmap if necessary
     shell: /usr/bin/oc patch cm proxy-whitelist -p '{"data":{"whitelist-error":"{{ reconfigure_status.stderr_lines[0]}}  {{ reconfigure_status.stderr_lines[1]}}"}}' -n whitelist
-    when: reconfigure_status.rc == 1
+    when: inventory_hostname in groups.loadbalancers_controlplane and reconfigure_status.rc == 1
     ignore_errors: true
     delegate_to: 127.0.0.1
+
+  - name: Revert to backed up whitelist file if reconfigure failed
+    copy:
+      src: /etc/squid/sites.whitelist.txt.bk
+      dest: /etc/squid/sites.whitelist.txt
+      remote_src: yes
+    ignore_errors: true
+    when: inventory_hostname in groups.loadbalancers_controlplane and reconfigure_status.rc == 1
+    notify:
+      - reconfigure squid
+
+  - meta: flush_handlers
 
   handlers:
     - name: reconfigure squid
@@ -51,3 +70,4 @@
       ignore_errors: true
       when: inventory_hostname in groups.loadbalancers_controlplane
       register: reconfigure_status
+
