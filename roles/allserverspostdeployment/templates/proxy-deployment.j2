@@ -51,7 +51,7 @@ items:
 - apiVersion: v1
   kind: ConfigMap
   metadata:
-    name: fluent-squid-config
+    name: fluent-proxy-config
   data:
     fluent.conf: |-
       <source>
@@ -68,13 +68,13 @@ items:
 - apiVersion: "v1"
   kind: "DeploymentConfig"
   metadata:
-    name: "squid-fluent-in"
+    name: "proxy-fluent-in"
   spec:
     replicas: 1
     template:
       metadata:
         labels:
-          name: "squid-fluent"
+          name: "proxy-fluent"
       spec:
         containers:
           - name: "fluent"
@@ -89,14 +89,14 @@ items:
                 name: fluent-config
               - mountPath: /bin/entrypoint
                 name: entrypoint
-        serviceAccountName: fluent-squid
+        serviceAccountName: fluent-proxy
         nodeSelector:
           "node-role.kubernetes.io/infra": "true"
         volumes:
           - name: fluent-config
             configMap:
               defaultMode: 420
-              name: fluent-squid-config
+              name: fluent-proxy-config
           - name: entrypoint
             configMap:
               defaultMode: 0777
@@ -104,10 +104,10 @@ items:
 - apiVersion: v1
   kind: Service
   metadata:
-    name: squid-fluent
+    name: proxy-fluent
   spec:
     selector:
-      name: "squid-fluent"
+      name: "proxy-fluent"
     ports:
     - port: 9881
       protocol: TCP
@@ -116,14 +116,14 @@ items:
   kind: Route
   metadata:
     annotations:
-    name: squid-fluent
+    name: proxy-fluent
   spec:
-    host: squid-showback.{{ domainSuffix }}
+    host: proxy-showback.{{ domainSuffix }}
     port:
       targetPort: 9880
     to:
       kind: Service
-      name: squid-fluent
+      name: proxy-fluent
       weight: 100
     wildcardPolicy: None
     tls:

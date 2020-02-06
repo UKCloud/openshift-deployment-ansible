@@ -38,8 +38,19 @@
     timeout: 300
   when: inventory_hostname == groups.loadbalancers_controlplane[1]
 
+- name: Setup install file for td-agent
+  template:
+    src: templates/td-agent-install.j2
+    dest: /home/cloud-user/td-agent-install.sh
+    owner: root
+    group: root
+    backup: yes
+    mode: 744
+  when: inventory_hostname in groups.loadbalancers_controlplane
+
 - name: install td-agent
-  shell: curl -L https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh | sh
+  command: sh /home/cloud-user/td-agent-install.sh
+  become: true
   when: inventory_hostname in groups.loadbalancers_controlplane
 
 - name: wait for install script to run
@@ -106,19 +117,19 @@
     - '"running" not in td_agent_state.status.SubState'
 
 - name: Create project for in-cluster fluentd
-  command: /usr/local/bin/oc new-project squid-showback
+  command: /usr/local/bin/oc new-project proxy-showback
   when: inventory_hostname == groups.masters[0]
 
 - name: Create service account for in-cluster fluentd
-  command: /usr/local/bin/oc create sa fluent-squid
+  command: /usr/local/bin/oc create sa fluent-proxy
   when: inventory_hostname == groups.masters[0]
 
 - name: Add privileged scc to fluentd service account
-  command: /usr/local/bin/oc adm policy add-scc-to-user privileged -z fluent-squid
+  command: /usr/local/bin/oc adm policy add-scc-to-user privileged -z fluent-proxy
   when: inventory_hostname == groups.masters[0]
 
 - name: annotate namespace so the pods are targeted to infra nodes only
-  command: /usr/local/bin/oc annotate ns squid-showback openshift.io/node-selector=node-role.kubernetes.io/infra=true
+  command: /usr/local/bin/oc annotate ns proxy-showback openshift.io/node-selector=node-role.kubernetes.io/infra=true
   when: inventory_hostname == groups.masters[0]
 
 - name: Add .docker.io and .docker.com for fluentd image import
@@ -163,16 +174,16 @@
 
 - name: Setup deployment config for fluent
   template:
-    src: squid-deployment.j2
-    dest: /home/cloud-user/squid-deployment.yml
+    src: proxy-deployment.j2
+    dest: /home/cloud-user/proxy-deployment.yml
   when: inventory_hostname == groups.masters[0]
 
-- name: Create squid deployment
-  command: /usr/local/bin/oc create -f /home/cloud-user/squid-deployment.yml
+- name: Create proxy deployment
+  command: /usr/local/bin/oc create -f /home/cloud-user/proxy-deployment.yml
   when: inventory_hostname == groups.masters[0] 
 
 - name: Scale deployment to number of infra nodes
   vars:
     infra_scale: "{{ groups['nodes_infra'] | length }}"
-  command: /usr/local/bin/oc scale dc squid-fluent-in --replicas={{ infra_scale }}
+  command: /usr/local/bin/oc scale dc proxy-fluent-in --replicas={{ infra_scale }}
   when: inventory_hostname == groups.masters[0]
