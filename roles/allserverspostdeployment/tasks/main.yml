@@ -36,8 +36,8 @@
 - name: Set journal size to 3G
   replace:
     path: /etc/systemd/journald.conf
-    regexp: '^\sSystemMaxUse=.*'
-    replace: ' SystemMaxUse=3G'
+    regexp: '^\s?SystemMaxUse=.*'
+    replace: 'SystemMaxUse=3G'
   when: inventory_hostname in groups.nodes and inventory_hostname not in groups.masters
 
 - name: Restart systemd-journald service to implement journal size change
