@@ -29,7 +29,7 @@
 
   - name: print whitelist to logs for debugging purposes
     debug:
-      var: proxy_whitelist
+      var: proxy_whitelist.stdout_lines
     when: inventory_hostname == 'localhost' and multinetwork
 
   - name: Fail play if task to retrieve whitelist fails
