@@ -27,6 +27,11 @@
     when: inventory_hostname == 'localhost' and multinetwork
     register: proxy_whitelist
 
+  - name: print whitelist to logs for debugging purposes
+    debug:
+      var: proxy_whitelist.stdout_lines
+    when: inventory_hostname == 'localhost' and multinetwork
+
   - name: Fail play if task to retrieve whitelist fails
     fail:
       msg: "Failing to avoid blank whitelist update"
