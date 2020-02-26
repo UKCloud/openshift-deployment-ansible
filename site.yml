@@ -8,4 +8,5 @@
 - import_playbook: portworx.yml
   when: deploy_portworx_storage
 - import_playbook: backup.yml
+- import_playbook: /home/cloud-user/openshift-tooling/zabbix-agent/zabbix-agent.yaml
 - import_playbook: upgrade_bastion.yml
