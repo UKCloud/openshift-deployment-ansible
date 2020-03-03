@@ -90,6 +90,14 @@
     reload: yes
   when: inventory_hostname in groups.loadbalancers
 
+- name: Increase the port range for outgoing connections
+  sysctl:
+    name: net.ipv4.ip_local_port_range
+    value: 10240 65535
+    state: present
+    reload: yes
+  when: inventory_hostname in groups.loadbalancers
+
 - name: Create conntrack hash table file
   file:
     path: /etc/modprobe.d/nf_conntrack.conf
