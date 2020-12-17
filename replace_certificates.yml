@@ -23,6 +23,26 @@
         - { key: "certFile", old_path: "{{ namedCertificatesPath }}/fullchain1.pem", new_path: "{{ namedCertificatesPath }}/{{ certFile | basename }}" }
         - { key: "keyFile", old_path: "{{ namedCertificatesPath }}/privkey1.pem", new_path: "{{ namedCertificatesPath }}/{{ keyFile | basename }}" }
 
+    - name: Update CA
+      block:
+      - name: Create temp directory
+        command: mktemp -d /tmp/replace_certificates-XXXXXX
+        register: openshift_cabundle_tmpdir
+      - name: Create new ca-bundle.crt in temp directory
+        shell: cat {{ masterConfigPath }}/ca.crt {{ namedCertificatesPath }}/{{ caFile | basename }} > {{ openshift_cabundle_tmpdir.stdout }}/ca-bundle.crt
+      - name: Compare new ca-bundle.crt with existing
+        command: diff {{ masterConfigPath }}/ca-bundle.crt {{ openshift_cabundle_tmpdir.stdout }}/ca-bundle.crt
+        failed_when: cabundle_diff.rc > 1
+        register: cabundle_diff
+      - name: Overwrite ca-bundle.crt when different
+        command: mv {{ openshift_cabundle_tmpdir.stdout }}/ca-bundle.crt {{ masterConfigPath }}/ca-bundle.crt
+        notify: restart master
+        when: cabundle_diff.rc == 1
+      - name: Remove temp directory
+        file:
+          state: absent
+          path: "{{ openshift_cabundle_tmpdir.stdout }}"
+
     - name: Copy named certificates
       copy:
         src: "{{ item }}"
