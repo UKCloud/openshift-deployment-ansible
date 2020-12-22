@@ -23,6 +23,17 @@
         - { key: "certFile", old_path: "{{ namedCertificatesPath }}/fullchain1.pem", new_path: "{{ namedCertificatesPath }}/{{ certFile | basename }}" }
         - { key: "keyFile", old_path: "{{ namedCertificatesPath }}/privkey1.pem", new_path: "{{ namedCertificatesPath }}/{{ keyFile | basename }}" }
 
+    - name: Copy named certificates
+      copy:
+        src: "{{ item }}"
+        dest: "{{ namedCertificatesPath }}/{{ item | basename }}"
+        mode: '0600'
+      with_items:
+        - "{{ certFile }}"
+        - "{{ keyFile }}"
+        - "{{ caFile }}"
+      notify: restart master
+
     - name: Update CA
       block:
       - name: Create temp directory
@@ -42,17 +53,6 @@
         file:
           state: absent
           path: "{{ openshift_cabundle_tmpdir.stdout }}"
-
-    - name: Copy named certificates
-      copy:
-        src: "{{ item }}"
-        dest: "{{ namedCertificatesPath }}/{{ item | basename }}"
-        mode: '0600'
-      with_items:
-        - "{{ certFile }}"
-        - "{{ keyFile }}"
-        - "{{ caFile }}"
-      notify: restart master
 
   handlers:
     - name: restart master
@@ -84,6 +84,7 @@
   vars:
     certificate: "{{ lookup('file', '{{ certFile }}').split('\n') }}"
     key: "{{ lookup('file', '{{ keyFile }}').split('\n') }}"
+    ca: "{{ lookup('file', '{{ caFile }}').split('\n') }}"
 
   tasks:
     - name: Create new router certificate
@@ -113,7 +114,7 @@
       notify: Rollout registry-console deployment
 
     - name: Patch docker-registry
-      command: /usr/local/bin/oc patch route docker-registry -p '{"spec":{"tls":{"certificate":"'"{{ certificate | join("\n") }}"'","key":"'"{{ key | join("\n") }}"'"}}}' -n default
+      command: /usr/local/bin/oc patch route docker-registry -p '{"spec":{"tls":{"certificate":"'"{{ certificate | join("\n") }}"'","key":"'"{{ key | join("\n") }}"'","caCertificate":"'"{{ ca | join("\n") }}"'"}}}' -n default
 
   handlers:
     - name: Rollout router deployment
