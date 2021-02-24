@@ -71,6 +71,7 @@
         curl --silent --tlsv1.2 --max-time 2
         --cacert /etc/origin/master/ca-bundle.crt
         https://{{ openshift_master_cluster_public_hostname }}:8443/healthz/ready
+        --resolve {{ openshift_master_cluster_public_hostname }}:8443:127.0.0.1
       args:
         warn: no
       register: api_output
